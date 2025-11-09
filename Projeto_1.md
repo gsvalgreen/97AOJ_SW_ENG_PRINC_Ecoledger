@@ -5,7 +5,7 @@
 * Geovana Cherubini (RM: 362820)
 * Gustavo Valverde (RM: 362076)
 * Fabricio Rodrigo (RM: 363892)
-* Pedro Thormeyr (RM: 363410)
+* Pedro Thormeyr (RM: 363401)
 * Paulo Cesar (RM: 361591)
 
 ## **Professor**
