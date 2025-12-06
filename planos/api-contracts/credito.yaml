@@ -1,0 +1,172 @@
+openapi: 3.0.3
+info:
+  title: EcoLedger - Credito Service API
+  version: 1.0.0
+  description: 'Serviço de acesso a crédito: propostas, solicitações e integração com instituições financeiras.'
+servers:
+  - url: https://api.ecoledger.local/credito
+security:
+  - bearerAuth: []
+paths:
+  /proposals:
+    get:
+      summary: Listar propostas aplicáveis
+      tags: [Proposals]
+      parameters:
+        - name: producerId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of proposals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Proposal'
+  /credit-requests:
+    post:
+      summary: Criar nova solicitação de crédito
+      tags: [CreditRequests]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditRequestCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /credit-requests/{id}:
+    get:
+      summary: Obter solicitação de crédito
+      tags: [CreditRequests]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Credit request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Atualizar status da solicitação (webhook de parceiro)
+      tags: [CreditRequests]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [PENDING, APPROVED, REJECTED]
+                institutionReference:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditRequest'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Proposal:
+      type: object
+      properties:
+        id:
+          type: string
+        institutionId:
+          type: string
+        maxAmount:
+          type: number
+        rate:
+          type: number
+        termOptions:
+          type: array
+          items:
+            type: integer
+        conditions:
+          type: string
+    CreditRequestCreate:
+      type: object
+      required: [producerId, proposalId, amountRequested]
+      properties:
+        producerId:
+          type: string
+        proposalId:
+          type: string
+        amountRequested:
+          type: number
+        termMonths:
+          type: integer
+        documents:
+          type: array
+          items:
+            type: object
+    CreditRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        producerId:
+          type: string
+        proposalId:
+          type: string
+        amountRequested:
+          type: number
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        history:
+          type: array
+          items:
+            type: object
+  responses:
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+

@@ -1,0 +1,132 @@
+openapi: 3.0.3
+info:
+  title: EcoLedger - Certificacao Service API
+  version: 1.0.0
+  description: Serviço que calcula e expõe o estado do Selo Verde por produtor.
+servers:
+  - url: https://api.ecoledger.local/certificacao
+security:
+  - bearerAuth: []
+paths:
+  /seals/{producerId}:
+    get:
+      summary: Obter selo do produtor
+      tags: [Seals]
+      parameters:
+        - name: producerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Green seal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GreenSeal'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /seals/{producerId}/recalculate:
+    post:
+      summary: Forçar recálculo do selo
+      tags: [Seals]
+      security:
+        - bearerAuth: [admin:seals]
+      parameters:
+        - name: producerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Recalculation started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  newStatus:
+                    type: string
+  /seals/{producerId}/history:
+    get:
+      summary: Histórico de alterações do selo
+      tags: [Seals]
+      parameters:
+        - name: producerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Seal history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SealChange'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    GreenSeal:
+      type: object
+      properties:
+        producerId:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, PENDING, INACTIVE]
+        level:
+          type: string
+          enum: [BRONZE, SILVER, GOLD]
+        score:
+          type: number
+        reasons:
+          type: array
+          items:
+            type: string
+        lastChecked:
+          type: string
+          format: date-time
+    SealChange:
+      type: object
+      properties:
+        id:
+          type: string
+        producerId:
+          type: string
+        fromStatus:
+          type: string
+        toStatus:
+          type: string
+        reason:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+  responses:
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+

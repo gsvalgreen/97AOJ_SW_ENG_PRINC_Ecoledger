@@ -1,0 +1,106 @@
+openapi: 3.0.3
+info:
+  title: EcoLedger - Notification Service API
+  version: 1.0.0
+  description: Serviço central de notificações (email, push, webhook) e gerenciamento de preferências.
+servers:
+  - url: https://api.ecoledger.local/notify
+security:
+  - bearerAuth: []
+paths:
+  /notifications/send:
+    post:
+      summary: Enviar notificação
+      tags: [Notifications]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendNotification'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notificationId:
+                    type: string
+  /preferences/{userId}:
+    get:
+      summary: Obter preferências de notificação do usuário
+      tags: [Preferences]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preferences'
+    patch:
+      summary: Atualizar preferências de notificação
+      tags: [Preferences]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Preferences'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preferences'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    SendNotification:
+      type: object
+      required: [templateId, data]
+      properties:
+        toUserId:
+          type: string
+        channel:
+          type: string
+          enum: [email, push, webhook]
+        templateId:
+          type: string
+        data:
+          type: object
+    Preferences:
+      type: object
+      properties:
+        userId:
+          type: string
+        channels:
+          type: object
+          properties:
+            email:
+              type: boolean
+            push:
+              type: boolean
+            webhook:
+              type: boolean
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+
