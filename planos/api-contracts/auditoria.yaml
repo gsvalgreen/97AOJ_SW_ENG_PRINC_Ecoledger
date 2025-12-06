@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: EcoLedger - Auditoria Service API
+  title: EcoLedger - Serviço de Auditoria API
   version: 1.0.0
   description: Serviço de validação e auditoria que consome movimentações e publica resultados.
 servers:
@@ -8,10 +8,10 @@ servers:
 security:
   - bearerAuth: []
 paths:
-  /audits/{id}:
+  /auditorias/{id}:
     get:
       summary: Recuperar registro de auditoria
-      tags: [Audits]
+      tags: [Auditorias]
       parameters:
         - name: id
           in: path
@@ -20,17 +20,17 @@ paths:
             type: string
       responses:
         '200':
-          description: Audit record
+          description: Registro de auditoria
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuditRecord'
+                $ref: '#/components/schemas/RegistroAuditoria'
         '404':
           $ref: '#/components/responses/NotFound'
-  /producers/{producerId}/audit-history:
+  /produtores/{producerId}/historico-auditorias:
     get:
       summary: Histórico de auditorias de um produtor
-      tags: [Audits]
+      tags: [Auditorias]
       parameters:
         - name: producerId
           in: path
@@ -39,7 +39,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Audit history
+          description: Histórico de auditorias
           content:
             application/json:
               schema:
@@ -48,11 +48,11 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/AuditRecord'
-  /audits/{id}/review:
+                      $ref: '#/components/schemas/RegistroAuditoria'
+  /auditorias/{id}/revisao:
     post:
       summary: Registrar revisão manual por auditor
-      tags: [Audits]
+      tags: [Auditorias]
       security:
         - bearerAuth: [auditor:write]
       parameters:
@@ -67,22 +67,22 @@ paths:
           application/json:
             schema:
               type: object
-              required: [auditorId, result]
+              required: [auditorId, resultado]
               properties:
                 auditorId:
                   type: string
-                result:
+                resultado:
                   type: string
-                  enum: [PASS, FAIL]
-                observations:
+                  enum: [APROVADO, REPROVADO]
+                observacoes:
                   type: string
       responses:
         '200':
-          description: Review registered
+          description: Revisão registrada
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuditRecord'
+                $ref: '#/components/schemas/RegistroAuditoria'
         '400':
           $ref: '#/components/responses/BadRequest'
 components:
@@ -92,46 +92,45 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    AuditRecord:
+    RegistroAuditoria:
       type: object
       properties:
         id:
           type: string
-        movementId:
+        movimentacaoId:
           type: string
         producerId:
           type: string
-        ruleVersion:
+        versaoRegra:
           type: string
-        result:
+        resultado:
           type: string
-          enum: [PASS, FAIL, REQUIRES_MANUAL]
-        evidence:
+          enum: [APROVADO, REPROVADO, REQUER_REVISAO]
+        evidencias:
           type: array
           items:
             type: object
-        processedAt:
+        processadoEm:
           type: string
           format: date-time
   responses:
     BadRequest:
-      description: Bad Request
+      description: Requisição inválida
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/Erro'
     NotFound:
-      description: Not Found
+      description: Não encontrado
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/Erro'
   schemas:
-    Error:
+    Erro:
       type: object
       properties:
-        code:
+        codigo:
           type: string
-        message:
+        mensagem:
           type: string
-

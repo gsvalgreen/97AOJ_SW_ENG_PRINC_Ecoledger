@@ -1,37 +1,37 @@
 openapi: 3.0.3
 info:
-  title: EcoLedger - Notification Service API
+  title: EcoLedger - Serviço de Notificação API
   version: 1.0.0
   description: Serviço central de notificações (email, push, webhook) e gerenciamento de preferências.
 servers:
-  - url: https://api.ecoledger.local/notify
+  - url: https://api.ecoledger.local/notificacoes
 security:
   - bearerAuth: []
 paths:
-  /notifications/send:
+  /notificacoes/enviar:
     post:
       summary: Enviar notificação
-      tags: [Notifications]
+      tags: [Notificacoes]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendNotification'
+              $ref: '#/components/schemas/EnviarNotificacao'
       responses:
         '202':
-          description: Accepted
+          description: Aceito
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  notificationId:
+                  notificacaoId:
                     type: string
-  /preferences/{userId}:
+  /preferencias/{userId}:
     get:
       summary: Obter preferências de notificação do usuário
-      tags: [Preferences]
+      tags: [Preferencias]
       parameters:
         - name: userId
           in: path
@@ -40,27 +40,27 @@ paths:
             type: string
       responses:
         '200':
-          description: Preferences
+          description: Preferências
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Preferences'
+                $ref: '#/components/schemas/Preferencias'
     patch:
       summary: Atualizar preferências de notificação
-      tags: [Preferences]
+      tags: [Preferencias]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Preferences'
+              $ref: '#/components/schemas/Preferencias'
       responses:
         '200':
-          description: Updated
+          description: Atualizado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Preferences'
+                $ref: '#/components/schemas/Preferencias'
 components:
   securitySchemes:
     bearerAuth:
@@ -68,25 +68,25 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    SendNotification:
+    EnviarNotificacao:
       type: object
       required: [templateId, data]
       properties:
-        toUserId:
+        paraUsuarioId:
           type: string
-        channel:
+        canal:
           type: string
           enum: [email, push, webhook]
         templateId:
           type: string
         data:
           type: object
-    Preferences:
+    Preferencias:
       type: object
       properties:
         userId:
           type: string
-        channels:
+        canais:
           type: object
           properties:
             email:
@@ -96,11 +96,10 @@ components:
             webhook:
               type: boolean
   schemas:
-    Error:
+    Erro:
       type: object
       properties:
-        code:
+        codigo:
           type: string
-        message:
+        mensagem:
           type: string
-

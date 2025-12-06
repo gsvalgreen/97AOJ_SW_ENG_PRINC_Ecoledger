@@ -4,28 +4,28 @@ Plano para o "Serviço de Notificação" — centraliza envio de mensagens (emai
 
 Responsabilidades
 
-- Receber solicitações de envio de notificações (sincronas ou por eventos).
+- Receber solicitações de envio de notificações (síncronas ou por eventos).
 - Gerenciar templates e preferências do usuário (opt-in/out).
 - Integrar com provedores (SMTP, Firebase, SES) e expor webhooks para parceiros.
-- Fornecer relatórios de entrega e retry logic.
+- Fornecer relatórios de entrega e lógica de retry.
 
 API REST
 
-- POST /notifications/send
-  - Payload: { toUserId?, channel: [email|push|webhook], templateId, data }
-  - Resposta: 202 Accepted { notificationId }
+- POST /notificacoes/enviar
+  - Payload: { paraUsuarioId?, canal: [email|push|webhook], templateId, data }
+  - Resposta: 202 Aceito { notificacaoId }
 
-- GET /preferences/{userId}
-  - Retorna preferências do usuário (channels enabled)
+- GET /preferencias/{userId}
+  - Retorna preferências do usuário (canais habilitados)
 
-- PATCH /preferences/{userId}
+- PATCH /preferencias/{userId}
   - Atualiza preferências
 
 Eventos consumidos
 
-- users.* (user.approved, user.rejected)
-- audit.completed
-- seal.updated
+- usuarios.* (user.approved, user.rejected)
+- auditoria.concluida
+- selo.atualizado
 - credit.result
 
 Cenários de Teste (do Projeto_1.md)
@@ -49,19 +49,18 @@ Cenários adicionais
 Implementação técnica
 
 - Queueing interno para cada canal com workers separados.
-- Delivery report store: notification_deliveries table com status, attempts, lastError.
-- Support for webhooks with retries and HMAC signatures for callbacks.
+- Delivery report store: tabela entregas_notificacao com status, tentativas, ultimoErro.
+- Suporte para webhooks com retries e assinaturas HMAC para callbacks.
 
 Checklist para o agente
 
 1. Implementar endpoints e validações.
-2. Integrar provedores (mock drivers para CI).
-3. Implementar preferências de usuário e respect of opt-out.
-4. Worker para processamento assíncrono com retries e DLQ.
-5. Tests: renderer, integration with mock providers, end-to-end with events.
+2. Integrar provedores (drivers mock para CI).
+3. Implementar preferências de usuário e respeito ao opt-out.
+4. Workers para processamento assíncrono com retries e DLQ.
+5. Tests: renderer, integração com provedores mock, end-to-end com eventos.
 
 Configuração
 
 - ENV: SMTP_URL, FIREBASE_CREDENTIALS, HMAC_SECRET, KAFKA_BOOTSTRAP
 - Throttling e rate-limits por canal e por usuário
-

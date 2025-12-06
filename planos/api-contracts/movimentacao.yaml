@@ -1,40 +1,40 @@
 openapi: 3.0.3
 info:
-  title: EcoLedger - Movimentacao Service API
+  title: EcoLedger - Serviço de Movimentação API
   version: 1.0.0
   description: Serviço para registrar e consultar movimentações de commodities.
 servers:
-  - url: https://api.ecoledger.local/movements
+  - url: https://api.ecoledger.local/movimentacoes
 security:
   - bearerAuth: []
 paths:
-  /movements:
+  /movimentacoes:
     post:
       summary: Criar nova movimentação
-      tags: [Movements]
+      tags: [Movimentacoes]
       security:
-        - bearerAuth: [producer:write]
+        - bearerAuth: [produtor:write]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MovementCreate'
+              $ref: '#/components/schemas/MovimentacaoCriacao'
       responses:
         '201':
-          description: Movement created
+          description: Movimentação criada
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MovementResponse'
+                $ref: '#/components/schemas/RespostaMovimentacao'
         '400':
           $ref: '#/components/responses/BadRequest'
         '403':
           $ref: '#/components/responses/Forbidden'
-  /movements/{id}:
+  /movimentacoes/{id}:
     get:
       summary: Obter movimentação por id
-      tags: [Movements]
+      tags: [Movimentacoes]
       parameters:
         - name: id
           in: path
@@ -43,17 +43,17 @@ paths:
             type: string
       responses:
         '200':
-          description: Movement
+          description: Movimentacao
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Movement'
+                $ref: '#/components/schemas/Movimentacao'
         '404':
           $ref: '#/components/responses/NotFound'
-  /producers/{producerId}/movements:
+  /produtores/{producerId}/movimentacoes:
     get:
       summary: Listar movimentações de um produtor
-      tags: [Movements]
+      tags: [Movimentacoes]
       parameters:
         - name: producerId
           in: path
@@ -86,15 +86,15 @@ paths:
             type: string
       responses:
         '200':
-          description: Paginated list
+          description: Lista paginada
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MovementList'
-  /commodities/{commodityId}/history:
+                $ref: '#/components/schemas/MovimentacaoLista'
+  /commodities/{commodityId}/historico:
     get:
       summary: Histórico por commodity
-      tags: [Movements]
+      tags: [Movimentacoes]
       parameters:
         - name: commodityId
           in: path
@@ -103,16 +103,16 @@ paths:
             type: string
       responses:
         '200':
-          description: Movement history
+          description: Histórico de movimentações
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  movements:
+                  movimentacoes:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Movement'
+                      $ref: '#/components/schemas/Movimentacao'
 components:
   securitySchemes:
     bearerAuth:
@@ -120,48 +120,48 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    MovementCreate:
+    MovimentacaoCriacao:
       type: object
-      required: [producerId, commodityId, type, quantity, unit, timestamp]
+      required: [producerId, commodityId, tipo, quantidade, unidade, timestamp]
       properties:
         producerId:
           type: string
         commodityId:
           type: string
-        type:
+        tipo:
           type: string
-          description: e.g., HARVEST, PROCESSING, TRANSPORT
-        quantity:
+          description: 'ex: COLHEITA, PROCESSAMENTO, TRANSPORTE'
+        quantidade:
           type: number
-        unit:
+        unidade:
           type: string
         timestamp:
           type: string
           format: date-time
-        location:
+        localizacao:
           type: object
           properties:
             lat:
               type: number
             lon:
               type: number
-        attachments:
+        anexos:
           type: array
           items:
             type: object
             properties:
-              type:
+              tipo:
                 type: string
               url:
                 type: string
               hash:
                 type: string
-    MovementResponse:
+    RespostaMovimentacao:
       type: object
       properties:
-        movementId:
+        movimentacaoId:
           type: string
-    Movement:
+    Movimentacao:
       type: object
       properties:
         id:
@@ -170,55 +170,54 @@ components:
           type: string
         commodityId:
           type: string
-        type:
+        tipo:
           type: string
-        quantity:
+        quantidade:
           type: number
-        unit:
+        unidade:
           type: string
         timestamp:
           type: string
           format: date-time
-        location:
+        localizacao:
           type: object
-        attachments:
+        anexos:
           type: array
           items:
             type: object
-    MovementList:
+    MovimentacaoLista:
       type: object
       properties:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/Movement'
+            $ref: '#/components/schemas/Movimentacao'
         total:
           type: integer
   responses:
     BadRequest:
-      description: Bad Request
+      description: Requisição inválida
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/Erro'
     Forbidden:
-      description: Forbidden
+      description: Proibido
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/Erro'
     NotFound:
-      description: Not Found
+      description: Não encontrado
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/Erro'
   schemas:
-    Error:
+    Erro:
       type: object
       properties:
-        code:
+        codigo:
           type: string
-        message:
+        mensagem:
           type: string
-

@@ -1,18 +1,18 @@
 openapi: 3.0.3
 info:
-  title: EcoLedger - Users Service API
+  title: EcoLedger - Serviço de Usuários API
   version: 1.0.0
   description: API para registro, autenticação e gestão de usuários (Produtores, Analistas, Auditores).
 servers:
-  - url: https://api.ecoledger.local/users
+  - url: https://api.ecoledger.local/usuarios
 security:
   - bearerAuth: []
 paths:
-  /registrations:
+  /cadastros:
     post:
       summary: Submete novo cadastro de usuário
       tags:
-        - Registrations
+        - Cadastros
       parameters:
         - name: Idempotency-Key
           in: header
@@ -24,21 +24,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegistrationCreate'
+              $ref: '#/components/schemas/CadastroCriacao'
       responses:
         '201':
-          description: Registration created
+          description: Cadastro criado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegistrationResponse'
+                $ref: '#/components/schemas/RespostaCadastro'
         '400':
           $ref: '#/components/responses/BadRequest'
-  /registrations/{id}:
+  /cadastros/{id}:
     get:
       summary: Recupera pedido de cadastro
       tags:
-        - Registrations
+        - Cadastros
       parameters:
         - name: id
           in: path
@@ -47,18 +47,18 @@ paths:
             type: string
       responses:
         '200':
-          description: Registration retrieved
+          description: Cadastro recuperado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Registration'
+                $ref: '#/components/schemas/Cadastro'
         '404':
           $ref: '#/components/responses/NotFound'
   /auth/login:
     post:
       summary: Autenticar usuário (email + senha)
       tags:
-        - Auth
+        - Autenticacao
       requestBody:
         required: true
         content:
@@ -78,16 +78,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthToken'
+                $ref: '#/components/schemas/TokenAuth'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /users/{id}:
+  /usuarios/{id}:
     get:
       summary: Obter perfil do usuário
       tags:
-        - Users
+        - Usuarios
       security:
-        - bearerAuth: [users:read]
+        - bearerAuth: [usuarios:read]
       parameters:
         - name: id
           in: path
@@ -96,11 +96,11 @@ paths:
             type: string
       responses:
         '200':
-          description: User profile
+          description: Perfil do usuário
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Usuario'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -110,9 +110,9 @@ paths:
     patch:
       summary: Atualizar perfil do usuário (parcial)
       tags:
-        - Users
+        - Usuarios
       security:
-        - bearerAuth: [users:write]
+        - bearerAuth: [usuarios:write]
       parameters:
         - name: id
           in: path
@@ -124,25 +124,25 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserUpdate'
+              $ref: '#/components/schemas/UsuarioAtualizacao'
       responses:
         '200':
-          description: User updated
+          description: Usuário atualizado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Usuario'
         '400':
           $ref: '#/components/responses/BadRequest'
         '403':
           $ref: '#/components/responses/Forbidden'
-  /users/{id}/status:
+  /usuarios/{id}/status:
     patch:
       summary: Atualiza status do usuário (admin/analista)
       tags:
-        - Users
+        - Usuarios
       security:
-        - bearerAuth: [admin:users]
+        - bearerAuth: [admin:usuarios]
       parameters:
         - name: id
           in: path
@@ -159,16 +159,16 @@ paths:
               properties:
                 status:
                   type: string
-                  enum: [PENDING, APPROVED, REJECTED]
+                  enum: [PENDENTE, APROVADO, REJEITADO]
                 reason:
                   type: string
       responses:
         '200':
-          description: Status updated
+          description: Status atualizado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Usuario'
         '400':
           $ref: '#/components/responses/BadRequest'
         '403':
@@ -180,72 +180,72 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    User:
+    Usuario:
       type: object
       properties:
         id:
           type: string
-        name:
+        nome:
           type: string
         email:
           type: string
           format: email
         role:
           type: string
-          enum: [producer, analyst, auditor]
-        documentId:
+          enum: [produtor, analista, auditor]
+        documento:
           type: string
         status:
           type: string
-          enum: [PENDING, APPROVED, REJECTED]
-        createdAt:
+          enum: [PENDENTE, APROVADO, REJEITADO]
+        criadoEm:
           type: string
           format: date-time
-      required: [id, name, email, role, status, createdAt]
-    RegistrationCreate:
+      required: [id, nome, email, role, status, criadoEm]
+    CadastroCriacao:
       type: object
-      required: [name, email, documentId, role]
+      required: [nome, email, documento, role]
       properties:
-        name:
+        nome:
           type: string
         email:
           type: string
           format: email
-        documentId:
+        documento:
           type: string
         role:
           type: string
-          enum: [producer, analyst, auditor]
-        farmData:
+          enum: [produtor, analista, auditor]
+        dadosFazenda:
           type: object
           additionalProperties: true
-        attachments:
+        anexos:
           type: array
           items:
             type: object
             properties:
-              type:
+              tipo:
                 type: string
               url:
                 type: string
-    RegistrationResponse:
+    RespostaCadastro:
       type: object
       properties:
-        registrationId:
+        cadastroId:
           type: string
         status:
           type: string
-    Registration:
+    Cadastro:
       allOf:
-        - $ref: '#/components/schemas/RegistrationResponse'
+        - $ref: '#/components/schemas/RespostaCadastro'
         - type: object
           properties:
-            userCandidate:
-              $ref: '#/components/schemas/User'
-            submittedAt:
+            candidatoUsuario:
+              $ref: '#/components/schemas/Usuario'
+            submetidoEm:
               type: string
               format: date-time
-    AuthToken:
+    TokenAuth:
       type: object
       properties:
         accessToken:
@@ -254,43 +254,43 @@ components:
           type: string
         expiresIn:
           type: integer
-    UserUpdate:
+    UsuarioAtualizacao:
       type: object
       properties:
-        name:
+        nome:
           type: string
-        farmData:
+        dadosFazenda:
           type: object
           additionalProperties: true
-    Error:
+    Erro:
       type: object
       properties:
-        code:
+        codigo:
           type: string
-        message:
+        mensagem:
           type: string
   responses:
     BadRequest:
-      description: Bad Request
+      description: Requisição inválida
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/Erro'
     Unauthorized:
-      description: Unauthorized
+      description: Não autorizado
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/Erro'
     Forbidden:
-      description: Forbidden
+      description: Proibido
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/Erro'
     NotFound:
-      description: Not Found
+      description: Não encontrado
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/Erro'

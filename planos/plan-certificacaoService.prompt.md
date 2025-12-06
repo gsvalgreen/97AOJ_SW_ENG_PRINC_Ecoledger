@@ -4,72 +4,71 @@ Plano para o "Serviço de Certificação (Selo Verde)" — consolida resultados 
 
 Responsabilidades
 
-- Consumir `audit.completed` e recalcular elegibilidade do produtor.
-- Armazenar o estado do selo (`GreenSeal`) e histórico de mudanças.
-- Expor endpoints para consulta do selo e forçar recálculo/manual override.
-- Publicar `seal.updated` para serviços dependentes (Crédito, Notificação).
+- Consumir `auditoria.concluida` e recalcular elegibilidade do produtor.
+- Armazenar o estado do selo (`SeloVerde`) e histórico de mudanças.
+- Expor endpoints para consulta do selo e forçar recálculo/substituição manual.
+- Publicar `selo.atualizado` para serviços dependentes (Crédito, Notificação).
 
 API REST
 
-- GET /seals/{producerId}
-  - Retorna estado atual do selo: { producerId, status: [ACTIVE|PENDING|INACTIVE], level?, lastUpdated, evidence[] }
+- GET /selos/{producerId}
+  - Retorna estado atual do selo: { producerId, status: [ATIVO|PENDENTE|INATIVO], nivel?, ultimoCheck, evidencias[] }
 
-- POST /seals/{producerId}/recalculate
+- POST /selos/{producerId}/recalcular
   - Força recálculo do selo com base em auditorias disponíveis.
-  - Resposta: 200 { newStatus }
+  - Resposta: 200 { novoStatus }
 
-- GET /seals/{producerId}/history
+- GET /selos/{producerId}/historico
   - Retorna mudanças históricas do selo com timestamps e motivos.
 
 Modelos
 
-- GreenSeal: { producerId, status, level (e.g., BRONZE|SILVER|GOLD), score, reasons[], lastChecked }
-- SealChange: { id, producerId, fromStatus, toStatus, reason, timestamp, evidence }
+- SeloVerde: { producerId, status, nivel (ex: BRONZE|PRATA|OURO), pontuacao, motivos[], ultimoCheck }
+- AlteracaoSelo: { id, producerId, deStatus, paraStatus, motivo, timestamp, evidencia }
 
 Regras e critérios
 
-- Definir thresholds que transformam os resultados de auditoria em score final.
-- Regras versionadas e auditable (ligar ao ruleVersion do AuditRecord).
+- Definir thresholds que transformam os resultados de auditoria em pontuação final.
+- Regras versionadas e auditáveis (ligar ao versaoRegra do RegistroAuditoria).
 - Política de expiração: selo expira após X meses sem novas auditorias.
 
 Eventos
 
-- Consome: `audit.completed`
-- Produz: `seal.updated` { producerId, oldStatus, newStatus, timestamp, details }
+- Consome: `auditoria.concluida`
+- Produz: `selo.atualizado` { producerId, statusAntigo, statusNovo, timestamp, detalhes }
 
 Cenários de Teste (mapeados)
 
 Feature: Consultar Status do Selo Verde
   Scenario: Produtor consulta selo ativo
     Given produtor autenticado com selo ativo
-    When GET /seals/{producerId}
-    Then 200 { status: "ACTIVE" }
+    When GET /selos/{producerId}
+    Then 200 { status: "ATIVO" }
 
-  Scenario: Produtor consulta selo pendente ou rejeitado
+  Scenario: Produtor consulta selo pendente ou inativo
     Given selo pendente
-    When GET /seals/{producerId}
-    Then 200 { status: "PENDING" | "INACTIVE" }
+    When GET /selos/{producerId}
+    Then 200 { status: "PENDENTE" | "INATIVO" }
 
 Cenários adicionais
-- Ao receber `audit.completed` com FAIL, selo reduz prioridade e publica `seal.updated`.
-- Recalculation manual por auditor gera histórico com motivo.
-- Expiração do selo realiza transição para PENDING e notifica o produtor.
+- Ao receber `auditoria.concluida` com REPROVADO, selo reduz prioridade e publica `selo.atualizado`.
+- Recalculo manual por auditor gera histórico com motivo.
+- Expiração do selo realiza transição para PENDENTE e notifica o produtor.
 
 Implementação técnica
 
-- Store: certDB com tabelas seals, seal_changes
-- Consumer robusto para `audit.completed` e processamento idempotente
-- Endpoint de recálculo síncrono (não bloquear demais; executar em background se necessário)
+- Store: certDB com tabelas selos, alteracoes_selo
+- Consumer robusto para `auditoria.concluida` e processamento idempotente
+- Endpoint de recálculo síncrono (executar em background se necessário)
 
 Checklist para o agente
 
-1. Implementar consumer `audit.completed` e lógica de cálculo.
-2. Persistir seals e seal_changes com migrations.
-3. Implementar REST endpoints e regras de autorização.
-4. Publicar `seal.updated` e integrar Notificação.
+1. Implementar consumer `auditoria.concluida` e lógica de cálculo.
+2. Persistir selos e alteracoes_selo com migrations.
+3. Implementar endpoints REST e regras de autorização.
+4. Publicar `selo.atualizado` e integrar Notificação.
 5. Testes unitários para cálculo e integração para reprocessamento.
 
 Configuração
 
-- ENV: DATABASE_URL, KAFKA_BOOTSTRAP, SEAL_EXPIRATION_DAYS, RULES_VERSION_STORE
-
+- ENV: DATABASE_URL, KAFKA_BOOTSTRAP, SELO_EXPIRATION_DIAS, RULES_VERSION_STORE

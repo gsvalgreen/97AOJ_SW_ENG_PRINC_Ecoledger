@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: EcoLedger - Certificacao Service API
+  title: EcoLedger - Serviço de Certificação API
   version: 1.0.0
   description: Serviço que calcula e expõe o estado do Selo Verde por produtor.
 servers:
@@ -8,10 +8,10 @@ servers:
 security:
   - bearerAuth: []
 paths:
-  /seals/{producerId}:
+  /selos/{producerId}:
     get:
       summary: Obter selo do produtor
-      tags: [Seals]
+      tags: [Selos]
       parameters:
         - name: producerId
           in: path
@@ -20,19 +20,19 @@ paths:
             type: string
       responses:
         '200':
-          description: Green seal
+          description: Selo verde
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GreenSeal'
+                $ref: '#/components/schemas/SeloVerde'
         '404':
           $ref: '#/components/responses/NotFound'
-  /seals/{producerId}/recalculate:
+  /selos/{producerId}/recalcular:
     post:
       summary: Forçar recálculo do selo
-      tags: [Seals]
+      tags: [Selos]
       security:
-        - bearerAuth: [admin:seals]
+        - bearerAuth: [admin:selos]
       parameters:
         - name: producerId
           in: path
@@ -41,18 +41,18 @@ paths:
             type: string
       responses:
         '200':
-          description: Recalculation started
+          description: Recalculo iniciado
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  newStatus:
+                  novoStatus:
                     type: string
-  /seals/{producerId}/history:
+  /selos/{producerId}/historico:
     get:
       summary: Histórico de alterações do selo
-      tags: [Seals]
+      tags: [Selos]
       parameters:
         - name: producerId
           in: path
@@ -61,7 +61,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Seal history
+          description: Histórico do selo
           content:
             application/json:
               schema:
@@ -70,7 +70,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/SealChange'
+                      $ref: '#/components/schemas/AlteracaoSelo'
 components:
   securitySchemes:
     bearerAuth:
@@ -78,55 +78,54 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    GreenSeal:
+    SeloVerde:
       type: object
       properties:
         producerId:
           type: string
         status:
           type: string
-          enum: [ACTIVE, PENDING, INACTIVE]
-        level:
+          enum: [ATIVO, PENDENTE, INATIVO]
+        nivel:
           type: string
-          enum: [BRONZE, SILVER, GOLD]
-        score:
+          enum: [BRONZE, PRATA, OURO]
+        pontuacao:
           type: number
-        reasons:
+        motivos:
           type: array
           items:
             type: string
-        lastChecked:
+        ultimoCheck:
           type: string
           format: date-time
-    SealChange:
+    AlteracaoSelo:
       type: object
       properties:
         id:
           type: string
         producerId:
           type: string
-        fromStatus:
+        deStatus:
           type: string
-        toStatus:
+        paraStatus:
           type: string
-        reason:
+        motivo:
           type: string
         timestamp:
           type: string
           format: date-time
   responses:
     NotFound:
-      description: Not Found
+      description: Não encontrado
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/Erro'
   schemas:
-    Error:
+    Erro:
       type: object
       properties:
-        code:
+        codigo:
           type: string
-        message:
+        mensagem:
           type: string
-

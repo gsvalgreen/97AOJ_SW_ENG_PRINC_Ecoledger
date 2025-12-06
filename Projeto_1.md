@@ -17,7 +17,7 @@
 ## **1. Relato do Problema**
 
 O agronegócio brasileiro enfrenta o desafio de atender à demanda por **transparência e sustentabilidade**. Atualmente,
-os produtores rurais têm dificuldade em comprovar práticas socioambientais corretas9. Essa falta de comprovação impede o
+os produtores rurais têm dificuldade em comprovar práticas socioambientais corretas. Essa falta de comprovação impede o
 acesso a **melhores condições de crédito** e a mercados mais exigentes.
 
 A necessidade central é **centralizar os registros de movimentação e manipulação das commodities** que esses produtores
