@@ -194,6 +194,13 @@ components:
             $ref: '#/components/schemas/Movimentacao'
         total:
           type: integer
+    Erro:
+      type: object
+      properties:
+        codigo:
+          type: string
+        mensagem:
+          type: string
   responses:
     BadRequest:
       description: Requisição inválida
@@ -213,11 +220,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Erro'
-  schemas:
-    Erro:
-      type: object
-      properties:
-        codigo:
-          type: string
-        mensagem:
-          type: string

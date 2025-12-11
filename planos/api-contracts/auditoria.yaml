@@ -6,12 +6,12 @@ info:
 servers:
   - url: https://api.ecoledger.local/auditoria
 security:
-  - bearerAuth: []
+  - bearerAuth: [ ]
 paths:
   /auditorias/{id}:
     get:
       summary: Recuperar registro de auditoria
-      tags: [Auditorias]
+      tags: [ Auditorias ]
       parameters:
         - name: id
           in: path
@@ -30,7 +30,7 @@ paths:
   /produtores/{producerId}/historico-auditorias:
     get:
       summary: Histórico de auditorias de um produtor
-      tags: [Auditorias]
+      tags: [ Auditorias ]
       parameters:
         - name: producerId
           in: path
@@ -52,9 +52,9 @@ paths:
   /auditorias/{id}/revisao:
     post:
       summary: Registrar revisão manual por auditor
-      tags: [Auditorias]
+      tags: [ Auditorias ]
       security:
-        - bearerAuth: [auditor:write]
+        - bearerAuth: [ auditor:write ]
       parameters:
         - name: id
           in: path
@@ -67,13 +67,13 @@ paths:
           application/json:
             schema:
               type: object
-              required: [auditorId, resultado]
+              required: [ auditorId, resultado ]
               properties:
                 auditorId:
                   type: string
                 resultado:
                   type: string
-                  enum: [APROVADO, REPROVADO]
+                  enum: [ APROVADO, REPROVADO ]
                 observacoes:
                   type: string
       responses:
@@ -105,7 +105,7 @@ components:
           type: string
         resultado:
           type: string
-          enum: [APROVADO, REPROVADO, REQUER_REVISAO]
+          enum: [ APROVADO, REPROVADO, REQUER_REVISAO ]
         evidencias:
           type: array
           items:
@@ -113,6 +113,13 @@ components:
         processadoEm:
           type: string
           format: date-time
+    Erro:
+      type: object
+      properties:
+        codigo:
+          type: string
+        mensagem:
+          type: string
   responses:
     BadRequest:
       description: Requisição inválida
@@ -126,11 +133,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Erro'
-  schemas:
-    Erro:
-      type: object
-      properties:
-        codigo:
-          type: string
-        mensagem:
-          type: string

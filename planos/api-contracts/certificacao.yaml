@@ -114,14 +114,6 @@ components:
         timestamp:
           type: string
           format: date-time
-  responses:
-    NotFound:
-      description: Não encontrado
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Erro'
-  schemas:
     Erro:
       type: object
       properties:
@@ -129,3 +121,10 @@ components:
           type: string
         mensagem:
           type: string
+  responses:
+    NotFound:
+      description: Não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
