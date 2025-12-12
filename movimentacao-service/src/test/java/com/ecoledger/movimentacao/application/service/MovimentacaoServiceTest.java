@@ -119,7 +119,6 @@ class MovimentacaoServiceTest {
                 "KG",
                 OffsetDateTime.now(),
                 null,
-                null,
                 null
         );
     }
@@ -133,7 +132,6 @@ class MovimentacaoServiceTest {
                 new BigDecimal("10.5"),
                 "KG",
                 OffsetDateTime.now(),
-                null,
                 null,
                 List.of(attachment)
         );

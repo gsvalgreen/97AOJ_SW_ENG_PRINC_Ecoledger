@@ -17,8 +17,7 @@ public record MovimentacaoRequest(
         @NotNull @DecimalMin(value = "0.0", inclusive = false) BigDecimal quantidade,
         @NotBlank String unidade,
         @NotNull OffsetDateTime timestamp,
-        Double latitude,
-        Double longitude,
+        @Valid Localizacao localizacao,
         @Valid List<MovimentacaoRequestAttachment> anexos
 ) {
     public record MovimentacaoRequestAttachment(
@@ -27,4 +26,6 @@ public record MovimentacaoRequest(
             @NotBlank String hash
     ) {
     }
+
+    public record Localizacao(Double lat, Double lon) {}
 }

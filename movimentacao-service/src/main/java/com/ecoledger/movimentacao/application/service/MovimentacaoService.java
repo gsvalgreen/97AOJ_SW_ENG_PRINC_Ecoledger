@@ -1,15 +1,19 @@
 package com.ecoledger.movimentacao.application.service;
 
 import com.ecoledger.movimentacao.application.dto.MovimentacaoRequest;
+import com.ecoledger.movimentacao.config.AttachmentPolicyProperties;
 import com.ecoledger.movimentacao.domain.model.Movimentacao;
 import com.ecoledger.movimentacao.domain.model.MovimentacaoAnexo;
 import com.ecoledger.movimentacao.domain.repository.MovimentacaoRepository;
-import com.ecoledger.movimentacao.config.AttachmentPolicyProperties;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MovimentacaoService {
@@ -36,6 +40,12 @@ public class MovimentacaoService {
     public UUID registrar(MovimentacaoRequest request) {
         validateProducer(request.producerId());
         validateAnexos(request.anexos());
+        Double lat = null;
+        Double lon = null;
+        if (request.localizacao() != null) {
+            lat = request.localizacao().lat();
+            lon = request.localizacao().lon();
+        }
         Movimentacao movimentacao = new Movimentacao(
                 request.producerId(),
                 request.commodityId(),
@@ -43,8 +53,8 @@ public class MovimentacaoService {
                 request.quantidade(),
                 request.unidade(),
                 request.timestamp(),
-                request.latitude(),
-                request.longitude(),
+                lat,
+                lon,
                 buildAnexos(request.anexos())
         );
         Movimentacao saved = repository.save(movimentacao);
@@ -87,5 +97,39 @@ public class MovimentacaoService {
                     return entity;
                 })
                 .collect(Collectors.toList());
+    }
+
+    public Movimentacao buscarPorId(java.util.UUID id) {
+        return repository.findById(id).orElseThrow(() -> new MovimentacaoNotFoundException(id));
+    }
+
+    public Page<Movimentacao> buscarPorProducer(String producerId, Pageable pageable) {
+        return repository.findByProducerId(producerId, pageable);
+    }
+
+    public Page<Movimentacao> buscarPorProducer(String producerId, Pageable pageable, String commodityId, OffsetDateTime fromDate, OffsetDateTime toDate) {
+        if (commodityId != null && !commodityId.isBlank()) {
+            return repository.findByProducerIdAndCommodityId(producerId, commodityId, pageable);
+        }
+        if (fromDate != null && toDate != null) {
+            return repository.findByProducerIdAndTimestampBetween(producerId, fromDate, toDate, pageable);
+        }
+        if (fromDate != null) {
+            return repository.findByProducerIdAndTimestampAfter(producerId, fromDate, pageable);
+        }
+        if (toDate != null) {
+            return repository.findByProducerIdAndTimestampBefore(producerId, toDate, pageable);
+        }
+        return repository.findByProducerId(producerId, pageable);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<com.ecoledger.movimentacao.application.dto.MovimentacaoDetailResponse> buscarPorProducerDto(String producerId, Pageable pageable, String commodityId, OffsetDateTime fromDate, OffsetDateTime toDate) {
+        var page = buscarPorProducer(producerId, pageable, commodityId, fromDate, toDate);
+        return page.map(com.ecoledger.movimentacao.application.dto.MovimentacaoDetailResponse::fromEntity);
+    }
+
+    public List<Movimentacao> buscarHistoricoPorCommodity(String commodityId) {
+        return repository.findByCommodityIdOrderByTimestampDesc(commodityId);
     }
 }

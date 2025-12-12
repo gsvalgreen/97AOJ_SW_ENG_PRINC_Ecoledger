@@ -135,6 +135,17 @@ tasks.test {
 
 > Observação: o plugin `org.springframework.boot` aplica um BOM que alinha as versões dos artefatos Spring entre si; ao atualizar `spring-boot` para 3.5.8, as versões transitivas do ecossistema Spring também serão compatíveis. Fixe versões explicitamente apenas para bibliotecas externas ao BOM quando necessário.
 
+### 6.3 Gradle Wrapper (obrigatório)
+
+Gere o wrapper localmente e comite os arquivos:
+
+```bash
+gradle wrapper --gradle-version 8.6
+# commitar: gradlew, gradlew.bat, gradle/wrapper/gradle-wrapper.jar, gradle/wrapper/gradle-wrapper.properties
+```
+
+> Nota: as dependências do Spring (starters, spring-kafka, spring-boot-starter-test etc.) não têm versão explícita neste exemplo de `build.gradle.kts` porque o plugin `org.springframework.boot` fornece um BOM (Bill of Materials) que garante versões compatíveis entre si para a versão do Spring Boot declarada (3.5.8). Se precisar travar versões específicas para algum artefato não gerenciado pelo BOM (ex.: WireMock), declare a versão explicitamente.
+
 ---
 
 ## 7. Práticas de desenvolvimento (TDD)
@@ -292,6 +303,7 @@ class MovimentacaoKafkaIT {
 - Preferir testes rápidos e estáveis.
 - Mockar integrações externas em unit tests; usar WireMock/H2/EmbeddedKafka em integration.
 - Documentar variáveis de ambiente e comandos para reproduzir localmente.
+- Sempre rode os testes localmente antes de seguir para o próximo passo.
 
 ---
 

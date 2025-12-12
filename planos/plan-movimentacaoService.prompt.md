@@ -94,17 +94,41 @@ Configuração
 
 ## Checklist de Implementação
 
-### Concluído
+### Concluído (status verificado)
 - [x] Projeto Gradle com Java 21/Spring Boot 3.5.8, migrations e repositório `MovimentacaoRepository` configurados.
-- [x] Endpoint POST `/movimentacoes` com validação de produtor, política de anexos e retorno 201.
+- [x] Endpoint POST `/movimentacoes` com validação de produtor (ProducerApprovalClient), política de anexos e retorno 201.
 - [x] Cliente `ProducerApprovalClient` consumindo `GET /usuarios/{id}` com stubs WireMock em testes.
 - [x] Publicação Kafka (`KafkaMovimentacaoEventPublisher`) com tópicos configuráveis, `KafkaTemplate` e testes unitários + EmbeddedKafka IT.
 - [x] Testes `MovimentacaoServiceTest`, `MovimentacaoControllerIT` (MockMvc + WireMock) e `KafkaMovimentacaoEventPublisherIT` executados via `integrationTest`.
 - [x] Validação de anexos em S3 (`S3AttachmentStorageService`) com políticas de MIME/tamanho/hash, client AWS SDK e testes unitários dedicados.
 
-### Próximos Passos
-- [ ] Disponibilizar GET `/movimentacoes/{id}`, `/produtores/{producerId}/movimentacoes` (paginação/filtros) e `/commodities/{commodityId}/historico`, incluindo consultas JPA, DTOs e cobertura de testes (unit + integração H2/WireMock).
-- [ ] Implementar fluxo completo de upload (endpoint ou serviço interno) gerando URLs assinadas/definitivas, versionamento e documentação de variáveis S3 restantes (ex.: buckets público/privado, uso do MinIO conforme `README-minio.md`).
-- [ ] Enriquecer validação/erros (Bean Validation adicional, Problem Details) e alinhar OpenAPI com `movimentacao.yaml` + exemplos reais.
-- [ ] Observabilidade e CI: revisar logs/metrics/healthchecks, atualizar README com comandos `./gradlew clean build` e variáveis obrigatórias.
-- [ ] Planejar/eventar `movimentacao.atualizada` e consumidores (Auditoria, Notificações) com testes de contrato ou WireMock específicos.
+### Pendências (prioridade alta -> baixa)
+- [ ] Implementar e disponibilizar GET `/movimentacoes/{id}` (detalhe) com DTO de resposta e testes unit + integração H2.
+- [ ] Implementar lista paginada `/produtores/{producerId}/movimentacoes` com filtros (fromDate, toDate, commodityId) e testes.
+- [ ] Implementar `/commodities/{commodityId}/historico` e cobertura de integração.
+- [ ] Completar fluxo de upload: endpoint para anexos, geração de URLs assinadas, confirmação de upload e versionamento (MinIO em CI).
+- [ ] Idempotência para criação (Idempotency-Key or duplicate-hash handling).
+- [ ] Enriquecer tratamento de erros (Problem Details), validações JSR-380 adicionais e mensagens de erro padronizadas.
+- [ ] OpenAPI: alinhar `movimentacao.yaml`, incluir exemplos e documentar erros/response codes.
+- [ ] Observabilidade: healthchecks, métricas básicas (request count, errors), logs estruturados e configuração para CI/Prod.
+- [ ] Testes de contrato/consumidor para Auditoria e Notificações (PACT/WireMock/contract tests).
+- [ ] Revisar índices DB (producerId+timestamp, commodityId+timestamp) e adicionar migrations faltantes se necessário.
+- [ ] Segurança: validar configuração JWT (audience), permissões por papel (produtor/analista/auditor) e rate limiting.
+- [ ] CI: incluir MinIO mock e EmbeddedKafka nas pipelines de integração; documentar variáveis obrigatórias no README.
+
+### Itens identificados na revisão do plano (gaps e riscos)
+- Idempotência não está formalizada no design; risco de duplicidade de movimentações em retries.
+- Controle de acesso e roles (Analista/Auditor) precisa ser explicitado nos endpoints de consulta.
+- Retenção/versão de anexos e política de hash/immutability requer especificação (onde e por quanto tempo manter anexos originais).
+- Falta de testes de contrato para consumidores (Auditoria/Notificações) pode gerar quebra em integração.
+- Testes E2E dependem de infra (MinIO, Kafka); CI atual precisa rodar estes mocks de forma determinística.
+- Observabilidade e SLAs não detalhados (logs, tracing, SLOs).
+
+### Ações recomendadas (próximos passos imediatos)
+1. Priorizar endpoints GET (id e listagens) + migrations/índices (1 sprint)
+2. Implementar fluxo de upload com MinIO em CI e testes que cubram hash/size/MIME (1 sprint)
+3. Adicionar suporte a Idempotency-Key e teste de conflito/duplication (short task)
+4. Especificar RBAC mínimo (produtor, analista, auditor) e aplicar em endpoints sensíveis
+5. Incluir health/metrics e atualizar README com variáveis de ambiente e comandos de build/test
+
+> Nota: o escopo principal (registro e publicação de eventos) está implementado; pontos acima são pendências e riscos identificados na revisão.
