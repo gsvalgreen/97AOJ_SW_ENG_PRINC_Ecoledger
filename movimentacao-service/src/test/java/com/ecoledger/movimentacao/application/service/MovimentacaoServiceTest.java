@@ -1,26 +1,24 @@
 package com.ecoledger.movimentacao.application.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import com.ecoledger.movimentacao.config.AttachmentPolicyProperties;
 import com.ecoledger.movimentacao.application.dto.MovimentacaoRequest;
+import com.ecoledger.movimentacao.config.AttachmentPolicyProperties;
 import com.ecoledger.movimentacao.domain.model.Movimentacao;
 import com.ecoledger.movimentacao.domain.repository.MovimentacaoRepository;
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
 class MovimentacaoServiceTest {
 
@@ -109,7 +107,7 @@ class MovimentacaoServiceTest {
 
         service.registrar(request);
 
-        verify(attachmentStorageService).validateAttachment(new MovimentacaoRequest.MovimentacaoRequestAttachment("application/pdf", "doc.pdf", "hash"));
+        verify(attachmentStorageService).validateAttachment(new MovimentacaoRequest.MovimentacaoRequestAttachment("application/pdf", "http://localhost:9000/movimentacoes/doc.pdf", "hash"));
     }
 
     private MovimentacaoRequest defaultRequest() {
@@ -127,7 +125,7 @@ class MovimentacaoServiceTest {
     }
 
     private MovimentacaoRequest withAttachment(String mimeType) {
-        var attachment = new MovimentacaoRequest.MovimentacaoRequestAttachment(mimeType, "doc.pdf", "hash");
+        var attachment = new MovimentacaoRequest.MovimentacaoRequestAttachment(mimeType, "http://localhost:9000/movimentacoes/doc.pdf", "hash");
         return new MovimentacaoRequest(
                 "prod-1",
                 "cmd-1",

@@ -4,16 +4,12 @@ import com.ecoledger.movimentacao.application.service.ProducerApprovalClient;
 import com.ecoledger.movimentacao.config.ProducerApprovalProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.client.ResponseErrorHandler;
-
-import java.io.IOException;
-import java.time.Duration;
 
 @Component
 public class HttpProducerApprovalClient implements ProducerApprovalClient {

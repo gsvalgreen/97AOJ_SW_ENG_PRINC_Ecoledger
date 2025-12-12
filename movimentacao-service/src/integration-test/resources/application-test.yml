@@ -19,7 +19,22 @@ logging:
   level:
     root: WARN
 
+s3:
+  endpoint: http://localhost:9000
+  bucket: movimentacoes
+  region: sa-east-1
+  access-key: minioadmin
+  secret-key: minioadmin
+  max-attachment-size-kb: 10240
+  allowed-mime-types:
+    - application/pdf
+    - image/png
+  public-base-url: http://localhost:9000/movimentacoes
+  use-path-style: true
+
 movimentacao:
+  attachments:
+    provider: no-op
   kafka:
     enabled: false
     bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}

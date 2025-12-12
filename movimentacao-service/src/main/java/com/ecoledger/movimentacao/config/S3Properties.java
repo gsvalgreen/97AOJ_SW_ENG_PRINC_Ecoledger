@@ -11,7 +11,9 @@ public record S3Properties(
         String accessKey,
         String secretKey,
         int maxAttachmentSizeKb,
-        List<String> allowedMimeTypes
+        List<String> allowedMimeTypes,
+        String publicBaseUrl,
+        boolean usePathStyle
 ) {
     public long maxAttachmentSizeBytes() {
         return maxAttachmentSizeKb * 1024L;

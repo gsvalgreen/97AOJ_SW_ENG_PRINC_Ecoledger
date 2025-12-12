@@ -15,7 +15,13 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,15 +29,22 @@ import java.util.Map;
 public class IntegrationInfrastructureConfiguration {
 
     @Bean
-    @ConditionalOnProperty(name = "movimentacao.attachments.provider", havingValue = "s3", matchIfMissing = true)
-    AttachmentStorageService s3AttachmentStorageService(S3Properties s3Properties) {
-        return new S3AttachmentStorageService(s3Properties);
+    S3Client s3Client(S3Properties s3Properties) {
+        return S3Client.builder()
+                .endpointOverride(URI.create(s3Properties.endpoint()))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(s3Properties.accessKey(), s3Properties.secretKey())))
+                .region(Region.of(s3Properties.region()))
+                .serviceConfiguration(S3Configuration.builder()
+                        .pathStyleAccessEnabled(s3Properties.usePathStyle())
+                        .build())
+                .build();
     }
 
     @Bean
-    @ConditionalOnMissingBean(AttachmentStorageService.class)
-    AttachmentStorageService noOpAttachmentStorageService() {
-        return new NoOpAttachmentStorageService();
+    @ConditionalOnProperty(name = "movimentacao.attachments.provider", havingValue = "s3", matchIfMissing = true)
+    AttachmentStorageService s3AttachmentStorageService(S3Properties s3Properties, S3Client s3Client) {
+        return new S3AttachmentStorageService(s3Properties, s3Client);
     }
 
     @Bean

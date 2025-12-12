@@ -39,8 +39,12 @@ s3:
   secret-key: ${S3_SECRET_KEY:local}
   max-attachment-size-kb: ${S3_MAX_ATTACHMENT_SIZE_KB:10240}
   allowed-mime-types: ${S3_ALLOWED_MIME_TYPES:application/pdf,image/png,image/jpeg}
+  public-base-url: ${S3_PUBLIC_BASE_URL:http://localhost:9000/movimentacoes}
+  use-path-style: ${S3_USE_PATH_STYLE:true}
 
 movimentacao:
+  attachments:
+    provider: ${MOVIMENTACAO_ATTACHMENTS_PROVIDER:s3}
   kafka:
     enabled: ${MOVIMENTACAO_KAFKA_ENABLED:true}
     bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}

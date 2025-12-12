@@ -100,11 +100,11 @@ Configuração
 - [x] Cliente `ProducerApprovalClient` consumindo `GET /usuarios/{id}` com stubs WireMock em testes.
 - [x] Publicação Kafka (`KafkaMovimentacaoEventPublisher`) com tópicos configuráveis, `KafkaTemplate` e testes unitários + EmbeddedKafka IT.
 - [x] Testes `MovimentacaoServiceTest`, `MovimentacaoControllerIT` (MockMvc + WireMock) e `KafkaMovimentacaoEventPublisherIT` executados via `integrationTest`.
+- [x] Validação de anexos em S3 (`S3AttachmentStorageService`) com políticas de MIME/tamanho/hash, client AWS SDK e testes unitários dedicados.
 
 ### Próximos Passos
-- [ ] Implementar `AttachmentStorageService` real com S3/MinIO (validação de MIME, tamanho, hash) e testes de integração conforme `README-minio.md`.
-  - [ ] Se possível, utilizar wiremock para simular S3 em testes de integração.
-- [ ] Disponibilizar GET `/movimentacoes/{id}`, `/produtores/{producerId}/movimentacoes` (paginação/filtros) e `/commodities/{commodityId}/historico`, incluindo consultas JPA e cobertura de testes.
-- [ ] Enriquecer validação/erros (Bean Validation, Problem Details) e alinhar OpenAPI com `movimentacao.yaml`.
-- [ ] Observabilidade e CI: revisar logs, métricas e documentar comandos/variáveis de ambiente restantes (S3, Kafka, usuários).
-- [ ] Planejar próximos eventos (`movimentacao.atualizada`) e consumidores (Auditoria, Notificações) com testes de contrato ou mocks.
+- [ ] Disponibilizar GET `/movimentacoes/{id}`, `/produtores/{producerId}/movimentacoes` (paginação/filtros) e `/commodities/{commodityId}/historico`, incluindo consultas JPA, DTOs e cobertura de testes (unit + integração H2/WireMock).
+- [ ] Implementar fluxo completo de upload (endpoint ou serviço interno) gerando URLs assinadas/definitivas, versionamento e documentação de variáveis S3 restantes (ex.: buckets público/privado, uso do MinIO conforme `README-minio.md`).
+- [ ] Enriquecer validação/erros (Bean Validation adicional, Problem Details) e alinhar OpenAPI com `movimentacao.yaml` + exemplos reais.
+- [ ] Observabilidade e CI: revisar logs/metrics/healthchecks, atualizar README com comandos `./gradlew clean build` e variáveis obrigatórias.
+- [ ] Planejar/eventar `movimentacao.atualizada` e consumidores (Auditoria, Notificações) com testes de contrato ou WireMock específicos.
