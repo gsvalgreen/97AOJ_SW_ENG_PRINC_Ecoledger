@@ -6,14 +6,23 @@ spring:
     password:
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: false
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
 
 logging:
   level:
     root: WARN
 
+movimentacao:
+  kafka:
+    enabled: false
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    topics:
+      movimentacao-criada: movimentacao.criada.test
+      movimentacao-atualizada: movimentacao.atualizada.test

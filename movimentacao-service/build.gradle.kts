@@ -44,9 +44,9 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito:mockito-junit-jupiter")
-    testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.2")
-    testImplementation("com.h2database:h2")
-    testImplementation("org.springframework.kafka:spring-kafka-test")
+    integrationTestImplementation("com.h2database:h2")
+    integrationTestImplementation("org.springframework.kafka:spring-kafka-test")
+    integrationTestImplementation("com.github.tomakehurst:wiremock-jre8-standalone:2.35.2")
 }
 
 tasks.test {

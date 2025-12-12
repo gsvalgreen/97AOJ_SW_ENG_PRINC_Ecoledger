@@ -96,13 +96,15 @@ Configuração
 
 ### Concluído
 - [x] Projeto Gradle com Java 21/Spring Boot 3.5.8, migrations e repositório `MovimentacaoRepository` configurados.
-- [x] Endpoint POST `/movimentacoes` com validação de produtor, política de anexos e publicação (no-op) de evento.
-- [x] Testes `MovimentacaoServiceTest` (unitário) e `MovimentacaoControllerIT` (H2) cobrindo fluxo feliz e regras de negócio.
-- [x] `IntegrationInfrastructureConfiguration` provê `AttachmentStorageService` (S3 vs no-op) e `MovimentacaoEventPublisher` no-op.
+- [x] Endpoint POST `/movimentacoes` com validação de produtor, política de anexos e retorno 201.
+- [x] Cliente `ProducerApprovalClient` consumindo `GET /usuarios/{id}` com stubs WireMock em testes.
+- [x] Publicação Kafka (`KafkaMovimentacaoEventPublisher`) com tópicos configuráveis, `KafkaTemplate` e testes unitários + EmbeddedKafka IT.
+- [x] Testes `MovimentacaoServiceTest`, `MovimentacaoControllerIT` (MockMvc + WireMock) e `KafkaMovimentacaoEventPublisherIT` executados via `integrationTest`.
 
 ### Próximos Passos
-- [ ] Implementar `KafkaMovimentacaoEventPublisher`, payload (`movimentacao.criada`/`movimentacao.atualizada`) e testes com Embedded Kafka.
-- [ ] Substituir `NoOpAttachmentStorageService` por integração real com S3/MinIO (validação de tamanho/MIME/hash + upload) e testes de integração.
-- [ ] Disponibilizar GET `/movimentacoes/{id}`, `/produtores/{producerId}/movimentacoes` (com paginação/filtros) e `/commodities/{commodityId}/historico`, com consultas JPA e cobertura de testes.
-- [ ] Adicionar validações complementares (Bean Validation/Problem Details) e documentação OpenAPI alinhada ao contrato `movimentacao.yaml`.
-- [ ] Atualizar observabilidade/CI (logs mínimos, comandos `./gradlew clean build`) e documentar variáveis de ambiente faltantes.
+- [ ] Implementar `AttachmentStorageService` real com S3/MinIO (validação de MIME, tamanho, hash) e testes de integração conforme `README-minio.md`.
+  - [ ] Se possível, utilizar wiremock para simular S3 em testes de integração.
+- [ ] Disponibilizar GET `/movimentacoes/{id}`, `/produtores/{producerId}/movimentacoes` (paginação/filtros) e `/commodities/{commodityId}/historico`, incluindo consultas JPA e cobertura de testes.
+- [ ] Enriquecer validação/erros (Bean Validation, Problem Details) e alinhar OpenAPI com `movimentacao.yaml`.
+- [ ] Observabilidade e CI: revisar logs, métricas e documentar comandos/variáveis de ambiente restantes (S3, Kafka, usuários).
+- [ ] Planejar próximos eventos (`movimentacao.atualizada`) e consumidores (Auditoria, Notificações) com testes de contrato ou mocks.
