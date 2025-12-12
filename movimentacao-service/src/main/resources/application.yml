@@ -41,3 +41,7 @@ s3:
   max-attachment-size-kb: ${S3_MAX_ATTACHMENT_SIZE_KB:10240}
   allowed-mime-types: ${S3_ALLOWED_MIME_TYPES:application/pdf,image/png,image/jpeg}
 
+movimentacao:
+  attachment-policy:
+    max-attachments: ${MOVIMENTACAO_MAX_ATTACHMENTS:3}
+    allowed-mime-types: ${MOVIMENTACAO_ALLOWED_MIME_TYPES:application/pdf,image/png,image/jpeg}

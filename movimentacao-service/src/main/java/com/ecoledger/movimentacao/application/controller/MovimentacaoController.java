@@ -2,13 +2,18 @@ package com.ecoledger.movimentacao.application.controller;
 
 import com.ecoledger.movimentacao.application.dto.MovimentacaoRequest;
 import com.ecoledger.movimentacao.application.dto.MovimentacaoResponse;
+import com.ecoledger.movimentacao.application.service.InvalidAttachmentException;
 import com.ecoledger.movimentacao.application.service.MovimentacaoService;
+import com.ecoledger.movimentacao.application.service.ProducerNotApprovedException;
 import jakarta.validation.Valid;
 import java.net.URI;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,5 +32,18 @@ public class MovimentacaoController {
         return ResponseEntity.created(URI.create("/movimentacoes/" + id))
                 .body(new MovimentacaoResponse(id));
     }
-}
 
+    @ExceptionHandler(ProducerNotApprovedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleProducerNotApproved(ProducerNotApprovedException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidAttachmentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidAttachment(InvalidAttachmentException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    public record ErrorResponse(String mensagem) {}
+}

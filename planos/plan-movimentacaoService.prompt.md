@@ -91,3 +91,18 @@ Configuração
 
 - ENVs: DATABASE_URL, S3_ENDPOINT, KAFKA_BOOTSTRAP, SERVICE_JWT_AUDIENCE
 - Parâmetros: maxAttachmentSize, allowedMimeTypes
+
+## Checklist de Implementação
+
+### Concluído
+- [x] Projeto Gradle com Java 21/Spring Boot 3.5.8, migrations e repositório `MovimentacaoRepository` configurados.
+- [x] Endpoint POST `/movimentacoes` com validação de produtor, política de anexos e publicação (no-op) de evento.
+- [x] Testes `MovimentacaoServiceTest` (unitário) e `MovimentacaoControllerIT` (H2) cobrindo fluxo feliz e regras de negócio.
+- [x] `IntegrationInfrastructureConfiguration` provê `AttachmentStorageService` (S3 vs no-op) e `MovimentacaoEventPublisher` no-op.
+
+### Próximos Passos
+- [ ] Implementar `KafkaMovimentacaoEventPublisher`, payload (`movimentacao.criada`/`movimentacao.atualizada`) e testes com Embedded Kafka.
+- [ ] Substituir `NoOpAttachmentStorageService` por integração real com S3/MinIO (validação de tamanho/MIME/hash + upload) e testes de integração.
+- [ ] Disponibilizar GET `/movimentacoes/{id}`, `/produtores/{producerId}/movimentacoes` (com paginação/filtros) e `/commodities/{commodityId}/historico`, com consultas JPA e cobertura de testes.
+- [ ] Adicionar validações complementares (Bean Validation/Problem Details) e documentação OpenAPI alinhada ao contrato `movimentacao.yaml`.
+- [ ] Atualizar observabilidade/CI (logs mínimos, comandos `./gradlew clean build`) e documentar variáveis de ambiente faltantes.

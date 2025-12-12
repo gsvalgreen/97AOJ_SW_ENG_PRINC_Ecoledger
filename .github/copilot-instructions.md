@@ -303,6 +303,7 @@ class MovimentacaoKafkaIT {
 - Preferir testes rápidos e estáveis.
 - Mockar integrações externas em unit tests; usar WireMock/H2/EmbeddedKafka em integration.
 - Documentar variáveis de ambiente e comandos para reproduzir localmente.
+- Sempre rode os testes localmente antes de seguir para o próximo passo.
 
 ---
 
