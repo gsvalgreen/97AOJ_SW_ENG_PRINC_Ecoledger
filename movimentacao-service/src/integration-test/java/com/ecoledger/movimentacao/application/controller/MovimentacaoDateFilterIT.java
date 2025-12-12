@@ -1,9 +1,9 @@
 package com.ecoledger.movimentacao.application.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.ecoledger.movimentacao.domain.model.Movimentacao;
 import com.ecoledger.movimentacao.domain.repository.MovimentacaoRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -21,7 +20,8 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -72,15 +72,15 @@ class MovimentacaoDateFilterIT {
     @Test
     void shouldFilterByFromAndToDate() throws Exception {
         var now = OffsetDateTime.now();
-        var m1 = new Movimentacao("prod-1","cmd-1","COLHEITA", new BigDecimal("1"), "KG", now.minusDays(3), null, null, List.of());
-        var m2 = new Movimentacao("prod-1","cmd-1","COLHEITA", new BigDecimal("2"), "KG", now.minusDays(1), null, null, List.of());
-        var m3 = new Movimentacao("prod-1","cmd-1","COLHEITA", new BigDecimal("3"), "KG", now.plusDays(1), null, null, List.of());
-        repository.saveAll(List.of(m1,m2,m3));
+        var m1 = new Movimentacao("prod-1", "cmd-1", "COLHEITA", new BigDecimal("1"), "KG", now.minusDays(3), null, null, List.of());
+        var m2 = new Movimentacao("prod-1", "cmd-1", "COLHEITA", new BigDecimal("2"), "KG", now.minusDays(1), null, null, List.of());
+        var m3 = new Movimentacao("prod-1", "cmd-1", "COLHEITA", new BigDecimal("3"), "KG", now.plusDays(1), null, null, List.of());
+        repository.saveAll(List.of(m1, m2, m3));
 
         var from = now.minusDays(2).toString();
         var to = now.plusDays(2).toString();
 
-        var resp = mockMvc.perform(get("/produtores/prod-1/movimentacoes?fromDate="+from+"&toDate="+to))
+        var resp = mockMvc.perform(get("/produtores/prod-1/movimentacoes?fromDate=" + from + "&toDate=" + to))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()

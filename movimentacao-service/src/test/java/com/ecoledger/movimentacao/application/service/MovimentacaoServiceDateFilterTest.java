@@ -1,6 +1,5 @@
 package com.ecoledger.movimentacao.application.service;
 
-import com.ecoledger.movimentacao.domain.model.Movimentacao;
 import com.ecoledger.movimentacao.domain.repository.MovimentacaoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 class MovimentacaoServiceDateFilterTest {
 
