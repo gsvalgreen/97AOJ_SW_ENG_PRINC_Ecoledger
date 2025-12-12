@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: movimentacao-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/movimentacao}
+    username: ${SPRING_DATASOURCE_USERNAME:movimentacao}
+    password: ${SPRING_DATASOURCE_PASSWORD:movimentacao}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: DEBUG
+    org.springframework.kafka: INFO
+
+kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+
+s3:
+  endpoint: ${S3_ENDPOINT:http://localhost:9000}
+  bucket: ${S3_BUCKET:movimentacoes}
+  region: ${S3_REGION:sa-east-1}
+  access-key: ${S3_ACCESS_KEY:local}
+  secret-key: ${S3_SECRET_KEY:local}
+  max-attachment-size-kb: ${S3_MAX_ATTACHMENT_SIZE_KB:10240}
+  allowed-mime-types: ${S3_ALLOWED_MIME_TYPES:application/pdf,image/png,image/jpeg}
+

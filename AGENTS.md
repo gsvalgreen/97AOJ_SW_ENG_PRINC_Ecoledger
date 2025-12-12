@@ -53,7 +53,7 @@ Usamos Gradle Kotlin DSL (`build.gradle.kts`) com Toolchain Java 21 e o Gradle W
 ```kotlin
 plugins {
     id("org.springframework.boot") version "3.5.8"
-    id("io.spring.dependency-management") version "1.1.2"
+    id("io.spring.dependency-management") version "1.1.7"
     java
 }
 
@@ -76,7 +76,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito:mockito-junit-jupiter")
     // WireMock explicit version is acceptable; Spring Boot BOM will align Spring-related libs
-    testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.0")
+    testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.2")
     testImplementation("com.h2database:h2")
     testImplementation("org.springframework.kafka:spring-kafka-test")
 }
@@ -129,7 +129,7 @@ tasks.test {
   - org.springframework.kafka:spring-kafka-test
 
 - Dependências não gerenciadas pelo BOM (recomendamos fixar versão compatível):
-  - com.github.tomakehurst:wiremock-jre8: 2.35.0 (compatível com Java 21)
+  - com.github.tomakehurst:wiremock-jre8: 2.35.2 (compatível com Java 21)
   - com.h2database:h2: use a série 2.1.x (testes em memória para JPA)
   - org.mockito:mockito-junit-jupiter: 5.x (Mockito 5 funciona bem com JUnit 5/Java 21)
 
