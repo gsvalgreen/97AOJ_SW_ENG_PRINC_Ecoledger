@@ -48,6 +48,12 @@ public class IntegrationInfrastructureConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(AttachmentStorageService.class)
+    AttachmentStorageService noOpAttachmentStorageService() {
+        return new NoOpAttachmentStorageService();
+    }
+
+    @Bean
     @ConditionalOnProperty(name = "movimentacao.kafka.enabled", havingValue = "true", matchIfMissing = true)
     ProducerFactory<String, Object> movimentacaoProducerFactory(KafkaProperties kafkaProperties) {
         Map<String, Object> props = new HashMap<>();

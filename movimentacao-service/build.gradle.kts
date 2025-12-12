@@ -2,6 +2,7 @@ plugins {
     id("org.springframework.boot") version "3.5.8"
     id("io.spring.dependency-management") version "1.1.7"
     java
+    id("jacoco")
 }
 
 java {
@@ -12,6 +13,10 @@ java {
 
 repositories {
     mavenCentral()
+}
+
+jacoco {
+    toolVersion = "0.8.13"
 }
 
 sourceSets {
@@ -70,6 +75,31 @@ val integrationTest = tasks.register<Test>("integrationTest") {
     useJUnitPlatform()
 }
 
+tasks.jacocoTestReport {
+    dependsOn(tasks.test, integrationTest)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+    val sourceSetsMain = sourceSets["main"]
+    classDirectories.setFrom(files(sourceSetsMain.output))
+    executionData.setFrom(fileTree(buildDir).include("**/jacoco/*.exec", "**/*.exec"))
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.8".toBigDecimal()
+            }
+        }
+    }
+    classDirectories.setFrom(files(sourceSets["main"].output))
+    executionData.setFrom(fileTree(buildDir).include("**/jacoco/*.exec", "**/*.exec"))
+}
+
 tasks.check {
     dependsOn(integrationTest)
+    dependsOn("jacocoTestReport")
 }
