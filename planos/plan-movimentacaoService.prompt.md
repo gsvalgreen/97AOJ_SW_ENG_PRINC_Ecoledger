@@ -98,22 +98,31 @@ Configuração
 - [x] Projeto Gradle com Java 21/Spring Boot 3.5.8, migrations e repositório `MovimentacaoRepository` configurados.
 - [x] Endpoint POST `/movimentacoes` com validação de produtor (ProducerApprovalClient), política de anexos e retorno 201.
 - [x] Cliente `ProducerApprovalClient` consumindo `GET /usuarios/{id}` com stubs WireMock em testes.
-- [x] Publicação Kafka (`KafkaMovimentacaoEventPublisher`) com tópicos configuráveis, `KafkaTemplate` e testes unitários + EmbeddedKafka IT.
+- [x] Inicialização de WireMock com stubs para serviços dependentes (usuarios) baseada no contrato em `planos/api-contracts/users.yaml`.
+- [x] WireMock container / configuração atualizada para habilitar Response Templating (templates dinâmicos nos stubs).
+- [x] Publicação Kafka (`KafkaMovimentacaoEventPublisher`) com tópicos configuráveis, `KafkaTemplate` e testes unitários + EmbeddedKafka IT; `application.yml` ajustado para permitir conexão local (localhost:9092) enquanto schema-registry usa DNS.
 - [x] Testes `MovimentacaoServiceTest`, `MovimentacaoControllerIT` (MockMvc + WireMock) e `KafkaMovimentacaoEventPublisherIT` executados via `integrationTest`.
 - [x] Validação de anexos em S3 (`S3AttachmentStorageService`) com políticas de MIME/tamanho/hash, client AWS SDK e testes unitários dedicados.
+- [x] Endpoint de suporte `/anexos/upload-proxy` adicionado para facilitar uploads nos feature tests (carrega bytes em MinIO).
+- [x] Feature tests locais: movidos para sourceSet `featureTest` com task `featureTest`; testes atualizados para provisionar anexos (upload-url, upload-proxy, confirm) e truncar tabelas antes da execução; cenário de idempotência validado.
+- [x] Implementado Idempotency-Service (Idempotency-Key + fallback por requestHash) com persistência em `idempotency_records` e testes.
+- [x] Flyway migrations atualizadas: V1/V2 agora usam `pgcrypto` + `gen_random_uuid()` como default para UUIDs (evita erros de persistência em bancos sem default UUID).
+- [x] Corrigido mapeamento JPA: relação pai-filho (Movimentacao <-> MovimentacaoAnexo) tornada bidirecional e ajustada a construção de entidades para setar o lado proprietário, evitando FK nulos.
+- [x] DTO fetch transactional: adicionada API de leitura que monta o DTO dentro de uma transação para evitar LazyInitializationException no GET `/movimentacoes/{id}`.
+- [x] Observabilidade: adicionados logs estruturados (MDC traceId), RequestLoggingFilter, logs em service/controller/idempotency/S3 para facilitar debugging de fluxo e erros.
+- [x] README atualizado com notas sobre Idempotency, anexos, OpenAPI e instruções para executar feature tests.
 
 ### Pendências (prioridade alta -> baixa)
 - [x] Implementar e disponibilizar GET `/movimentacoes/{id}` (detalhe) com DTO de resposta e testes unit + integração H2.
 - [x] Implementar lista paginada `/produtores/{producerId}/movimentacoes` com filtros (fromDate, toDate, commodityId) e testes.
 - [x] Implementar `/commodities/{commodityId}/historico` e cobertura de integração.
-- [x] Completar fluxo de upload: endpoint para anexos, geração de URLs assinadas, confirmação de upload e versionamento (MinIO em CI).
-- [x] Idempotência para criação (Idempotency-Key optional + duplicate-hash fallback).
-- [x] Flyway migration: V2__create_idempotency_records.sql criada para persistir idempotency_records.
-- [x] Testes de feature locais: movidos para sourceSet `featureTest` com task `featureTest` e testes que validam anexos e idempotência contra localhost.
-- [x] README atualizado com notas sobre Idempotency, anexos, OpenAPI e instruções para executar feature tests.
+- [x] Completar fluxo de upload: geração de URLs assinadas de produção e versionamento (MinIO em CI já configurado para testes).
+- [x] Idempotência para criação (Idempotency-Key optional + duplicate-hash fallback) — implementado e testado localmente.
+- [x] Flyway migration: V2__create_idempotency_records.sql criada/atualizada.
+- [x] Testes de feature locais executando com MinIO e serviços stubados (WireMock) — cenário de ponta a ponta validado localmente.
 - [x] Enriquecer tratamento de erros (Problem Details), validações JSR-380 adicionais e mensagens de erro padronizadas.
 - [x] OpenAPI: alinhar `movimentacao.yaml`, incluir exemplos e documentar erros/response codes.
-- [ ] Observabilidade: healthchecks, métricas básicas (request count, errors), logs estruturados e configuração para CI/Prod.
+- [ ] Observabilidade: healthchecks, métricas (Micrometer), tracing e configuração para CI/Prod (apenas logs básicos implementados).
 - [ ] Testes de contrato/consumidor para Auditoria e Notificações (PACT/WireMock/contract tests).
 - [ ] Revisar índices DB (producerId+timestamp, commodityId+timestamp) e adicionar migrations faltantes se necessário.
 - [ ] Segurança: validar configuração JWT (audience), permissões por papel (produtor/analista/auditor) e rate limiting.

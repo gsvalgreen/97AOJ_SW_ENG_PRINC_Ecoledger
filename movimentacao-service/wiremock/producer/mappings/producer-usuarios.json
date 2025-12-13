@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/usuarios/.*"
+  },
+  "response": {
+    "status": 200,
+    "body": "{ \"id\": \"{{request.pathSegments.[1]}}\", \"nome\": \"Produtor {{request.pathSegments.[1]}}\", \"email\": \"produtor+{{request.pathSegments.[1]}}@example.com\", \"role\": \"produtor\", \"documento\": \"00000000000\", \"status\": \"APROVADO\", \"criadoEm\": \"{{now format='yyyy-MM-dd HH:mm:ssXXX'}}\" }",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"]
+  }
+}

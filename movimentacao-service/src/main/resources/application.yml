@@ -35,14 +35,17 @@ s3:
   endpoint: ${S3_ENDPOINT:http://localhost:9000}
   bucket: ${S3_BUCKET:movimentacoes}
   region: ${S3_REGION:sa-east-1}
-  access-key: ${S3_ACCESS_KEY:local}
-  secret-key: ${S3_SECRET_KEY:local}
+  access-key: ${S3_ACCESS_KEY:minioadmin}
+  secret-key: ${S3_SECRET_KEY:minioadmin}
   max-attachment-size-kb: ${S3_MAX_ATTACHMENT_SIZE_KB:10240}
   allowed-mime-types: ${S3_ALLOWED_MIME_TYPES:application/pdf,image/png,image/jpeg}
   public-base-url: ${S3_PUBLIC_BASE_URL:http://localhost:9000/movimentacoes}
   use-path-style: ${S3_USE_PATH_STYLE:true}
 
 movimentacao:
+  attachment-policy:
+    max-attachments: ${MOVIMENTACAO_ATTACHMENT_POLICY_MAX_ATTACHMENTS:5}
+    allowed-mime-types: ${s3.allowed-mime-types}
   attachments:
     provider: ${MOVIMENTACAO_ATTACHMENTS_PROVIDER:s3}
   kafka:
@@ -52,5 +55,5 @@ movimentacao:
       movimentacao-criada: movimentacao.criada
       movimentacao-atualizada: movimentacao.atualizada
   producer-approval:
-    base-url: ${PRODUCER_APPROVAL_BASE_URL:http://producer-service}
+    base-url: ${PRODUCER_APPROVAL_BASE_URL:http://localhost:8089}
     timeout-ms: ${PRODUCER_APPROVAL_TIMEOUT_MS:2000}

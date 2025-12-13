@@ -9,7 +9,7 @@ Requisitos
 Serviços auxiliares (definidos em docker-compose.yml)
 - Kafka: bootstrap em localhost:29092 (broker dentro do compose)
 - Schema Registry: http://localhost:8081
-- Kafka UI: http://localhost:8080
+- Kafka UI: http://localhost:8090
 - MinIO: http://localhost:9000 (console em http://localhost:9001) — credenciais: minioadmin / minioadmin. Buckets criados: `movimentacoes`, `anexos`.
 - Postgres (movimentacao-db): jdbc:postgresql://localhost:5433/movimentacao (user: ecoledger / ecoledger)
 - MailHog: http://localhost:8025

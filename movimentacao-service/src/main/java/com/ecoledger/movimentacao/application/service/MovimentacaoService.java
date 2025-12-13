@@ -2,6 +2,7 @@ package com.ecoledger.movimentacao.application.service;
 
 import com.ecoledger.movimentacao.application.dto.MovimentacaoDetailResponse;
 import com.ecoledger.movimentacao.application.dto.MovimentacaoRequest;
+import com.ecoledger.movimentacao.application.dto.MovimentacaoRequest.MovimentacaoRequestAttachment;
 import com.ecoledger.movimentacao.config.AttachmentPolicyProperties;
 import com.ecoledger.movimentacao.domain.model.Movimentacao;
 import com.ecoledger.movimentacao.domain.model.MovimentacaoAnexo;
@@ -39,8 +40,12 @@ public class MovimentacaoService {
 
     @Transactional
     public UUID registrar(MovimentacaoRequest request) {
+        org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MovimentacaoService.class);
+        LOG.info("Starting registrar for producerId={} commodityId={} tipo={} timestamp={} traceId={}", request.producerId(), request.commodityId(), request.tipo(), request.timestamp(), org.slf4j.MDC.get("traceId"));
         validateProducer(request.producerId());
+        LOG.debug("Producer validated for producerId={} traceId={}", request.producerId(), org.slf4j.MDC.get("traceId"));
         validateAnexos(request.anexos());
+        LOG.debug("Attachments validated count={} traceId={}", request.anexos() == null ? 0 : request.anexos().size(), org.slf4j.MDC.get("traceId"));
         Double lat = null;
         Double lon = null;
         if (request.localizacao() != null) {
@@ -59,7 +64,13 @@ public class MovimentacaoService {
                 buildAnexos(request.anexos())
         );
         Movimentacao saved = repository.save(movimentacao);
-        eventPublisher.publishCreated(saved);
+        LOG.info("Saved movimentacao id={} producerId={} traceId={}", saved.getId(), saved.getProducerId(), org.slf4j.MDC.get("traceId"));
+        try {
+            eventPublisher.publishCreated(saved);
+            LOG.info("Published movimentacao.criada for id={} traceId={}", saved.getId(), org.slf4j.MDC.get("traceId"));
+        } catch (Exception ex) {
+            LOG.error("Failed to publish event for movimentacao id={} traceId={} error={}", saved.getId(), org.slf4j.MDC.get("traceId"), ex.getMessage());
+        }
         return saved.getId();
     }
 
@@ -69,7 +80,7 @@ public class MovimentacaoService {
         }
     }
 
-    private void validateAnexos(List<MovimentacaoRequest.MovimentacaoRequestAttachment> anexos) {
+    private void validateAnexos(List<MovimentacaoRequestAttachment> anexos) {
         if (anexos == null || anexos.isEmpty()) {
             return;
         }
@@ -85,7 +96,7 @@ public class MovimentacaoService {
         }
     }
 
-    private List<MovimentacaoAnexo> buildAnexos(List<MovimentacaoRequest.MovimentacaoRequestAttachment> anexos) {
+    private List<MovimentacaoAnexo> buildAnexos(List<MovimentacaoRequestAttachment> anexos) {
         if (anexos == null) {
             return List.of();
         }
@@ -100,8 +111,14 @@ public class MovimentacaoService {
                 .collect(Collectors.toList());
     }
 
-    public Movimentacao buscarPorId(java.util.UUID id) {
+    public Movimentacao buscarPorId(UUID id) {
         return repository.findById(id).orElseThrow(() -> new MovimentacaoNotFoundException(id));
+    }
+
+    @Transactional(readOnly = true)
+    public MovimentacaoDetailResponse buscarPorIdDto(UUID id) {
+        var m = repository.findById(id).orElseThrow(() -> new MovimentacaoNotFoundException(id));
+        return MovimentacaoDetailResponse.fromEntity(m);
     }
 
     public Page<Movimentacao> buscarPorProducer(String producerId, Pageable pageable) {

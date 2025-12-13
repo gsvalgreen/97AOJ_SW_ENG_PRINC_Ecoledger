@@ -45,26 +45,37 @@ public class MovimentacaoController {
     public ResponseEntity<MovimentacaoResponse> criar(@Valid @RequestBody MovimentacaoRequest request,
                                                       @RequestHeader(value = "X-Idempotency-Key", required = false) String idempotencyKey
     ) {
+        org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MovimentacaoController.class);
         try {
             String payloadJson = this.objectMapper.writeValueAsString(request);
             String requestHash = sha256(payloadJson);
+            LOG.info("Received create movimentacao request producerId={} commodityId={} idempotencyKey={} traceId={}", request.producerId(), request.commodityId(), idempotencyKey, org.slf4j.MDC.get("traceId"));
             var maybe = this.idempotencyService.handle(idempotencyKey, requestHash, () -> service.registrar(request));
             if (maybe.isPresent()) {
                 var resp = maybe.get();
+                LOG.info("Idempotency returned existing response movimentacaoId={} idempotencyKey={} traceId={}", resp.movimentacaoId(), idempotencyKey, org.slf4j.MDC.get("traceId"));
                 return ResponseEntity.created(URI.create("/movimentacoes/" + resp.movimentacaoId())).body(resp);
             }
             // if empty, fallthrough to normal behaviour
             var id = service.registrar(request);
+            LOG.info("Created movimentacao id={} producerId={} traceId={}", id, request.producerId(), org.slf4j.MDC.get("traceId"));
             return ResponseEntity.created(URI.create("/movimentacoes/" + id)).body(new MovimentacaoResponse(id));
+        } catch (ProducerNotApprovedException ex) {
+            LOG.warn("Producer not approved: {} traceId={}", ex.getMessage(), org.slf4j.MDC.get("traceId"));
+            throw ex;
+        } catch (InvalidAttachmentException ex) {
+            LOG.warn("Invalid attachment: {} traceId={}", ex.getMessage(), org.slf4j.MDC.get("traceId"));
+            throw ex;
         } catch (Exception ex) {
+            LOG.error("Unhandled error while creating movimentacao: {} traceId={}", ex.getMessage(), org.slf4j.MDC.get("traceId"), ex);
             throw new RuntimeException(ex);
         }
     }
 
     @GetMapping("/movimentacoes/{id}")
     public ResponseEntity<MovimentacaoDetailResponse> buscarPorId(@PathVariable UUID id) {
-        var m = service.buscarPorId(id);
-        return ResponseEntity.ok(MovimentacaoDetailResponse.fromEntity(m));
+        var dto = service.buscarPorIdDto(id);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/produtores/{producerId}/movimentacoes")

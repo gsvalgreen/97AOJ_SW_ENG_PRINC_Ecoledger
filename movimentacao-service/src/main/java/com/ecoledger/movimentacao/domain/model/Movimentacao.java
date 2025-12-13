@@ -52,8 +52,7 @@ public class Movimentacao {
     @Column(name = "criado_em", nullable = false)
     private OffsetDateTime criadoEm;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "movimentacao_id")
+    @OneToMany(mappedBy = "movimentacao", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MovimentacaoAnexo> anexos = new ArrayList<>();
 
     protected Movimentacao() {
@@ -80,6 +79,9 @@ public class Movimentacao {
         this.criadoEm = OffsetDateTime.now();
         if (anexos != null) {
             this.anexos.addAll(anexos);
+            for (MovimentacaoAnexo a : this.anexos) {
+                a.setMovimentacao(this);
+            }
         }
     }
 

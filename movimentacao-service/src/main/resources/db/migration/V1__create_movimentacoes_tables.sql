@@ -1,5 +1,7 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE movimentacoes (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     producer_id VARCHAR(36) NOT NULL,
     commodity_id VARCHAR(36) NOT NULL,
     tipo VARCHAR(40) NOT NULL,
@@ -12,7 +14,7 @@ CREATE TABLE movimentacoes (
 );
 
 CREATE TABLE movimentacao_anexos (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     movimentacao_id UUID NOT NULL REFERENCES movimentacoes(id),
     tipo VARCHAR(40) NOT NULL,
     url TEXT NOT NULL,
