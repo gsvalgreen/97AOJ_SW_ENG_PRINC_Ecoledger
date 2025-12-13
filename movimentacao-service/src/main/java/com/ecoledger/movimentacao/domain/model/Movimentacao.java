@@ -1,15 +1,7 @@
 package com.ecoledger.movimentacao.domain.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -60,14 +52,14 @@ public class Movimentacao {
     }
 
     public Movimentacao(String producerId,
-                         String commodityId,
-                         String tipo,
-                         BigDecimal quantidade,
-                         String unidade,
-                         OffsetDateTime timestamp,
-                         Double latitude,
-                         Double longitude,
-                         List<MovimentacaoAnexo> anexos) {
+                        String commodityId,
+                        String tipo,
+                        BigDecimal quantidade,
+                        String unidade,
+                        OffsetDateTime timestamp,
+                        Double latitude,
+                        Double longitude,
+                        List<MovimentacaoAnexo> anexos) {
         this.producerId = producerId;
         this.commodityId = commodityId;
         this.tipo = tipo;
