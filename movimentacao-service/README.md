@@ -47,7 +47,13 @@ CI/CD
 - O serviço possui um pipeline de CI configurado no GitHub Actions (`.github/workflows/movimentacao-service-ci.yml`)
 - O pipeline é acionado automaticamente em push/pull request para branches `main`, `develop` e `feature/**`
 - Executa: `./gradlew clean build` (inclui testes unitários, integração e cobertura de código)
+- Análise de código: integrado com SonarCloud para análise de qualidade, cobertura e vulnerabilidades
 - Artefatos gerados: relatórios de testes e cobertura (disponíveis por 30 dias)
+
+Qualidade de Código
+- SonarCloud: https://sonarcloud.io/project/overview?id=gsvalgreen_97AOJ_SW_ENG_PRINC_Ecoledger_movimentacao
+- Para executar análise local: `./gradlew sonar -Dsonar.token=<seu-token>`
+- Cobertura mínima exigida: 80% (verificada pelo Jacoco durante o build)
 
 Notas
 - O serviço kafka-init no compose cria automaticamente os tópicos: usuarios.events, movimentacao.events, auditoria.events, certificacao.events, credito.events e notificacao.events.

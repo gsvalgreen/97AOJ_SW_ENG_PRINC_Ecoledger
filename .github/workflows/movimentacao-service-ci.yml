@@ -41,7 +41,16 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew -B --no-daemon clean build
+        run: ./gradlew --no-daemon clean build
+
+      - name: SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./gradlew --no-daemon sonar \
+            -Dsonar.projectKey=gsvalgreen_97AOJ_SW_ENG_PRINC_Ecoledger_movimentacao \
+            -Dsonar.organization=gsvalgreen \
+            -Dsonar.host.url=https://sonarcloud.io
 
       - name: Upload test results
         if: always()
