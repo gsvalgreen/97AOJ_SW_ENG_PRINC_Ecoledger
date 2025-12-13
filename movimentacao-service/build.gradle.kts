@@ -3,6 +3,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     java
     id("jacoco")
+    id("org.sonarqube") version "5.1.0.4882"
 }
 
 java {
@@ -17,6 +18,14 @@ repositories {
 
 jacoco {
     toolVersion = "0.8.13"
+}
+
+sonar {
+    properties {
+        property("sonar.projectName", "ECO Ledger - Movimentacao Service")
+        property("sonar.java.coveragePlugin", "jacoco")
+        property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport.xml")
+    }
 }
 
 sourceSets {
