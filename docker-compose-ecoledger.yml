@@ -111,87 +111,17 @@ services:
     networks:
       - ecoledger
 
-  users-db:
+  postgres:
     image: postgres:16
-    container_name: ecoledger-users-db
+    container_name: ecoledger-postgres
     environment:
-      POSTGRES_DB: users
-      POSTGRES_USER: ecoledger
-      POSTGRES_PASSWORD: ecoledger
+      POSTGRES_USER: ecoledger_admin
+      POSTGRES_PASSWORD: ecoledger_admin
     ports:
       - "5432:5432"
     volumes:
-      - users-db-data:/var/lib/postgresql/data
-    networks:
-      - ecoledger
-
-  movimentacao-db:
-    image: postgres:16
-    container_name: ecoledger-movimentacao-db
-    environment:
-      POSTGRES_DB: movimentacao
-      POSTGRES_USER: ecoledger
-      POSTGRES_PASSWORD: ecoledger
-    ports:
-      - "5433:5432"
-    volumes:
-      - movimentacao-db-data:/var/lib/postgresql/data
-    networks:
-      - ecoledger
-
-  auditoria-db:
-    image: postgres:16
-    container_name: ecoledger-auditoria-db
-    environment:
-      POSTGRES_DB: auditoria
-      POSTGRES_USER: ecoledger
-      POSTGRES_PASSWORD: ecoledger
-    ports:
-      - "5434:5432"
-    volumes:
-      - auditoria-db-data:/var/lib/postgresql/data
-    networks:
-      - ecoledger
-
-  certificacao-db:
-    image: postgres:16
-    container_name: ecoledger-certificacao-db
-    environment:
-      POSTGRES_DB: certificacao
-      POSTGRES_USER: ecoledger
-      POSTGRES_PASSWORD: ecoledger
-    ports:
-      - "5435:5432"
-    volumes:
-      - certificacao-db-data:/var/lib/postgresql/data
-    networks:
-      - ecoledger
-
-  credito-db:
-    image: postgres:16
-    container_name: ecoledger-credito-db
-    environment:
-      POSTGRES_DB: credito
-      POSTGRES_USER: ecoledger
-      POSTGRES_PASSWORD: ecoledger
-    ports:
-      - "5436:5432"
-    volumes:
-      - credito-db-data:/var/lib/postgresql/data
-    networks:
-      - ecoledger
-
-  notification-db:
-    image: postgres:16
-    container_name: ecoledger-notification-db
-    environment:
-      POSTGRES_DB: notification
-      POSTGRES_USER: ecoledger
-      POSTGRES_PASSWORD: ecoledger
-    ports:
-      - "5437:5432"
-    volumes:
-      - notification-db-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
     networks:
       - ecoledger
 
@@ -221,16 +151,16 @@ services:
     image: movimentacao-service:local
     container_name: ecoledger-movimentacao-service
     depends_on:
-      - movimentacao-db
+      - postgres
       - kafka
       - minio
       - schema-registry
     ports:
       - "8082:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://movimentacao-db:5432/movimentacao
-      SPRING_DATASOURCE_USERNAME: ecoledger
-      SPRING_DATASOURCE_PASSWORD: ecoledger
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/movimentacao
+      SPRING_DATASOURCE_USERNAME: ecoledger_movimentacao
+      SPRING_DATASOURCE_PASSWORD: ecoledger_movimentacao
       KAFKA_BOOTSTRAP: kafka:9092
       S3_ENDPOINT: http://minio:9000
       S3_BUCKET: movimentacoes
@@ -249,10 +179,5 @@ networks:
     driver: bridge
 
 volumes:
-  users-db-data:
-  movimentacao-db-data:
-  auditoria-db-data:
-  certificacao-db-data:
-  credito-db-data:
-  notification-db-data:
+  postgres-data:
   minio-data:
