@@ -1,0 +1,258 @@
+version: "3.9"
+
+name: ecoledger-fullstack
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: ecoledger-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+    networks:
+      - ecoledger
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: ecoledger-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - ecoledger
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.6.1
+    container_name: ecoledger-schema-registry
+    depends_on:
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    networks:
+      - ecoledger
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    container_name: ecoledger-kafka-ui
+    depends_on:
+      - kafka
+      - schema-registry
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: ecoledger
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
+    networks:
+      - ecoledger
+
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: ecoledger-kafka-init
+    depends_on:
+      - kafka
+    entrypoint: ["/bin/bash", "-c"]
+    command: >-
+      "sleep 5 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic usuarios.events --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic movimentacao.events --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic auditoria.events --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic certificacao.events --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic credito.events --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic notificacao.events --partitions 3 --replication-factor 1"
+    networks:
+      - ecoledger
+
+  minio:
+    image: minio/minio:RELEASE.2024-05-10T01-41-38Z
+    container_name: ecoledger-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - ecoledger
+
+  minio-setup:
+    image: minio/mc:latest
+    container_name: ecoledger-minio-setup
+    depends_on:
+      - minio
+    entrypoint: ["/bin/sh", "-c"]
+    command: >-
+      "sleep 5 &&
+      mc alias set ecoledger http://minio:9000 minioadmin minioadmin &&
+      mc mb -p ecoledger/movimentacoes &&
+      mc mb -p ecoledger/anexos &&
+      mc anonymous set public ecoledger/anexos"
+    networks:
+      - ecoledger
+
+  users-db:
+    image: postgres:16
+    container_name: ecoledger-users-db
+    environment:
+      POSTGRES_DB: users
+      POSTGRES_USER: ecoledger
+      POSTGRES_PASSWORD: ecoledger
+    ports:
+      - "5432:5432"
+    volumes:
+      - users-db-data:/var/lib/postgresql/data
+    networks:
+      - ecoledger
+
+  movimentacao-db:
+    image: postgres:16
+    container_name: ecoledger-movimentacao-db
+    environment:
+      POSTGRES_DB: movimentacao
+      POSTGRES_USER: ecoledger
+      POSTGRES_PASSWORD: ecoledger
+    ports:
+      - "5433:5432"
+    volumes:
+      - movimentacao-db-data:/var/lib/postgresql/data
+    networks:
+      - ecoledger
+
+  auditoria-db:
+    image: postgres:16
+    container_name: ecoledger-auditoria-db
+    environment:
+      POSTGRES_DB: auditoria
+      POSTGRES_USER: ecoledger
+      POSTGRES_PASSWORD: ecoledger
+    ports:
+      - "5434:5432"
+    volumes:
+      - auditoria-db-data:/var/lib/postgresql/data
+    networks:
+      - ecoledger
+
+  certificacao-db:
+    image: postgres:16
+    container_name: ecoledger-certificacao-db
+    environment:
+      POSTGRES_DB: certificacao
+      POSTGRES_USER: ecoledger
+      POSTGRES_PASSWORD: ecoledger
+    ports:
+      - "5435:5432"
+    volumes:
+      - certificacao-db-data:/var/lib/postgresql/data
+    networks:
+      - ecoledger
+
+  credito-db:
+    image: postgres:16
+    container_name: ecoledger-credito-db
+    environment:
+      POSTGRES_DB: credito
+      POSTGRES_USER: ecoledger
+      POSTGRES_PASSWORD: ecoledger
+    ports:
+      - "5436:5432"
+    volumes:
+      - credito-db-data:/var/lib/postgresql/data
+    networks:
+      - ecoledger
+
+  notification-db:
+    image: postgres:16
+    container_name: ecoledger-notification-db
+    environment:
+      POSTGRES_DB: notification
+      POSTGRES_USER: ecoledger
+      POSTGRES_PASSWORD: ecoledger
+    ports:
+      - "5437:5432"
+    volumes:
+      - notification-db-data:/var/lib/postgresql/data
+    networks:
+      - ecoledger
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: ecoledger-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - ecoledger
+
+  # WireMock used as temporary user-service substitute
+  wiremock:
+    image: wiremock/wiremock:3.13.2
+    container_name: wiremock-producer
+    command: ["--local-response-templating","--verbose"]
+    ports:
+      - "8089:8080"
+    volumes:
+      - ./movimentacao-service/wiremock/producer:/home/wiremock
+    networks:
+      - ecoledger
+
+  # Movimentacao service built locally
+  movimentacao-service:
+    image: movimentacao-service:local
+    container_name: ecoledger-movimentacao-service
+    depends_on:
+      - movimentacao-db
+      - kafka
+      - minio
+      - schema-registry
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://movimentacao-db:5432/movimentacao
+      SPRING_DATASOURCE_USERNAME: ecoledger
+      SPRING_DATASOURCE_PASSWORD: ecoledger
+      KAFKA_BOOTSTRAP: kafka:9092
+      S3_ENDPOINT: http://minio:9000
+      S3_BUCKET: movimentacoes
+      S3_REGION: sa-east-1
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_PUBLIC_BASE_URL: http://minio:9000/movimentacoes
+      S3_USE_PATH_STYLE: "true"
+      MOVIMENTACAO_KAFKA_ENABLED: "true"
+      PRODUCER_APPROVAL_BASE_URL: http://wiremock:8080
+    networks:
+      - ecoledger
+
+networks:
+  ecoledger:
+    driver: bridge
+
+volumes:
+  users-db-data:
+  movimentacao-db-data:
+  auditoria-db-data:
+  certificacao-db-data:
+  credito-db-data:
+  notification-db-data:
+  minio-data:
