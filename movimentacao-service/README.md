@@ -43,6 +43,12 @@ Testes
 - Testes unitários: ./gradlew test
 - Testes de integração (se configurados): ./gradlew integrationTest ou ./gradlew clean check
 
+CI/CD
+- O serviço possui um pipeline de CI configurado no GitHub Actions (`.github/workflows/movimentacao-service-ci.yml`)
+- O pipeline é acionado automaticamente em push/pull request para branches `main`, `develop` e `feature/**`
+- Executa: `./gradlew clean build` (inclui testes unitários, integração e cobertura de código)
+- Artefatos gerados: relatórios de testes e cobertura (disponíveis por 30 dias)
+
 Notas
 - O serviço kafka-init no compose cria automaticamente os tópicos: usuarios.events, movimentacao.events, auditoria.events, certificacao.events, credito.events e notificacao.events.
 - Se precisar inspecionar filas e tópicos, acesse o Kafka UI em http://localhost:8080.
