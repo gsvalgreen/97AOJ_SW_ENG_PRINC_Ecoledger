@@ -64,8 +64,7 @@ public class MovimentacaoController {
 
     @GetMapping("/commodities/{commodityId}/historico")
     public ResponseEntity<java.util.List<MovimentacaoDetailResponse>> historicoPorCommodity(@PathVariable String commodityId) {
-        var list = service.buscarHistoricoPorCommodity(commodityId);
-        var items = list.stream().map(MovimentacaoDetailResponse::fromEntity).toList();
+        var items = service.buscarHistoricoPorCommodity(commodityId);
         return ResponseEntity.ok(items);
     }
 

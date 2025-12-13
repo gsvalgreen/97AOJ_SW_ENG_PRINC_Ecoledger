@@ -9,4 +9,10 @@ public class NoOpAttachmentStorageService implements AttachmentStorageService {
     public void validateAttachment(MovimentacaoRequestAttachment attachment) {
         // no-op fallback for local tests
     }
+
+    @Override
+    public AttachmentConfirmation confirmUpload(String objectKey) {
+        String url = "https://no-op.storage/" + objectKey;
+        return new AttachmentConfirmation(objectKey, url, null, null, 0L);
+    }
 }

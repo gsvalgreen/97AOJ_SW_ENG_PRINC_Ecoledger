@@ -34,6 +34,28 @@ public class S3AttachmentStorageService implements AttachmentStorageService {
         validateHash(attachment, metadata);
     }
 
+    @Override
+    public AttachmentConfirmation confirmUpload(String objectKey) {
+        String key = objectKey;
+        HeadObjectRequest request = HeadObjectRequest.builder()
+                .bucket(properties.bucket())
+                .key(key)
+                .build();
+        try {
+            HeadObjectResponse metadata = s3Client.headObject(request);
+            String contentType = metadata.contentType();
+            String hash = (metadata.metadata() == null) ? null : metadata.metadata().get("hash");
+            long size = metadata.contentLength();
+            String base = properties.publicBaseUrl() != null && !properties.publicBaseUrl().isBlank() ? properties.publicBaseUrl() : properties.endpoint();
+            String url = String.format("%s/%s/%s", base, properties.bucket(), key);
+            return new AttachmentConfirmation(objectKey, url, contentType, hash, size);
+        } catch (NoSuchKeyException ex) {
+            throw new com.ecoledger.movimentacao.application.service.InvalidAttachmentException("Attachment not found in storage");
+        } catch (AwsServiceException | SdkClientException ex) {
+            throw new com.ecoledger.movimentacao.application.service.InvalidAttachmentException("Unable to confirm attachment: " + ex.getMessage());
+        }
+    }
+
     private void ensureMimeAllowed(String mime) {
         if (!properties.allowedMimeTypes().contains(mime)) {
             throw new InvalidAttachmentException("Attachment type not allowed: " + mime);

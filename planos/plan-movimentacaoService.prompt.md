@@ -104,9 +104,9 @@ Configuração
 
 ### Pendências (prioridade alta -> baixa)
 - [x] Implementar e disponibilizar GET `/movimentacoes/{id}` (detalhe) com DTO de resposta e testes unit + integração H2.
-- [ ] Implementar lista paginada `/produtores/{producerId}/movimentacoes` com filtros (fromDate, toDate, commodityId) e testes.
-- [ ] Implementar `/commodities/{commodityId}/historico` e cobertura de integração.
-- [ ] Completar fluxo de upload: endpoint para anexos, geração de URLs assinadas, confirmação de upload e versionamento (MinIO em CI).
+- [x] Implementar lista paginada `/produtores/{producerId}/movimentacoes` com filtros (fromDate, toDate, commodityId) e testes.
+- [x] Implementar `/commodities/{commodityId}/historico` e cobertura de integração.
+- [x] Completar fluxo de upload: endpoint para anexos, geração de URLs assinadas, confirmação de upload e versionamento (MinIO em CI).
 - [ ] Idempotência para criação (Idempotency-Key or duplicate-hash handling).
 - [ ] Enriquecer tratamento de erros (Problem Details), validações JSR-380 adicionais e mensagens de erro padronizadas.
 - [ ] OpenAPI: alinhar `movimentacao.yaml`, incluir exemplos e documentar erros/response codes.

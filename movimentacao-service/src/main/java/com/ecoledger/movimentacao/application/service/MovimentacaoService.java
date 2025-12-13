@@ -1,5 +1,6 @@
 package com.ecoledger.movimentacao.application.service;
 
+import com.ecoledger.movimentacao.application.dto.MovimentacaoDetailResponse;
 import com.ecoledger.movimentacao.application.dto.MovimentacaoRequest;
 import com.ecoledger.movimentacao.config.AttachmentPolicyProperties;
 import com.ecoledger.movimentacao.domain.model.Movimentacao;
@@ -123,13 +124,17 @@ public class MovimentacaoService {
         return repository.findByProducerId(producerId, pageable);
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public org.springframework.data.domain.Page<com.ecoledger.movimentacao.application.dto.MovimentacaoDetailResponse> buscarPorProducerDto(String producerId, Pageable pageable, String commodityId, OffsetDateTime fromDate, OffsetDateTime toDate) {
+    @Transactional(readOnly = true)
+    public Page<MovimentacaoDetailResponse> buscarPorProducerDto(String producerId, Pageable pageable, String commodityId, OffsetDateTime fromDate, OffsetDateTime toDate) {
         var page = buscarPorProducer(producerId, pageable, commodityId, fromDate, toDate);
-        return page.map(com.ecoledger.movimentacao.application.dto.MovimentacaoDetailResponse::fromEntity);
+        return page.map(MovimentacaoDetailResponse::fromEntity);
     }
 
-    public List<Movimentacao> buscarHistoricoPorCommodity(String commodityId) {
-        return repository.findByCommodityIdOrderByTimestampDesc(commodityId);
+    @Transactional(readOnly = true)
+    public List<MovimentacaoDetailResponse> buscarHistoricoPorCommodity(String commodityId) {
+        var list = repository.findByCommodityIdOrderByTimestampDesc(commodityId);
+        return list.stream()
+                .map(MovimentacaoDetailResponse::fromEntity)
+                .toList();
     }
 }
