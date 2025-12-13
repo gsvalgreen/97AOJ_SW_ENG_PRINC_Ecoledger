@@ -14,6 +14,13 @@ paths:
       tags: [Movimentacoes]
       security:
         - bearerAuth: [produtor:write]
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Chave de idempotência opcional para evitar duplicação de requests
       requestBody:
         required: true
         content:
@@ -113,6 +120,58 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Movimentacao'
+  /anexos/upload-url:
+    post:
+      summary: Gerar URL de upload (simulada)
+      tags: [Anexos]
+      security:
+        - bearerAuth: [produtor:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contentType:
+                  type: string
+      responses:
+        '200':
+          description: URL de upload assinada (simulada)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  objectKey: { type: string }
+                  uploadUrl: { type: string }
+  /anexos/confirm:
+    post:
+      summary: Confirmar upload de anexo
+      tags: [Anexos]
+      security:
+        - bearerAuth: [produtor:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                objectKey: { type: string }
+      responses:
+        '200':
+          description: Informações do anexo confirmado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  objectKey: { type: string }
+                  url: { type: string }
+                  tipo: { type: string }
+                  hash: { type: string }
+                  size: { type: integer }
 components:
   securitySchemes:
     bearerAuth:
