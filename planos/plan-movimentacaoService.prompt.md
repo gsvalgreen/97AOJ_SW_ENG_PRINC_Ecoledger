@@ -103,7 +103,7 @@ Configuração
 - [x] Validação de anexos em S3 (`S3AttachmentStorageService`) com políticas de MIME/tamanho/hash, client AWS SDK e testes unitários dedicados.
 
 ### Pendências (prioridade alta -> baixa)
-- [ ] Implementar e disponibilizar GET `/movimentacoes/{id}` (detalhe) com DTO de resposta e testes unit + integração H2.
+- [x] Implementar e disponibilizar GET `/movimentacoes/{id}` (detalhe) com DTO de resposta e testes unit + integração H2.
 - [ ] Implementar lista paginada `/produtores/{producerId}/movimentacoes` com filtros (fromDate, toDate, commodityId) e testes.
 - [ ] Implementar `/commodities/{commodityId}/historico` e cobertura de integração.
 - [ ] Completar fluxo de upload: endpoint para anexos, geração de URLs assinadas, confirmação de upload e versionamento (MinIO em CI).
