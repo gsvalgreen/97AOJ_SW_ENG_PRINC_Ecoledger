@@ -1,44 +1,64 @@
 package com.ecoledger.movimentacao.application.controller;
 
-import com.ecoledger.movimentacao.application.dto.MovimentacaoRequest;
-import com.ecoledger.movimentacao.application.dto.MovimentacaoResponse;
 import com.ecoledger.movimentacao.application.dto.MovimentacaoDetailResponse;
 import com.ecoledger.movimentacao.application.dto.MovimentacaoListResponse;
-import com.ecoledger.movimentacao.application.service.InvalidAttachmentException;
-import com.ecoledger.movimentacao.application.service.MovimentacaoNotFoundException;
-import com.ecoledger.movimentacao.application.service.MovimentacaoService;
-import com.ecoledger.movimentacao.application.service.ProducerNotApprovedException;
+import com.ecoledger.movimentacao.application.dto.MovimentacaoRequest;
+import com.ecoledger.movimentacao.application.dto.MovimentacaoResponse;
+import com.ecoledger.movimentacao.application.service.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
-import java.net.URI;
-import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping
 public class MovimentacaoController {
 
     private final MovimentacaoService service;
+    private final ObjectMapper objectMapper;
+    private final IdempotencyService idempotencyService;
 
-    public MovimentacaoController(MovimentacaoService service) {
+    public MovimentacaoController(MovimentacaoService service,
+                                  ObjectMapper objectMapper,
+                                  IdempotencyService idempotencyService) {
         this.service = service;
+        this.objectMapper = objectMapper;
+        this.idempotencyService = idempotencyService;
+    }
+
+    private static String sha256(String value) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(value.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return java.util.HexFormat.of().formatHex(digest);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @PostMapping("/movimentacoes")
-    public ResponseEntity<MovimentacaoResponse> criar(@Valid @RequestBody MovimentacaoRequest request) {
-        var id = service.registrar(request);
-        return ResponseEntity.created(URI.create("/movimentacoes/" + id))
-                .body(new MovimentacaoResponse(id));
+    public ResponseEntity<MovimentacaoResponse> criar(@Valid @RequestBody MovimentacaoRequest request,
+                                                      @RequestHeader(value = "X-Idempotency-Key", required = false) String idempotencyKey
+    ) {
+        try {
+            String payloadJson = this.objectMapper.writeValueAsString(request);
+            String requestHash = sha256(payloadJson);
+            var maybe = this.idempotencyService.handle(idempotencyKey, requestHash, () -> service.registrar(request));
+            if (maybe.isPresent()) {
+                var resp = maybe.get();
+                return ResponseEntity.created(URI.create("/movimentacoes/" + resp.movimentacaoId())).body(resp);
+            }
+            // if empty, fallthrough to normal behaviour
+            var id = service.registrar(request);
+            return ResponseEntity.created(URI.create("/movimentacoes/" + id)).body(new MovimentacaoResponse(id));
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @GetMapping("/movimentacoes/{id}")
@@ -86,5 +106,6 @@ public class MovimentacaoController {
         return new ErrorResponse(ex.getMessage());
     }
 
-    public record ErrorResponse(String mensagem) {}
+    public record ErrorResponse(String mensagem) {
+    }
 }
