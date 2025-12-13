@@ -26,12 +26,24 @@ sourceSets {
         compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
         runtimeClasspath += output + compileClasspath
     }
+    val featureTest by creating {
+        java.srcDir("src/feature-test/java")
+        resources.srcDir("src/feature-test/resources")
+        compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
+        runtimeClasspath += output + compileClasspath
+    }
 }
 
 val integrationTestImplementation by configurations.getting {
     extendsFrom(configurations.testImplementation.get())
 }
 val integrationTestRuntimeOnly by configurations.getting {
+    extendsFrom(configurations.testRuntimeOnly.get())
+}
+val featureTestImplementation by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
+val featureTestRuntimeOnly by configurations.getting {
     extendsFrom(configurations.testRuntimeOnly.get())
 }
 
@@ -43,6 +55,7 @@ dependencies {
     implementation("org.springframework.kafka:spring-kafka")
     implementation("software.amazon.awssdk:s3:2.40.6")
     implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.apache.commons:commons-lang3:3.18.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
@@ -70,6 +83,15 @@ val integrationTest = tasks.register<Test>("integrationTest") {
     group = "verification"
     testClassesDirs = sourceSets["integrationTest"].output.classesDirs
     classpath = sourceSets["integrationTest"].runtimeClasspath
+    shouldRunAfter(tasks.test)
+    useJUnitPlatform()
+}
+
+val featureTest = tasks.register<Test>("featureTest") {
+    description = "Runs feature tests against local instance"
+    group = "verification"
+    testClassesDirs = sourceSets["featureTest"].output.classesDirs
+    classpath = sourceSets["featureTest"].runtimeClasspath
     shouldRunAfter(tasks.test)
     useJUnitPlatform()
 }

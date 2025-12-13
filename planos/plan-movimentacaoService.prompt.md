@@ -108,6 +108,9 @@ Configuração
 - [x] Implementar `/commodities/{commodityId}/historico` e cobertura de integração.
 - [x] Completar fluxo de upload: endpoint para anexos, geração de URLs assinadas, confirmação de upload e versionamento (MinIO em CI).
 - [x] Idempotência para criação (Idempotency-Key optional + duplicate-hash fallback).
+- [x] Flyway migration: V2__create_idempotency_records.sql criada para persistir idempotency_records.
+- [x] Testes de feature locais: movidos para sourceSet `featureTest` com task `featureTest` e testes que validam anexos e idempotência contra localhost.
+- [x] README atualizado com notas sobre Idempotency, anexos, OpenAPI e instruções para executar feature tests.
 - [x] Enriquecer tratamento de erros (Problem Details), validações JSR-380 adicionais e mensagens de erro padronizadas.
 - [x] OpenAPI: alinhar `movimentacao.yaml`, incluir exemplos e documentar erros/response codes.
 - [ ] Observabilidade: healthchecks, métricas básicas (request count, errors), logs estruturados e configuração para CI/Prod.

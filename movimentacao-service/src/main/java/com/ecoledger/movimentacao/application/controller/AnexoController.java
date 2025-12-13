@@ -19,7 +19,8 @@ public class AnexoController {
     private final S3Properties s3Properties;
     private final AttachmentStorageService attachmentStorageService;
 
-    public AnexoController(S3Properties s3Properties, AttachmentStorageService attachmentStorageService) {
+    public AnexoController(S3Properties s3Properties,
+                           AttachmentStorageService attachmentStorageService) {
         this.s3Properties = s3Properties;
         this.attachmentStorageService = attachmentStorageService;
     }

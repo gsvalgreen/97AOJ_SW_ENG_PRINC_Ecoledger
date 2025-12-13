@@ -2,9 +2,9 @@ spring:
   application:
     name: movimentacao-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/movimentacao}
-    username: ${SPRING_DATASOURCE_USERNAME:movimentacao}
-    password: ${SPRING_DATASOURCE_PASSWORD:movimentacao}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/movimentacao}
+    username: ${SPRING_DATASOURCE_USERNAME:ecoledger}
+    password: ${SPRING_DATASOURCE_PASSWORD:ecoledger}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

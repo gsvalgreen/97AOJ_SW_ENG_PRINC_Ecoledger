@@ -5,7 +5,6 @@ import com.ecoledger.movimentacao.application.service.AttachmentStorageService;
 import com.ecoledger.movimentacao.application.service.InvalidAttachmentException;
 import com.ecoledger.movimentacao.config.S3Properties;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -13,7 +12,6 @@ import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
-@Service
 public class S3AttachmentStorageService implements AttachmentStorageService {
 
     private final S3Properties properties;
