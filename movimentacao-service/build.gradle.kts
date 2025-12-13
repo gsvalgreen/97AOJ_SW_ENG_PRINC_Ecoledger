@@ -41,7 +41,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.kafka:spring-kafka")
-    implementation("software.amazon.awssdk:s3:2.25.30")
+    implementation("software.amazon.awssdk:s3:2.40.6")
     implementation("org.flywaydb:flyway-core")
     implementation("org.apache.commons:commons-lang3:3.18.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -53,9 +53,8 @@ dependencies {
     integrationTestImplementation("com.h2database:h2")
     integrationTestImplementation("org.springframework.kafka:spring-kafka-test")
     integrationTestImplementation("com.github.tomakehurst:wiremock-jre8-standalone:2.35.2")
-    integrationTestImplementation("software.amazon.awssdk:s3:2.20.52")
-    integrationTestImplementation("com.adobe.testing:s3mock:3.3.0")
-    integrationTestImplementation("com.adobe.testing:s3mock-testcontainers:3.3.0")
+    integrationTestImplementation("com.adobe.testing:s3mock:4.11.0")
+    integrationTestImplementation("com.adobe.testing:s3mock-testcontainers:4.11.0")
     integrationTestImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.2")
 }
 
