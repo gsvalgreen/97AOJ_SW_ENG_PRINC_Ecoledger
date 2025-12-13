@@ -44,6 +44,7 @@ jobs:
         run: ./gradlew --no-daemon clean build
 
       - name: SonarCloud Scan
+        if: env.SONAR_TOKEN != ''
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |

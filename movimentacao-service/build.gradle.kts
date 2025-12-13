@@ -25,7 +25,6 @@ sonar {
         property("sonar.projectName", "ECO Ledger - Movimentacao Service")
         property("sonar.java.coveragePlugin", "jacoco")
         property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport.xml")
-        property("sonar.junit.reportPaths", "${layout.buildDirectory.get()}/test-results/test,${layout.buildDirectory.get()}/test-results/integrationTest")
     }
 }
 
