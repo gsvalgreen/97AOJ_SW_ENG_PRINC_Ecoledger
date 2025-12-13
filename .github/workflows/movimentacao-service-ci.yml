@@ -41,7 +41,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew -B -Dorg.gradle.daemon=false clean build --no-daemon
+        run: ./gradlew -B --no-daemon clean build
 
       - name: Upload test results
         if: always()
