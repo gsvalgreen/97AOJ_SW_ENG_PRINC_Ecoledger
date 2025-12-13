@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:auditoria;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  flyway:
+    enabled: false
+
+auditoria:
+  kafka:
+    enabled: false
+    bootstrap-servers: localhost:9092
+    topics:
+      movimentacao-criada: movimentacao.criada
+      auditoria-concluida: auditoria.concluida
+    consumer:
+      group-id: auditoria-service-test
+      max-retries: 3
+      retry-backoff-ms: 100
+  rules:
+    version: "1.0.0-test"
+    quantity:
+      max-threshold: 1000
+      min-threshold: 1
+    location:
+      allowed-regions:
+        - "BR-SP"
+        - "BR-MG"
+        - "BR-PR"
+      validate-coordinates: false
+    attachments:
+      required: false
+      min-count: 0
+      required-types: []
+
+logging:
+  level:
+    com.ecoledger: DEBUG
+    org.springframework: INFO

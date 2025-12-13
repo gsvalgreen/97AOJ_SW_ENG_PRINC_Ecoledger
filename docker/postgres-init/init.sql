@@ -73,6 +73,9 @@ GRANT ALL PRIVILEGES ON DATABASE auditoria TO ecoledger_auditoria;
 GRANT ALL PRIVILEGES ON DATABASE certificacao TO ecoledger_certificacao;
 GRANT ALL PRIVILEGES ON DATABASE credito TO ecoledger_credito;
 GRANT ALL PRIVILEGES ON DATABASE notification TO ecoledger_notification;
+GRANT ALL ON SCHEMA public TO ecoledger_notification;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ecoledger_notification;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ecoledger_notification;
 
 -- ensure admin has access to all DBs
 GRANT ALL PRIVILEGES ON DATABASE users TO ecoledger_admin;

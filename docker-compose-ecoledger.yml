@@ -73,8 +73,9 @@ services:
     command: >-
       "sleep 5 &&
       kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic usuarios.events --partitions 3 --replication-factor 1 &&
-      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic movimentacao.events --partitions 3 --replication-factor 1 &&
-      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic auditoria.events --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic movimentacao.criada --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic movimentacao.atualizada --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic auditoria.concluida --partitions 3 --replication-factor 1 &&
       kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic certificacao.events --partitions 3 --replication-factor 1 &&
       kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic credito.events --partitions 3 --replication-factor 1 &&
       kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic notificacao.events --partitions 3 --replication-factor 1"
@@ -171,6 +172,25 @@ services:
       S3_USE_PATH_STYLE: "true"
       MOVIMENTACAO_KAFKA_ENABLED: "true"
       PRODUCER_APPROVAL_BASE_URL: http://wiremock:8080
+    networks:
+      - ecoledger
+
+  # Auditoria service built locally
+  auditoria-service:
+    image: auditoria-service:local
+    container_name: ecoledger-auditoria-service
+    depends_on:
+      - postgres
+      - kafka
+      - kafka-init
+    ports:
+      - "8083:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auditoria
+      SPRING_DATASOURCE_USERNAME: ecoledger_auditoria
+      SPRING_DATASOURCE_PASSWORD: ecoledger_auditoria
+      KAFKA_ENABLED: "true"
+      KAFKA_BOOTSTRAP: kafka:9092
     networks:
       - ecoledger
 
