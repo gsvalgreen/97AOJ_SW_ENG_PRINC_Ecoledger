@@ -1,6 +1,3 @@
-// language: kotlin
-// arquivo: `users-service/build.gradle.kts`
-
 plugins {
     id("org.springframework.boot") version "3.5.8"
     id("io.spring.dependency-management") version "1.1.7"
@@ -27,7 +24,10 @@ sonar {
     properties {
         property("sonar.projectName", "ECO Ledger - Users Service")
         property("sonar.java.coveragePlugin", "jacoco")
-        property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport.xml")
+        property(
+            "sonar.coverage.jacoco.xmlReportPaths",
+            "${layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport.xml"
+        )
     }
 }
 
@@ -38,12 +38,7 @@ sourceSets {
         compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
         runtimeClasspath += output + compileClasspath
     }
-    val featureTest by creating {
-        java.srcDir("src/feature-test/java")
-        resources.srcDir("src/feature-test/resources")
-        compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
-        runtimeClasspath += output + compileClasspath
-    }
+
 }
 
 val integrationTestImplementation by configurations.getting {
@@ -52,12 +47,7 @@ val integrationTestImplementation by configurations.getting {
 val integrationTestRuntimeOnly by configurations.getting {
     extendsFrom(configurations.testRuntimeOnly.get())
 }
-val featureTestImplementation by configurations.getting {
-    extendsFrom(configurations.testImplementation.get())
-}
-val featureTestRuntimeOnly by configurations.getting {
-    extendsFrom(configurations.testRuntimeOnly.get())
-}
+
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -112,14 +102,14 @@ val integrationTest = tasks.register<Test>("integrationTest") {
     useJUnitPlatform()
 }
 
-val featureTest = tasks.register<Test>("featureTest") {
-    description = "Runs feature tests against local instance"
-    group = "verification"
-    testClassesDirs = sourceSets["featureTest"].output.classesDirs
-    classpath = sourceSets["featureTest"].runtimeClasspath
-    shouldRunAfter(tasks.test)
-    useJUnitPlatform()
+// Enable JaCoCo execution data for integration and feature tests
+tasks.named<Test>("integrationTest") {
+    extensions.configure(JacocoTaskExtension::class) {
+        destinationFile = file("${buildDir}/jacoco/integrationTest.exec")
+    }
 }
+
+
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test, integrationTest)
@@ -129,7 +119,13 @@ tasks.jacocoTestReport {
     }
     val sourceSetsMain = sourceSets["main"]
     classDirectories.setFrom(files(sourceSetsMain.output))
-    executionData.setFrom(fileTree(buildDir).include("**/jacoco/*.exec", "**/*.exec"))
+    // include execution files from unit and integration tests
+    executionData.setFrom(
+        files(
+            "${buildDir}/jacoco/test.exec",
+            "${buildDir}/jacoco/integrationTest.exec"
+        )
+    )
 }
 
 tasks.jacocoTestCoverageVerification {
@@ -142,7 +138,12 @@ tasks.jacocoTestCoverageVerification {
         }
     }
     classDirectories.setFrom(files(sourceSets["main"].output))
-    executionData.setFrom(fileTree(buildDir).include("**/jacoco/*.exec", "**/*.exec"))
+    executionData.setFrom(
+        files(
+            "${buildDir}/jacoco/test.exec",
+            "${buildDir}/jacoco/integrationTest.exec"
+        )
+    )
 }
 
 tasks.check {
