@@ -61,6 +61,8 @@ jobs:
             -Dsonar.organization=gsvalgreen
             -Dsonar.sources=src
             -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.test.*
+            -Dsonar.exclusions=**/*.test.*
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
 
       - name: Upload coverage artifact
