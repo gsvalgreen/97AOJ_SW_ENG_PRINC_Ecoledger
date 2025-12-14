@@ -9,7 +9,7 @@ import java.util.UUID;
 public class CadastroEntity {
 
     @Id
-    private String id;
+    private UUID id;
 
     private String status;
 
@@ -20,13 +20,13 @@ public class CadastroEntity {
     private Instant submetidoEm;
 
     public CadastroEntity() {
-        this.id = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID();
         this.submetidoEm = Instant.now();
         this.status = "PENDENTE";
     }
 
     // getters e setters
-    public String getId() { return id; }
+    public UUID getId() { return id; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public UsuarioEntity getCandidatoUsuario() { return candidatoUsuario; }

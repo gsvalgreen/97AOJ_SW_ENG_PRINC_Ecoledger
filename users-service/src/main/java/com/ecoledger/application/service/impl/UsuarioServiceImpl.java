@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -40,7 +41,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         var existing = idempotencyService.findCadastroIdByKey(idempotencyKey);
         if (existing.isPresent()) {
             var c = cadastroRepository.findById(existing.get()).orElseThrow(() -> new IllegalArgumentException("Cadastro não encontrado"));
-            return new RespostaCadastroDto(c.getId(), c.getStatus());
+            return new RespostaCadastroDto(c.getId().toString(), c.getStatus());
         }
 
         UsuarioEntity user = new UsuarioEntity();
@@ -67,12 +68,12 @@ public class UsuarioServiceImpl implements UsuarioService {
         eventPublisher.publishRegistered(payload);
         notificationClient.notifyRegistration(payload);
 
-        return new RespostaCadastroDto(cadastro.getId(), cadastro.getStatus());
+        return new RespostaCadastroDto(cadastro.getId().toString(), cadastro.getStatus());
     }
 
     private java.util.Map<String, Object> MapUser(UsuarioEntity u) {
         var m = new java.util.HashMap<String, Object>();
-        m.put("id", u.getId());
+        m.put("id", u.getId().toString());
         m.put("nome", u.getNome());
         m.put("email", u.getEmail());
         m.put("role", u.getRole());
@@ -84,12 +85,12 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public CadastroDto getCadastro(String id) {
-        return cadastroRepository.findById(id)
+        return cadastroRepository.findById(UUID.fromString(id))
                 .map(c -> new CadastroDto(
-                        c.getId(),
+                        c.getId().toString(),
                         c.getStatus(),
                         new UsuarioDto(
-                                c.getCandidatoUsuario().getId(),
+                                c.getCandidatoUsuario().getId().toString(),
                                 c.getCandidatoUsuario().getNome(),
                                 c.getCandidatoUsuario().getEmail(),
                                 c.getCandidatoUsuario().getRole(),
@@ -106,32 +107,32 @@ public class UsuarioServiceImpl implements UsuarioService {
     public TokenAuthDto authenticate(String email, String password) {
         Optional<UsuarioEntity> u = usuarioRepository.findByEmail(email);
         if (u.isEmpty()) throw new IllegalArgumentException("Credenciais inválidas");
-        return new TokenAuthDto("access."+u.get().getId(), "refresh."+u.get().getId(), 3600L);
+        return new TokenAuthDto("access."+u.get().getId().toString(), "refresh."+u.get().getId().toString(), 3600L);
     }
 
     @Override
     public UsuarioDto getUsuario(String id) {
-        return usuarioRepository.findById(id)
-                .map(u -> new UsuarioDto(u.getId(), u.getNome(), u.getEmail(), u.getRole(), u.getDocumento(), u.getStatus(), u.getCriadoEm()))
+        return usuarioRepository.findById(UUID.fromString(id))
+                .map(u -> new UsuarioDto(u.getId().toString(), u.getNome(), u.getEmail(), u.getRole(), u.getDocumento(), u.getStatus(), u.getCriadoEm()))
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
     }
 
     @Override
     public UsuarioDto updateUsuario(String id, UsuarioAtualizacaoDto dto) {
-        UsuarioEntity u = usuarioRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+        UsuarioEntity u = usuarioRepository.findById(UUID.fromString(id)).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
         if (dto.nome() != null) u.setNome(dto.nome());
         usuarioRepository.save(u);
-        return new UsuarioDto(u.getId(), u.getNome(), u.getEmail(), u.getRole(), u.getDocumento(), u.getStatus(), u.getCriadoEm());
+        return new UsuarioDto(u.getId().toString(), u.getNome(), u.getEmail(), u.getRole(), u.getDocumento(), u.getStatus(), u.getCriadoEm());
     }
 
     @Override
     public UsuarioDto updateStatus(String id, String status, String reason) {
-        UsuarioEntity u = usuarioRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+        UsuarioEntity u = usuarioRepository.findById(UUID.fromString(id)).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
         u.setStatus(status);
         usuarioRepository.save(u);
 
         var payload = new java.util.HashMap<String, Object>();
-        payload.put("usuarioId", u.getId());
+        payload.put("usuarioId", u.getId().toString());
         payload.put("status", status);
         payload.put("reason", reason);
         payload.put("timestamp", java.time.Instant.now());
@@ -144,6 +145,6 @@ public class UsuarioServiceImpl implements UsuarioService {
             notificationClient.notifyRejection(payload);
         }
 
-        return new UsuarioDto(u.getId(), u.getNome(), u.getEmail(), u.getRole(), u.getDocumento(), u.getStatus(), u.getCriadoEm());
+        return new UsuarioDto(u.getId().toString(), u.getNome(), u.getEmail(), u.getRole(), u.getDocumento(), u.getStatus(), u.getCriadoEm());
     }
 }

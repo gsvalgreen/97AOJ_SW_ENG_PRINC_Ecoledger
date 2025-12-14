@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
@@ -15,17 +16,18 @@ import java.util.Map;
 @TestConfiguration
 public class TestKafkaConfig {
 
-    // Provide a KafkaTemplate<String,String> that targets the EmbeddedKafka broker used in tests
+    // Provide a ProducerFactory<String,Object> and KafkaTemplate<String,Object> for tests that target the EmbeddedKafka broker
     @Bean
     @Primary
-    public ProducerFactory<String, String> stringProducerFactory(EmbeddedKafkaBroker embeddedKafka) {
+    public ProducerFactory<String, Object> testProducerFactory(EmbeddedKafkaBroker embeddedKafka) {
         Map<String, Object> props = KafkaTestUtils.producerProps(embeddedKafka);
-        return new DefaultKafkaProducerFactory<>(props, new StringSerializer(), new StringSerializer());
+        // keep key as String, value serialized as JSON to match main configuration
+        return new DefaultKafkaProducerFactory<>(props, new StringSerializer(), new JsonSerializer<>());
     }
 
-    @Bean(name = "stringKafkaTemplate")
+    @Bean(name = "testKafkaTemplate")
     @Primary
-    public KafkaTemplate<String, String> stringKafkaTemplate(ProducerFactory<String, String> pf) {
+    public KafkaTemplate<String, Object> testKafkaTemplate(ProducerFactory<String, Object> pf) {
         return new KafkaTemplate<>(pf);
     }
 

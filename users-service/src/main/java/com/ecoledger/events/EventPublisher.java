@@ -7,10 +7,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Component
 public class EventPublisher {
 
-    private final KafkaTemplate<String, String> kafka;
+    private final KafkaTemplate<String, Object> kafka;
     private final ObjectMapper mapper;
 
-    public EventPublisher(KafkaTemplate<String, String> kafka, ObjectMapper mapper) {
+    public EventPublisher(KafkaTemplate<String, Object> kafka, ObjectMapper mapper) {
         this.kafka = kafka;
         this.mapper = mapper;
     }

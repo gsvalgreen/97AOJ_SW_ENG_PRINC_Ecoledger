@@ -96,7 +96,7 @@ class UsuariosControllerIT {
         JsonNode json = mapper.readTree(body);
         String cadastroId = json.get("cadastroId").asText();
 
-        Assertions.assertTrue(cadastroRepository.findById(cadastroId).isPresent());
+        Assertions.assertTrue(cadastroRepository.findById(java.util.UUID.fromString(cadastroId)).isPresent());
 
         // await both the HTTP notification and the Kafka event
         Awaitility.await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -19,13 +20,13 @@ public class IdempotencyServiceImpl implements IdempotencyService {
     }
 
     @Override
-    public Optional<String> findCadastroIdByKey(String key) {
+    public Optional<UUID> findCadastroIdByKey(String key) {
         if (key == null || key.isBlank()) return Optional.empty();
         return repo.findById(key).map(IdempotencyEntity::getCadastroId);
     }
 
     @Override
-    public void saveKey(String key, String cadastroId) {
+    public void saveKey(String key, UUID cadastroId) {
         if (key == null || key.isBlank()) return;
         repo.save(new IdempotencyEntity(key, cadastroId));
     }

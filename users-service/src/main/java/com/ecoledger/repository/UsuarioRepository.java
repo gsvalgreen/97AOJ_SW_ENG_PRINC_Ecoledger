@@ -2,9 +2,10 @@ package com.ecoledger.repository;
 
 import com.ecoledger.application.entity.UsuarioEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.UUID;
 import java.util.Optional;
 
-public interface UsuarioRepository extends JpaRepository<UsuarioEntity, String> {
+public interface UsuarioRepository extends JpaRepository<UsuarioEntity, UUID> {
     Optional<UsuarioEntity> findByEmail(String email);
     Optional<UsuarioEntity> findByDocumento(String documento);
 }

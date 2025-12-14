@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -63,7 +64,7 @@ class UsuarioServiceImplTest {
         assertEquals("PENDENTE", resp.status());
 
         verify(cadastroRepository, times(1)).save(any());
-        verify(idempotencyService, times(1)).saveKey(eq("idem-key"), anyString());
+        verify(idempotencyService, times(1)).saveKey(eq("idem-key"), any(java.util.UUID.class));
         verify(eventPublisher, times(1)).publishRegistered(any());
         verify(notificationClient, times(1)).notifyRegistration(any());
     }
@@ -77,10 +78,11 @@ class UsuarioServiceImplTest {
         usuario.setRole("role");
         usuario.setStatus("PENDENTE");
 
-        when(usuarioRepository.findById(anyString())).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findById(any(java.util.UUID.class))).thenReturn(Optional.of(usuario));
         when(usuarioRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var out = service.updateStatus("any-id", "APROVADO", "ok");
+        var id = UUID.randomUUID();
+        var out = service.updateStatus(id.toString(), "APROVADO", "ok");
 
         assertNotNull(out);
         assertEquals("APROVADO", out.status());
@@ -98,10 +100,11 @@ class UsuarioServiceImplTest {
         usuario.setRole("role");
         usuario.setStatus("PENDENTE");
 
-        when(usuarioRepository.findById(anyString())).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findById(any(java.util.UUID.class))).thenReturn(Optional.of(usuario));
         when(usuarioRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var out = service.updateStatus("any-id", "REJEITADO", "invalid");
+        var id = UUID.randomUUID();
+        var out = service.updateStatus(id.toString(), "REJEITADO", "invalid");
 
         assertNotNull(out);
         assertEquals("REJEITADO", out.status());

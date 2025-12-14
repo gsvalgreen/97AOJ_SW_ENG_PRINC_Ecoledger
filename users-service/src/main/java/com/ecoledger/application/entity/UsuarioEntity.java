@@ -9,7 +9,7 @@ import java.util.UUID;
 public class UsuarioEntity {
 
     @Id
-    private String id;
+    private UUID id;
 
     private String nome;
 
@@ -25,12 +25,12 @@ public class UsuarioEntity {
     private Instant criadoEm;
 
     public UsuarioEntity() {
-        this.id = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID();
         this.criadoEm = Instant.now();
     }
 
     // getters e setters
-    public String getId() { return id; }
+    public UUID getId() { return id; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
     public String getEmail() { return email; }

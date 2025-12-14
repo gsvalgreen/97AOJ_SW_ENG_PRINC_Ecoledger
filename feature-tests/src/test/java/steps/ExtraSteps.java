@@ -310,11 +310,9 @@ public class ExtraSteps {
         }
     }
 
-    @When("^eu solicito GET /produtores/([^/]+)/movimentacoes\\?page=(\\d+)&size=(\\d+)$")
-    public void get_movements_paginated(java.lang.String producerId, java.lang.String pageStr, java.lang.String sizeStr) throws Exception {
-        Integer page = Integer.parseInt(pageStr);
-        Integer size = Integer.parseInt(sizeStr);
-        String url = String.format("http://localhost:8082/produtores/%s/movimentacoes?page=%d&size=%d", producerId, page, size);
+    @When("eu solicito GET {word}")
+    public void get_movements_paginated(String urlPath) throws Exception {
+        String url = urlPath.startsWith("http") ? urlPath : "http://localhost:8082" + urlPath;
         HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofSeconds(10)).GET().build();
         HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
         lastGetStatus = resp.statusCode();

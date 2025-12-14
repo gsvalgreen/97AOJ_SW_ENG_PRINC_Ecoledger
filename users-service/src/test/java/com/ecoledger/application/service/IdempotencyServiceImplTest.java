@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -33,27 +34,29 @@ class IdempotencyServiceImplTest {
 
     @Test
     void findCadastroIdByKey_existingKey_returnsCadastroId() {
-        var entity = new IdempotencyEntity("key-1", "cad-123");
+        var uuid = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        var entity = new IdempotencyEntity("key-1", uuid);
         when(repo.findById("key-1")).thenReturn(Optional.of(entity));
 
         var out = service.findCadastroIdByKey("key-1");
         assertTrue(out.isPresent());
-        assertEquals("cad-123", out.get());
+        assertEquals(uuid, out.get());
     }
 
     @Test
     void saveKey_nullOrBlank_doesNotCallRepo() {
-        service.saveKey(null, "x");
-        service.saveKey("   ", "x");
+        service.saveKey(null, UUID.randomUUID());
+        service.saveKey("   ", UUID.randomUUID());
         verify(repo, never()).save(any());
     }
 
     @Test
     void saveKey_valid_callsRepoSave() {
-        service.saveKey("k1", "cad-1");
+        var uuid = UUID.fromString("00000000-0000-0000-0000-000000000002");
+        service.saveKey("k1", uuid);
         ArgumentCaptor<IdempotencyEntity> cap = ArgumentCaptor.forClass(IdempotencyEntity.class);
         verify(repo, times(1)).save(cap.capture());
         assertEquals("k1", cap.getValue().getKey());
-        assertEquals("cad-1", cap.getValue().getCadastroId());
+        assertEquals(uuid, cap.getValue().getCadastroId());
     }
 }
