@@ -119,8 +119,16 @@ public class TestHooks {
     private void truncateDb(String jdbcUrl, String user, String password, String table) {
         try (Connection conn = DriverManager.getConnection(jdbcUrl, user, password);
              Statement st = conn.createStatement()) {
-            String sql = "TRUNCATE TABLE IF EXISTS " + table + " CASCADE";
-            st.execute(sql);
+            // Use to_regclass to check existence safely, then truncate
+            String checkSql = "SELECT to_regclass('public.' || '" + table + "')";
+            try (var rs = st.executeQuery(checkSql)) {
+                if (rs.next() && rs.getString(1) != null) {
+                    String sql = "TRUNCATE TABLE public.\"" + table + "\" CASCADE";
+                    st.execute(sql);
+                } else {
+                    System.out.println("Table not present, skipping truncate: " + table + " on " + jdbcUrl);
+                }
+            }
         } catch (Exception e) {
             // ignore: DB may not be ready or tables may not exist yet
             System.err.println("Warning: could not truncate " + table + " on " + jdbcUrl + " - " + e.getMessage());
