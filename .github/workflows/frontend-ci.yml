@@ -39,26 +39,31 @@ jobs:
         working-directory: frontend-web
         run: npx vite build --mode production
 
-      - name: Run tests (Vitest)
+      - name: Generate coverage report (Vitest)
         working-directory: frontend-web
-        # --run ensures tests execute in CI; --coverage will generate coverage reports
+        continue-on-error: true
         run: npm test -- --run --coverage
+
+      - name: Run tests (Vitest, no coverage)
+        working-directory: frontend-web
+        run: npm test -- --run --coverage=false
 
       - name: SonarCloud Scan
         if: env.SONAR_TOKEN != ''
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          # install sonar-scanner CLI and run scan including LCOV coverage report
-          npm install -g sonar-scanner-cli
-          sonar-scanner \
-            -Dsonar.projectKey=gsvalgreen_97AOJ_SW_ENG_PRINC_Ecoledger_frontend-web \
-            -Dsonar.organization=gsvalgreen \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.sources=src \
-            -Dsonar.tests=src \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-            -Dsonar.login=${SONAR_TOKEN}
+          SONAR_HOST_URL: https://sonarcloud.io
+        uses: sonarsource/sonarqube-scan-action@v6
+        with:
+          projectBaseDir: frontend-web
+          args: >-
+            -Dsonar.projectKey=gsvalgreen_97AOJ_SW_ENG_PRINC_Ecoledger_frontend-web
+            -Dsonar.organization=gsvalgreen
+            -Dsonar.sources=src
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.test.*
+            -Dsonar.exclusions=**/*.test.*
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
