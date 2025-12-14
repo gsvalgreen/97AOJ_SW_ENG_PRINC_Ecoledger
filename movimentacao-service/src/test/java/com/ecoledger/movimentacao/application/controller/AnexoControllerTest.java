@@ -64,7 +64,7 @@ class AnexoControllerTest {
         String key = "k1";
         byte[] body = "hello".getBytes();
         var resp = controller.uploadProxy(key, body, "text/plain");
-        assertEquals(200, resp.getStatusCodeValue());
+        assertEquals(200, resp.getStatusCode().value());
         ArgumentCaptor<PutObjectRequest> captor = ArgumentCaptor.forClass(PutObjectRequest.class);
         verify(s3Client).putObject(captor.capture(), any(software.amazon.awssdk.core.sync.RequestBody.class));
         assertEquals(s3Properties.bucket(), captor.getValue().bucket());
@@ -76,7 +76,7 @@ class AnexoControllerTest {
     void uploadProxy_whenS3Throws_returns500() {
         doThrow(new RuntimeException("boom")).when(s3Client).putObject(any(PutObjectRequest.class), any(software.amazon.awssdk.core.sync.RequestBody.class));
         var resp = controller.uploadProxy("k2", null, null);
-        assertEquals(500, resp.getStatusCodeValue());
+        assertEquals(500, resp.getStatusCode().value());
     }
 
     @Test
@@ -84,7 +84,7 @@ class AnexoControllerTest {
         var expected = new AttachmentStorageService.AttachmentConfirmation("k", "url", "tipo", "hash", 10L);
         when(attachmentStorageService.confirmUpload("k")).thenReturn(expected);
         var resp = controller.confirmUpload(new AnexoController.ConfirmUploadRequest("k"));
-        assertEquals(200, resp.getStatusCodeValue());
+        assertEquals(200, resp.getStatusCode().value());
         assertEquals(expected, resp.getBody());
     }
 

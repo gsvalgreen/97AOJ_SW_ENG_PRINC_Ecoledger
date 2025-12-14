@@ -113,7 +113,10 @@ tasks.jacocoTestReport {
     }
     val sourceSetsMain = sourceSets["main"]
     classDirectories.setFrom(files(sourceSetsMain.output))
-    executionData.setFrom(fileTree(buildDir).include("**/jacoco/*.exec", "**/*.exec"))
+    executionData.setFrom(files(
+        file("$buildDir/jacoco/test.exec"),
+        file("$buildDir/jacoco/integrationTest.exec")
+    ))
 }
 
 tasks.jacocoTestCoverageVerification {
@@ -126,7 +129,7 @@ tasks.jacocoTestCoverageVerification {
         }
     }
     classDirectories.setFrom(files(sourceSets["main"].output))
-    executionData.setFrom(fileTree(buildDir).include("**/jacoco/*.exec", "**/*.exec"))
+    executionData.setFrom(files(file("$buildDir/jacoco/test.exec"), file("$buildDir/jacoco/integrationTest.exec"), file("$buildDir/jacoco/featureTest.exec")))
 }
 
 tasks.check {

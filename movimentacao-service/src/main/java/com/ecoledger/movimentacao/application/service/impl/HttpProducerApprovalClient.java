@@ -32,7 +32,7 @@ public class HttpProducerApprovalClient implements ProducerApprovalClient {
         LOGGER.info("Checking producer approval for {} traceId={} url={}", producerId, traceId, url);
         try {
             var response = restTemplate.getForEntity(url, UsuarioResponse.class);
-            LOGGER.debug("Producer service responded with status={} body={}", response.getStatusCodeValue(), response.getBody());
+            LOGGER.debug("Producer service responded with status={} body={}", response.getStatusCode().value(), response.getBody());
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
                 LOGGER.info("Producer {} not approved or no body returned traceId={}", producerId, traceId);
                 return false;

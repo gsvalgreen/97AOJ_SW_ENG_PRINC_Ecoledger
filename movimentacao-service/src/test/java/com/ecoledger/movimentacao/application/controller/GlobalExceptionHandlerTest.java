@@ -3,20 +3,20 @@ package com.ecoledger.movimentacao.application.controller;
 import com.ecoledger.movimentacao.application.service.InvalidAttachmentException;
 import com.ecoledger.movimentacao.application.service.MovimentacaoNotFoundException;
 import com.ecoledger.movimentacao.application.service.ProducerNotApprovedException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import jakarta.servlet.http.HttpServletRequest;
-import org.mockito.Mockito;
-
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 class GlobalExceptionHandlerTest {
@@ -30,7 +30,7 @@ class GlobalExceptionHandlerTest {
         when(req.getRequestURI()).thenReturn("/test/prod");
 
         ResponseEntity<GlobalExceptionHandler.ProblemDetails> resp = handler.handleProducerNotApproved(ex, req);
-        assertEquals(403, resp.getStatusCodeValue());
+        assertEquals(403, resp.getStatusCode().value());
         var body = resp.getBody();
         assertNotNull(body);
         assertEquals("Producer Not Approved", body.title());
@@ -44,7 +44,7 @@ class GlobalExceptionHandlerTest {
         when(req.getRequestURI()).thenReturn("/test/attach");
 
         ResponseEntity<GlobalExceptionHandler.ProblemDetails> resp = handler.handleInvalidAttachment(ex, req);
-        assertEquals(400, resp.getStatusCodeValue());
+        assertEquals(400, resp.getStatusCode().value());
         var body = resp.getBody();
         assertNotNull(body);
         assertEquals("Invalid Attachment", body.title());
@@ -58,7 +58,7 @@ class GlobalExceptionHandlerTest {
         when(req.getRequestURI()).thenReturn("/test/notfound");
 
         ResponseEntity<GlobalExceptionHandler.ProblemDetails> resp = handler.handleNotFound(ex, req);
-        assertEquals(404, resp.getStatusCodeValue());
+        assertEquals(404, resp.getStatusCode().value());
         var body = resp.getBody();
         assertNotNull(body);
         assertEquals("Not Found", body.title());
@@ -71,7 +71,7 @@ class GlobalExceptionHandlerTest {
         when(req.getRequestURI()).thenReturn("/test/err");
 
         ResponseEntity<GlobalExceptionHandler.ProblemDetails> resp = handler.handleGeneric(ex, req);
-        assertEquals(500, resp.getStatusCodeValue());
+        assertEquals(500, resp.getStatusCode().value());
         var body = resp.getBody();
         assertNotNull(body);
         assertEquals("Internal Server Error", body.title());
@@ -91,7 +91,7 @@ class GlobalExceptionHandlerTest {
         when(req.getRequestURI()).thenReturn("/test/validate");
 
         ResponseEntity<GlobalExceptionHandler.ProblemDetails> resp = handler.handleValidation(ex, req);
-        assertEquals(400, resp.getStatusCodeValue());
+        assertEquals(400, resp.getStatusCode().value());
         var body = resp.getBody();
         assertNotNull(body);
         Map<String, String> errors = body.errors();
@@ -99,7 +99,9 @@ class GlobalExceptionHandlerTest {
         assertEquals("must not be blank", errors.get("field1"));
     }
 
-    // dummy method used to create MethodParameter
+
     @SuppressWarnings("unused")
-    private void dummy(String s) {}
+    private void dummy(String s) {
+        // dummy method used to create MethodParameter
+    }
 }
