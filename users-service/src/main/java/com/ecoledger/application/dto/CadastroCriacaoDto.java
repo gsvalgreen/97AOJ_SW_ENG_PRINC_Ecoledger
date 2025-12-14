@@ -11,6 +11,7 @@ public record CadastroCriacaoDto(
         @NotBlank String nome,
         @Email @NotBlank String email,
         @NotBlank String documento,
+        @NotBlank String senha,
         @NotBlank String role,
         @NotNull Map<String, Object> dadosFazenda,
         @NotNull List<Map<String, Object>> anexos

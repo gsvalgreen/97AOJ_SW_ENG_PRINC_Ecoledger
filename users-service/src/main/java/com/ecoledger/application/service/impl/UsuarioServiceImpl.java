@@ -48,6 +48,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         user.setNome(dto.nome());
         user.setEmail(dto.email());
         user.setDocumento(dto.documento());
+        user.setSenha(dto.senha());
         user.setRole(dto.role());
         user.setStatus("PENDENTE");
 
@@ -107,6 +108,12 @@ public class UsuarioServiceImpl implements UsuarioService {
     public TokenAuthDto authenticate(String email, String password) {
         Optional<UsuarioEntity> u = usuarioRepository.findByEmail(email);
         if (u.isEmpty()) throw new IllegalArgumentException("Credenciais inválidas");
+        
+        // Validar senha (comparação simples - em produção use BCrypt)
+        if (!password.equals(u.get().getSenha())) {
+            throw new IllegalArgumentException("Credenciais inválidas");
+        }
+        
         return new TokenAuthDto("access."+u.get().getId().toString(), "refresh."+u.get().getId().toString(), 3600L);
     }
 

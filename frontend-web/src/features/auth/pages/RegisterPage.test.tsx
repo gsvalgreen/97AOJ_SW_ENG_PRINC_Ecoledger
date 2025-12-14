@@ -1,9 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from '../../../test/testUtils';
 import RegisterPage from './RegisterPage';
-import { usersApi } from '../../../api/usersApi';
 
 vi.mock('../../../api/usersApi');
 vi.mock('react-router-dom', async () => {
@@ -25,6 +24,8 @@ describe('RegisterPage', () => {
     expect(screen.getByLabelText(/nome completo/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/cpf\/cnpj/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^senha$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/confirmar senha/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/tipo de usuário/i)).toBeInTheDocument();
   });
 
@@ -34,10 +35,14 @@ describe('RegisterPage', () => {
     const nomeInput = screen.getByLabelText(/nome completo/i);
     const emailInput = screen.getByLabelText(/email/i);
     const documentoInput = screen.getByLabelText(/cpf\/cnpj/i);
+    const senhaInput = screen.getByLabelText(/^senha$/i);
+    const confirmarSenhaInput = screen.getByLabelText(/confirmar senha/i);
 
     expect(nomeInput).toBeRequired();
     expect(emailInput).toBeRequired();
     expect(documentoInput).toBeRequired();
+    expect(senhaInput).toBeRequired();
+    expect(confirmarSenhaInput).toBeRequired();
   });
 
   it('should navigate to next step when clicking next', async () => {
@@ -47,10 +52,14 @@ describe('RegisterPage', () => {
     const nomeInput = screen.getByLabelText(/nome completo/i);
     const emailInput = screen.getByLabelText(/email/i);
     const documentoInput = screen.getByLabelText(/cpf\/cnpj/i);
+    const senhaInput = screen.getByLabelText(/^senha$/i);
+    const confirmarSenhaInput = screen.getByLabelText(/confirmar senha/i);
 
     await user.type(nomeInput, 'Test User');
     await user.type(emailInput, 'test@example.com');
     await user.type(documentoInput, '12345678900');
+    await user.type(senhaInput, 'password123');
+    await user.type(confirmarSenhaInput, 'password123');
 
     const nextButton = screen.getByRole('button', { name: /próximo/i });
     await user.click(nextButton);
@@ -67,10 +76,14 @@ describe('RegisterPage', () => {
     const nomeInput = screen.getByLabelText(/nome completo/i);
     const emailInput = screen.getByLabelText(/email/i);
     const documentoInput = screen.getByLabelText(/cpf\/cnpj/i);
+    const senhaInput = screen.getByLabelText(/^senha$/i);
+    const confirmarSenhaInput = screen.getByLabelText(/confirmar senha/i);
 
     await user.type(nomeInput, 'Test User');
     await user.type(emailInput, 'test@example.com');
     await user.type(documentoInput, '12345678900');
+    await user.type(senhaInput, 'password123');
+    await user.type(confirmarSenhaInput, 'password123');
 
     const nextButton = screen.getByRole('button', { name: /próximo/i });
     await user.click(nextButton);
@@ -87,10 +100,14 @@ describe('RegisterPage', () => {
     const nomeInput = screen.getByLabelText(/nome completo/i);
     const emailInput = screen.getByLabelText(/email/i);
     const documentoInput = screen.getByLabelText(/cpf\/cnpj/i);
+    const senhaInput = screen.getByLabelText(/^senha$/i);
+    const confirmarSenhaInput = screen.getByLabelText(/confirmar senha/i);
 
     await user.type(nomeInput, 'Test User');
     await user.type(emailInput, 'test@example.com');
     await user.type(documentoInput, '12345678900');
+    await user.type(senhaInput, 'password123');
+    await user.type(confirmarSenhaInput, 'password123');
 
     const nextButton = screen.getByRole('button', { name: /próximo/i });
     await user.click(nextButton);

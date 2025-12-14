@@ -16,6 +16,7 @@ export interface CadastroCriacao {
   nome: string;
   email: string;
   documento: string;
+  senha: string;
   role: UserRole;
   dadosFazenda?: Record<string, unknown>;
   anexos?: Array<{
