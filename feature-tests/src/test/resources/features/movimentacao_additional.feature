@@ -25,3 +25,9 @@ Funcionalidade: Cenários adicionais de movimentacao
     Quando eu crio 3 movimentacoes validas para o produtor "prod-list"
     E eu solicito GET /produtores/prod-list/movimentacoes?page=0&size=2
     Então a resposta contém no máximo 2 itens e total >= 3
+
+  Cenário: Histórico por commodity retorna movimentacoes recentes
+    Dado o banco está limpo para produtor "prod-hist"
+    Quando eu crio 2 movimentacoes validas para o produtor "prod-hist"
+    E eu consulto o historico da commodity "commodity-1"
+    Então o historico retorna pelo menos 2 movimentacoes

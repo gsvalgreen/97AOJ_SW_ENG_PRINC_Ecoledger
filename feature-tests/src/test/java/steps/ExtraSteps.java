@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.DriverManager;
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -274,12 +275,24 @@ public class ExtraSteps {
     @Dado("o banco está limpo para produtor {string}")
     public void db_clean_for_producer(String producerId) throws Exception {
         // best effort: truncate movimentacoes and anexos
-        try (var conn = java.sql.DriverManager.getConnection("jdbc:postgresql://localhost:5432/movimentacao","ecoledger_admin","ecoledger_admin");
+        try (var conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/movimentacao","ecoledger_admin","ecoledger_admin");
              var st = conn.createStatement()) {
             st.execute("DELETE FROM movimentacao_anexos WHERE movimentacao_id IN (SELECT id FROM movimentacoes WHERE producer_id='"+producerId+"')");
             st.execute("DELETE FROM movimentacoes WHERE producer_id='"+producerId+"'");
         } catch (Exception e) {
             System.err.println("Warning cleaning producer data: " + e.getMessage());
+        }
+    }
+
+    @Dado("o selo para o produtor {string} está limpo")
+    public void clear_selo_for_producer(String producerId) throws Exception {
+        try (var conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/certificacao","ecoledger_certificacao","ecoledger_certificacao");
+             var st = conn.createStatement()) {
+            st.execute("DELETE FROM selo_motivos WHERE selo_producer_id='" + producerId + "'");
+            st.execute("DELETE FROM alteracoes_selo WHERE producer_id='" + producerId + "'");
+            st.execute("DELETE FROM selos WHERE producer_id='" + producerId + "'");
+        } catch (Exception e) {
+            System.err.println("Warning cleaning selo data: " + e.getMessage());
         }
     }
 
@@ -319,6 +332,18 @@ public class ExtraSteps {
         lastGetResponseBody = resp.body();
     }
 
+    @Quando("eu consulto o historico da commodity {string}")
+    public void get_commodity_history(String commodityId) throws Exception {
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8082/commodities/" + commodityId + "/historico"))
+                .timeout(Duration.ofSeconds(10))
+                .GET()
+                .build();
+        HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+        lastGetStatus = resp.statusCode();
+        lastGetResponseBody = resp.body();
+    }
+
     @Entao("a resposta contém no máximo {int} itens e total >= {int}")
     public void assert_pagination_counts(Integer maxItems, Integer totalAtLeast) throws Exception {
         assertEquals(200, lastGetStatus);
@@ -328,6 +353,15 @@ public class ExtraSteps {
         assertNotNull(items);
         assertTrue(items.size() <= maxItems, "items size <= maxItems");
         assertTrue(total >= totalAtLeast, "total >= expected");
+    }
+
+    @Entao("o historico retorna pelo menos {int} movimentacoes")
+    public void assert_history_count(Integer minMovs) {
+        assertEquals(200, lastGetStatus, "Esperava resposta 200 do histórico");
+        JsonObject jo = gson.fromJson(lastGetResponseBody, JsonObject.class);
+        assertTrue(jo.has("movimentacoes"), "Resposta deve conter a chave movimentacoes");
+        JsonArray arr = jo.getAsJsonArray("movimentacoes");
+        assertTrue(arr.size() >= minMovs, "Quantidade de movimentacoes no histórico deve ser >= " + minMovs);
     }
 
     @Quando("eu aplico uma revisao manual para a primeira auditoria do produtor {string} com auditor {string} e resultado {string}")

@@ -19,8 +19,11 @@ public class UsersSteps {
     private final HttpClient client = HttpClient.newHttpClient();
     private final Gson gson = new Gson();
     private String lastCadastroId;
+    private String previousCadastroId;
     private int lastStatus;
     private String lastBody;
+    private String lastIdempotencyKey;
+    private String lastPayload;
 
     @Dado("o serviço de usuarios está disponível em localhost:8084")
     public void users_service_available() {
@@ -56,13 +59,15 @@ public class UsersSteps {
         dados.addProperty("fazenda", "x");
         payload.add("dadosFazenda", dados);
         payload.add("anexos", new com.google.gson.JsonArray());
+        lastPayload = gson.toJson(payload);
+        lastIdempotencyKey = "ft-key-" + unique;
 
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8084/usuarios/cadastros"))
                 .timeout(Duration.ofSeconds(10))
                 .header("Content-Type", "application/json")
-                .header("Idempotency-Key", "ft-key-" + unique)
-                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(payload)))
+                .header("Idempotency-Key", lastIdempotencyKey)
+                .POST(HttpRequest.BodyPublishers.ofString(lastPayload))
                 .build();
 
         HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
@@ -87,6 +92,41 @@ public class UsersSteps {
         HttpResponse<String> gresp = client.send(get, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, gresp.statusCode());
         assertTrue(gresp.body().contains("email") || gresp.body().contains("nome"));
+    }
+
+    @Quando("eu reenviar o mesmo cadastro com a mesma idempotency key")
+    public void resend_same_cadastro_with_same_key() throws Exception {
+        assertNotNull(lastPayload, "Nenhum cadastro válido foi submetido antes do reenvio");
+        assertNotNull(lastIdempotencyKey, "Chave de idempotência não registrada");
+        assertNotNull(lastCadastroId, "Cadastro inicial não disponível para comparação");
+        previousCadastroId = lastCadastroId;
+
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8084/usuarios/cadastros"))
+                .timeout(Duration.ofSeconds(10))
+                .header("Content-Type", "application/json")
+                .header("Idempotency-Key", lastIdempotencyKey)
+                .POST(HttpRequest.BodyPublishers.ofString(lastPayload))
+                .build();
+
+        HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+        lastStatus = resp.statusCode();
+        lastBody = resp.body();
+        lastCadastroId = null;
+        if ((lastStatus == 200 || lastStatus == 201) && lastBody != null && !lastBody.isBlank()) {
+            var jo = gson.fromJson(lastBody, JsonObject.class);
+            if (jo.has("cadastroId")) {
+                lastCadastroId = jo.get("cadastroId").getAsString();
+            }
+        }
+    }
+
+    @Entao("o serviço retorna o mesmo cadastroId")
+    public void assert_same_cadastro_id() {
+        assertTrue(lastStatus == 200 || lastStatus == 201, "Esperava 200 ou 201 no reenvio, mas foi " + lastStatus);
+        assertNotNull(previousCadastroId, "Cadastro original não registrado para comparação");
+        assertNotNull(lastCadastroId, "Resposta idempotente deve conter cadastroId");
+        assertEquals(previousCadastroId, lastCadastroId, "Idempotency-Key deve retornar o mesmo cadastroId");
     }
 
     @Quando("eu submeter um cadastro inválido")

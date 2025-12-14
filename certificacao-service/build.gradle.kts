@@ -53,6 +53,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.apache.commons:commons-lang3:3.18.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     runtimeOnly("org.postgresql:postgresql")

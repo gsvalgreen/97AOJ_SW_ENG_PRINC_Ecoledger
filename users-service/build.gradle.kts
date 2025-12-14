@@ -62,6 +62,7 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.18.0")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("io.projectreactor.netty:reactor-netty")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

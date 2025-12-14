@@ -1,11 +1,20 @@
 package com.ecoledger.movimentacao.application.controller;
 
+import com.ecoledger.movimentacao.application.dto.HistoricoMovimentacaoResponse;
 import com.ecoledger.movimentacao.application.dto.MovimentacaoDetailResponse;
 import com.ecoledger.movimentacao.application.dto.MovimentacaoListResponse;
 import com.ecoledger.movimentacao.application.dto.MovimentacaoRequest;
 import com.ecoledger.movimentacao.application.dto.MovimentacaoResponse;
 import com.ecoledger.movimentacao.application.service.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -17,6 +26,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping
+@Tag(name = "Movimentacoes")
+@SecurityRequirement(name = "bearerAuth")
 public class MovimentacaoController {
 
     private final MovimentacaoService service;
@@ -42,8 +53,22 @@ public class MovimentacaoController {
     }
 
     @PostMapping("/movimentacoes")
-    public ResponseEntity<MovimentacaoResponse> criar(@Valid @RequestBody MovimentacaoRequest request,
-                                                      @RequestHeader(value = "X-Idempotency-Key", required = false) String idempotencyKey
+    @Operation(
+            summary = "Criar nova movimentação",
+            description = "Cria uma nova movimentação e retorna o identificador gerado."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Movimentação criada",
+                    content = @Content(schema = @Schema(implementation = MovimentacaoResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Requisição inválida",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Produtor não aprovado",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<MovimentacaoResponse> criar(
+            @Valid @RequestBody MovimentacaoRequest request,
+            @Parameter(name = "X-Idempotency-Key", description = "Chave para garantir idempotência da criação", required = false)
+            @RequestHeader(value = "X-Idempotency-Key", required = false) String idempotencyKey
     ) {
         org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MovimentacaoController.class);
         try {
@@ -73,12 +98,23 @@ public class MovimentacaoController {
     }
 
     @GetMapping("/movimentacoes/{id}")
+    @Operation(summary = "Obter movimentação por id", description = "Retorna os detalhes completos de uma movimentação.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Movimentação encontrada",
+                    content = @Content(schema = @Schema(implementation = MovimentacaoDetailResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Movimentação não encontrada",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     public ResponseEntity<MovimentacaoDetailResponse> buscarPorId(@PathVariable UUID id) {
         var dto = service.buscarPorIdDto(id);
         return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/produtores/{producerId}/movimentacoes")
+    @Operation(summary = "Listar movimentações de um produtor",
+            description = "Retorna paginação de movimentações filtrando por produtor, período e commodity.")
+    @ApiResponse(responseCode = "200", description = "Lista paginada",
+            content = @Content(schema = @Schema(implementation = MovimentacaoListResponse.class)))
     public ResponseEntity<MovimentacaoListResponse> listarPorProducer(
             @PathVariable String producerId,
             @RequestParam(defaultValue = "1") int page,
@@ -94,9 +130,12 @@ public class MovimentacaoController {
     }
 
     @GetMapping("/commodities/{commodityId}/historico")
-    public ResponseEntity<java.util.List<MovimentacaoDetailResponse>> historicoPorCommodity(@PathVariable String commodityId) {
+    @Operation(summary = "Histórico por commodity", description = "Lista as movimentações associadas a uma commodity.")
+    @ApiResponse(responseCode = "200", description = "Histórico encontrado",
+            content = @Content(schema = @Schema(implementation = HistoricoMovimentacaoResponse.class)))
+    public ResponseEntity<HistoricoMovimentacaoResponse> historicoPorCommodity(@PathVariable String commodityId) {
         var items = service.buscarHistoricoPorCommodity(commodityId);
-        return ResponseEntity.ok(items);
+        return ResponseEntity.ok(new HistoricoMovimentacaoResponse(items));
     }
 
     @ExceptionHandler(ProducerNotApprovedException.class)
@@ -117,6 +156,9 @@ public class MovimentacaoController {
         return new ErrorResponse(ex.getMessage());
     }
 
-    public record ErrorResponse(String mensagem) {
+    @Schema(name = "Erro", description = "Modelo de erro padrão da API")
+    public record ErrorResponse(
+            @Schema(description = "Mensagem de erro", example = "Recurso não encontrado") String mensagem
+    ) {
     }
 }

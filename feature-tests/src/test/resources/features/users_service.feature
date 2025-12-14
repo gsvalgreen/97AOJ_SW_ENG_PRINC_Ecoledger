@@ -6,6 +6,13 @@ Funcionalidade: Serviço de usuários - cenários básicos
     Quando eu submeter um cadastro valido
     Então o serviço retorna 201 e eu consigo recuperar o cadastro criado
 
+  Cenário: Reenvio com mesma Idempotency-Key retorna o mesmo cadastro
+    Dado o serviço de usuarios está disponível em localhost:8084
+    Quando eu submeter um cadastro valido
+    Então o serviço retorna 201 e eu consigo recuperar o cadastro criado
+    Quando eu reenviar o mesmo cadastro com a mesma idempotency key
+    Então o serviço retorna o mesmo cadastroId
+
   Cenário: Produtor tenta enviar cadastro com dados incompletos
     Dado o serviço de usuarios está disponível em localhost:8084
     Quando eu submeter um cadastro inválido

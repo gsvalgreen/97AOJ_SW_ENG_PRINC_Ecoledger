@@ -7,6 +7,10 @@ Resumo
 - Publica eventos assíncronos em Kafka: `user.registered`, `user.approved`, `user.rejected`.
 - Persiste em PostgreSQL (users-db) e segue o plano e contratos descritos em Projeto_1.md e planos/plan-usersService.prompt.md.
 
+## Documentação OpenAPI
+- Swagger UI: http://localhost:8080/swagger-ui/index.html
+- OpenAPI JSON: http://localhost:8080/v3/api-docs (reflete os contratos de `planos/api-contracts/users.yaml`)
+
 Stack e requisitos
 - Java 21 + Spring Boot
 - Gradle (wrapper incluído)
