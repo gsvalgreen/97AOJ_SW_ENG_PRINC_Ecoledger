@@ -3,14 +3,14 @@ import { creditoApi } from './creditoApi';
 import type { PropostaFinanciamento, SolicitacaoCredito } from '../types';
 
 vi.mock('./axiosConfig', () => ({
-  default: {
+  creditoApiInstance: {
     post: vi.fn(),
     get: vi.fn(),
     patch: vi.fn(),
   },
 }));
 
-import axiosInstance from './axiosConfig';
+import { creditoApiInstance } from './axiosConfig';
 
 describe('creditoApi', () => {
   beforeEach(() => {
@@ -30,11 +30,11 @@ describe('creditoApi', () => {
         },
       ];
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (creditoApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await creditoApi.getPropostas('prod-1');
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/credito/propostas?producerId=prod-1');
+      expect(creditoApiInstance.get).toHaveBeenCalledWith('/propostas?producerId=prod-1');
       expect(result).toEqual(mockResponse);
     });
   });
@@ -49,11 +49,11 @@ describe('creditoApi', () => {
       };
 
       const mockResponse = { solicitacaoId: '1' };
-      (axiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (creditoApiInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await creditoApi.criarSolicitacao(mockData);
 
-      expect(axiosInstance.post).toHaveBeenCalledWith('/credito/solicitacoes-credito', mockData);
+      expect(creditoApiInstance.post).toHaveBeenCalledWith('/solicitacoes-credito', mockData);
       expect(result).toEqual(mockResponse);
     });
   });
@@ -69,11 +69,11 @@ describe('creditoApi', () => {
         criadoEm: '2024-01-01T00:00:00Z',
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (creditoApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await creditoApi.getSolicitacao('1');
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/credito/solicitacoes-credito/1');
+      expect(creditoApiInstance.get).toHaveBeenCalledWith('/solicitacoes-credito/1');
       expect(result).toEqual(mockResponse);
     });
   });
@@ -89,11 +89,11 @@ describe('creditoApi', () => {
         criadoEm: '2024-01-01T00:00:00Z',
       };
 
-      (axiosInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (creditoApiInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await creditoApi.updateSolicitacaoStatus('1', 'APROVADO');
 
-      expect(axiosInstance.patch).toHaveBeenCalledWith('/credito/solicitacoes-credito/1/status', {
+      expect(creditoApiInstance.patch).toHaveBeenCalledWith('/solicitacoes-credito/1/status', {
         status: 'APROVADO',
       });
       expect(result).toEqual(mockResponse);
@@ -107,7 +107,7 @@ describe('creditoApi', () => {
         total: 0,
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (creditoApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await creditoApi.listarSolicitacoes({
         status: 'PENDENTE',
@@ -116,7 +116,7 @@ describe('creditoApi', () => {
         size: 20,
       });
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/credito/solicitacoes-credito', {
+      expect(creditoApiInstance.get).toHaveBeenCalledWith('/solicitacoes-credito', {
         params: {
           status: 'PENDENTE',
           producerId: 'prod-1',
@@ -133,11 +133,11 @@ describe('creditoApi', () => {
         total: 0,
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (creditoApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await creditoApi.listarSolicitacoes();
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/credito/solicitacoes-credito', {
+      expect(creditoApiInstance.get).toHaveBeenCalledWith('/solicitacoes-credito', {
         params: undefined,
       });
       expect(result).toEqual(mockResponse);

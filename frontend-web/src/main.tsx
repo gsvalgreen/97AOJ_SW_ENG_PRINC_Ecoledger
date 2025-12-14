@@ -3,12 +3,24 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import { useAuthStore } from './store/authStore';
 import { setupMockInterceptor } from './mock/mockApi';
-import axiosInstance from './api/axiosConfig';
+import {
+  usersApiInstance,
+  movimentacoesApiInstance,
+  certificacaoApiInstance,
+  auditoriaApiInstance,
+  creditoApiInstance,
+  notificacoesApiInstance,
+} from './api/axiosConfig';
 import './index.css';
 
-// Setup mock API if enabled
+// Setup mock API if enabled - intercept all service instances
 if (import.meta.env.VITE_MOCK_API === 'true') {
-  setupMockInterceptor(axiosInstance as any);
+  setupMockInterceptor(usersApiInstance as any);
+  setupMockInterceptor(movimentacoesApiInstance as any);
+  setupMockInterceptor(certificacaoApiInstance as any);
+  setupMockInterceptor(auditoriaApiInstance as any);
+  setupMockInterceptor(creditoApiInstance as any);
+  setupMockInterceptor(notificacoesApiInstance as any);
   console.log('🔧 Mock API enabled - Using mock data');
 }
 

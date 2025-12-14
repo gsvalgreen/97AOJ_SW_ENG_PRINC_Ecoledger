@@ -4,14 +4,14 @@ import { usersApi } from './usersApi';
 import type { Usuario, CadastroCriacao, TokenAuth } from '../types';
 
 vi.mock('./axiosConfig', () => ({
-  default: {
+  usersApiInstance: {
     post: vi.fn(),
     get: vi.fn(),
     patch: vi.fn(),
   },
 }));
 
-import axiosInstance from './axiosConfig';
+import { usersApiInstance } from './axiosConfig';
 
 describe('usersApi', () => {
   beforeEach(() => {
@@ -26,11 +26,11 @@ describe('usersApi', () => {
         expiresIn: 3600,
       };
 
-      (axiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (usersApiInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await usersApi.login({ email: 'test@example.com', password: 'password' });
 
-      expect(axiosInstance.post).toHaveBeenCalledWith('/usuarios/auth/login', {
+      expect(usersApiInstance.post).toHaveBeenCalledWith('/usuarios/auth/login', {
         email: 'test@example.com',
         password: 'password',
       });
@@ -48,11 +48,11 @@ describe('usersApi', () => {
       };
 
       const mockResponse = { cadastroId: '1', status: 'PENDENTE' };
-      (axiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (usersApiInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await usersApi.register(mockData);
 
-      expect(axiosInstance.post).toHaveBeenCalledWith('/usuarios/cadastros', mockData, { headers: {} });
+      expect(usersApiInstance.post).toHaveBeenCalledWith('/usuarios/cadastros', mockData, { headers: {} });
       expect(result).toEqual(mockResponse);
     });
 
@@ -65,11 +65,11 @@ describe('usersApi', () => {
       };
 
       const mockResponse = { cadastroId: '1', status: 'PENDENTE' };
-      (axiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (usersApiInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       await usersApi.register(mockData, 'idempotency-key');
 
-      expect(axiosInstance.post).toHaveBeenCalledWith(
+      expect(usersApiInstance.post).toHaveBeenCalledWith(
         '/usuarios/cadastros',
         mockData,
         { headers: { 'Idempotency-Key': 'idempotency-key' } }
@@ -80,11 +80,11 @@ describe('usersApi', () => {
   describe('getCadastro', () => {
     it('should fetch cadastro by id', async () => {
       const mockResponse = { cadastroId: '1', status: 'PENDENTE' };
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (usersApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await usersApi.getCadastro('1');
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/usuarios/cadastros/1');
+      expect(usersApiInstance.get).toHaveBeenCalledWith('/usuarios/cadastros/1');
       expect(result).toEqual(mockResponse);
     });
   });
@@ -101,11 +101,11 @@ describe('usersApi', () => {
         criadoEm: '2024-01-01T00:00:00Z',
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (usersApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await usersApi.getUsuario('1');
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/usuarios/usuarios/1');
+      expect(usersApiInstance.get).toHaveBeenCalledWith('/usuarios/1');
       expect(result).toEqual(mockResponse);
     });
   });
@@ -122,11 +122,11 @@ describe('usersApi', () => {
         criadoEm: '2024-01-01T00:00:00Z',
       };
 
-      (axiosInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (usersApiInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await usersApi.updateUsuario('1', { nome: 'Updated Name' });
 
-      expect(axiosInstance.patch).toHaveBeenCalledWith('/usuarios/usuarios/1', { nome: 'Updated Name' });
+      expect(usersApiInstance.patch).toHaveBeenCalledWith('/usuarios/1', { nome: 'Updated Name' });
       expect(result).toEqual(mockResponse);
     });
   });
@@ -143,11 +143,11 @@ describe('usersApi', () => {
         criadoEm: '2024-01-01T00:00:00Z',
       };
 
-      (axiosInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (usersApiInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await usersApi.updateUsuarioStatus('1', 'APROVADO');
 
-      expect(axiosInstance.patch).toHaveBeenCalledWith('/usuarios/usuarios/1/status', {
+      expect(usersApiInstance.patch).toHaveBeenCalledWith('/usuarios/1/status', {
         status: 'APROVADO',
         reason: undefined,
       });
@@ -165,11 +165,11 @@ describe('usersApi', () => {
         criadoEm: '2024-01-01T00:00:00Z',
       };
 
-      (axiosInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (usersApiInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       await usersApi.updateUsuarioStatus('1', 'REJEITADO', 'Documentação incompleta');
 
-      expect(axiosInstance.patch).toHaveBeenCalledWith('/usuarios/usuarios/1/status', {
+      expect(usersApiInstance.patch).toHaveBeenCalledWith('/usuarios/1/status', {
         status: 'REJEITADO',
         reason: 'Documentação incompleta',
       });
@@ -183,11 +183,11 @@ describe('usersApi', () => {
         total: 1,
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (usersApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await usersApi.listarCadastros({ status: 'PENDENTE', page: 1, size: 20 });
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/usuarios/cadastros', {
+      expect(usersApiInstance.get).toHaveBeenCalledWith('/usuarios/cadastros', {
         params: { status: 'PENDENTE', page: 1, size: 20 },
       });
       expect(result).toEqual(mockResponse);
@@ -199,11 +199,11 @@ describe('usersApi', () => {
         total: 0,
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (usersApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await usersApi.listarCadastros();
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/usuarios/cadastros', {
+      expect(usersApiInstance.get).toHaveBeenCalledWith('/usuarios/cadastros', {
         params: undefined,
       });
       expect(result).toEqual(mockResponse);

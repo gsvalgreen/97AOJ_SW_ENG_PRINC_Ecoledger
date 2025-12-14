@@ -233,7 +233,7 @@ export const setupMockInterceptor = (instance: any) => {
       if (url.includes('/usuarios/auth/login') && method === 'post') {
         const { email, password } = config.data || {};
         response = await mockApi.login(email, password);
-      } else if (url.includes('/usuarios/usuarios/') && method === 'get' && !url.includes('/status')) {
+      } else if (url.match(/\/usuarios\/[^/]+$/) && method === 'get' && !url.includes('/status') && !url.includes('/cadastros') && !url.includes('/auth')) {
         const id = url.split('/').pop()?.split('?')[0];
         response = await mockApi.getUsuario(id!);
       } else if (url.includes('/usuarios/cadastros') && method === 'post') {
@@ -243,55 +243,55 @@ export const setupMockInterceptor = (instance: any) => {
       } else if (url.match(/\/usuarios\/cadastros\/[^/]+$/) && method === 'get') {
         const id = url.split('/').pop()?.split('?')[0];
         response = await mockApi.getCadastro(id!);
-      } else if (url.includes('/usuarios/usuarios/') && url.includes('/status') && method === 'patch') {
+      } else if (url.match(/\/usuarios\/[^/]+\/status$/) && method === 'patch') {
         const parts = url.split('/');
         const id = parts[parts.indexOf('usuarios') + 1];
         const { status, reason } = config.data || {};
         response = await mockApi.updateUsuarioStatus(id, status, reason);
       }
       // Movimentações endpoints
-      else if (url.includes('/movimentacoes/movimentacoes') && method === 'post' && !url.includes('/anexos')) {
+      else if (url.includes('/movimentacoes') && method === 'post' && !url.includes('/anexos')) {
         response = await mockApi.criarMovimentacao(config.data);
-      } else if (url.match(/\/movimentacoes\/movimentacoes\/[^/]+$/) && method === 'get') {
+      } else if (url.match(/\/movimentacoes\/[^/]+$/) && method === 'get') {
         const id = url.split('/').pop()?.split('?')[0];
         response = await mockApi.obterMovimentacao(id!);
-      } else if (url.includes('/movimentacoes/produtores/') && url.includes('/movimentacoes') && method === 'get') {
+      } else if (url.includes('/produtores/') && url.includes('/movimentacoes') && method === 'get') {
         const parts = url.split('/');
         const producerId = parts[parts.indexOf('produtores') + 1];
         response = await mockApi.listarMovimentacoes(producerId, config.params);
-      } else if (url.includes('/movimentacoes/commodities/') && url.includes('/historico') && method === 'get') {
+      } else if (url.includes('/commodities/') && url.includes('/historico') && method === 'get') {
         const parts = url.split('/');
         const commodityId = parts[parts.indexOf('commodities') + 1];
         response = await mockApi.historicoCommodity(commodityId);
-      } else if (url.includes('/movimentacoes/anexos/upload-url') && method === 'post') {
+      } else if (url.includes('/anexos/upload-url') && method === 'post') {
         const { contentType } = config.data || {};
         response = await mockApi.gerarUploadUrl(contentType);
-      } else if (url.includes('/movimentacoes/anexos/confirm') && method === 'post') {
+      } else if (url.includes('/anexos/confirm') && method === 'post') {
         const { objectKey } = config.data || {};
         response = await mockApi.confirmarUpload(objectKey);
       }
       // Certificação endpoints
-      else if (url.match(/\/certificacao\/selos\/[^/]+$/) && !url.includes('/historico') && !url.includes('/recalcular') && method === 'get') {
+      else if (url.match(/\/selos\/[^/]+$/) && !url.includes('/historico') && !url.includes('/recalcular') && method === 'get') {
         const id = url.split('/').pop()?.split('?')[0];
         response = await mockApi.getSelo(id!);
-      } else if (url.includes('/certificacao/selos/') && url.includes('/historico') && method === 'get') {
+      } else if (url.includes('/selos/') && url.includes('/historico') && method === 'get') {
         const parts = url.split('/');
         const producerId = parts[parts.indexOf('selos') + 1];
         response = await mockApi.getHistoricoSelo(producerId);
       }
       // Crédito endpoints
-      else if (url.includes('/credito/propostas') && method === 'get') {
+      else if (url.includes('/propostas') && method === 'get') {
         // Extract producerId from query params or URL
         const producerId = config.params?.producerId || new URLSearchParams(url.split('?')[1] || '').get('producerId');
         response = await mockApi.getPropostas(producerId || 'prod-1');
-      } else if (url.includes('/credito/solicitacoes-credito') && method === 'post') {
+      } else if (url.includes('/solicitacoes-credito') && method === 'post') {
         response = await mockApi.criarSolicitacao(config.data);
-      } else if (url.match(/\/credito\/solicitacoes-credito\/[^/]+$/) && !url.includes('/status') && method === 'get') {
+      } else if (url.match(/\/solicitacoes-credito\/[^/]+$/) && !url.includes('/status') && method === 'get') {
         const id = url.split('/').pop()?.split('?')[0];
         response = await mockApi.getSolicitacao(id!);
-      } else if (url.includes('/credito/solicitacoes-credito') && method === 'get' && !url.match(/\/credito\/solicitacoes-credito\/[^/]+$/)) {
+      } else if (url.includes('/solicitacoes-credito') && method === 'get' && !url.match(/\/solicitacoes-credito\/[^/]+$/)) {
         response = await mockApi.listarSolicitacoes(config.params);
-      } else if (url.includes('/credito/solicitacoes-credito/') && url.includes('/status') && method === 'patch') {
+      } else if (url.includes('/solicitacoes-credito/') && url.includes('/status') && method === 'patch') {
         const parts = url.split('/');
         const id = parts[parts.indexOf('solicitacoes-credito') + 1];
         const { status } = config.data || {};

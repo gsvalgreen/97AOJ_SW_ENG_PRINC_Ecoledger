@@ -1,4 +1,4 @@
-import axiosInstance from './axiosConfig';
+import { notificacoesApiInstance } from './axiosConfig';
 
 export interface PreferenciaNotificacao {
   userId: string;
@@ -10,14 +10,24 @@ export interface PreferenciaNotificacao {
 }
 
 export const notificacoesApi = {
+  enviarNotificacao: async (data: {
+    paraUsuarioId?: string;
+    canal: 'email' | 'push' | 'webhook';
+    templateId: string;
+    data: Record<string, unknown>;
+  }): Promise<{ notificacaoId: string }> => {
+    const response = await notificacoesApiInstance.post<{ notificacaoId: string }>('/notificacoes/enviar', data);
+    return response.data;
+  },
+
   getPreferencias: async (userId: string): Promise<PreferenciaNotificacao> => {
-    const response = await axiosInstance.get<PreferenciaNotificacao>(`/notificacoes/preferencias/${userId}`);
+    const response = await notificacoesApiInstance.get<PreferenciaNotificacao>(`/preferencias/${userId}`);
     return response.data;
   },
 
   updatePreferencias: async (userId: string, preferencias: Partial<PreferenciaNotificacao>): Promise<PreferenciaNotificacao> => {
-    const response = await axiosInstance.patch<PreferenciaNotificacao>(
-      `/notificacoes/preferencias/${userId}`,
+    const response = await notificacoesApiInstance.patch<PreferenciaNotificacao>(
+      `/preferencias/${userId}`,
       preferencias
     );
     return response.data;

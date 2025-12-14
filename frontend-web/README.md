@@ -38,8 +38,26 @@ npm install
 Crie um arquivo `.env` baseado no `.env.example`:
 
 ```bash
-VITE_API_BASE_URL=http://localhost:8080
+# URLs dos serviços backend (portas padrão)
+VITE_USERS_API_URL=http://localhost:8084
+VITE_MOVIMENTACOES_API_URL=http://localhost:8082
+VITE_CERTIFICACAO_API_URL=http://localhost:8085
+VITE_AUDITORIA_API_URL=http://localhost:8082
+VITE_CREDITO_API_URL=http://localhost:8086
+VITE_NOTIFICACOES_API_URL=http://localhost:8087
+
+# Habilitar mock API para desenvolvimento sem backend
+VITE_MOCK_API=false
 ```
+
+### URLs dos Serviços Backend
+
+- **Users Service**: `http://localhost:8084` (porta 8084, base path `/usuarios`)
+- **Movimentação Service**: `http://localhost:8082` (porta 8082, base path `/`)
+- **Certificação Service**: `http://localhost:8085` (porta 8085, base path `/selos`)
+- **Auditoria Service**: `http://localhost:8082` (porta 8082, base path `/`)
+- **Crédito Service**: `http://localhost:8086` (porta 8086, base path `/`)
+- **Notificações Service**: `http://localhost:8087` (porta 8087, base path `/`)
 
 ## Desenvolvimento
 
@@ -80,8 +98,22 @@ npm run lint
 - [ ] Upload de anexos
 - [ ] Consulta do selo verde
 
+## Integração com Backend
+
+O frontend está configurado para se comunicar com múltiplos microserviços backend. Cada serviço tem sua própria instância Axios configurada com a URL base apropriada.
+
+### Estrutura de URLs
+
+- **Users**: `/usuarios/*` (ex: `/usuarios/auth/login`, `/usuarios/{id}`)
+- **Movimentações**: `/movimentacoes`, `/produtores/{id}/movimentacoes`, `/commodities/{id}/historico`, `/anexos/*`
+- **Certificação**: `/selos/{producerId}`, `/selos/{producerId}/historico`
+- **Auditoria**: `/auditorias/{id}`, `/produtores/{id}/historico-auditorias`
+- **Crédito**: `/propostas`, `/solicitacoes-credito/*`
+- **Notificações**: `/notificacoes/enviar`, `/preferencias/{userId}`
+
 ## Notas
 
-- A aplicação requer que o backend esteja rodando e acessível na URL configurada em `VITE_API_BASE_URL`
-- O token JWT é armazenado no localStorage
+- A aplicação requer que os serviços backend estejam rodando e acessíveis nas URLs configuradas
+- O token JWT é armazenado no localStorage e enviado automaticamente em todas as requisições
 - As rotas são protegidas baseadas no status de autenticação e role do usuário
+- Para desenvolvimento sem backend, configure `VITE_MOCK_API=true` no `.env`

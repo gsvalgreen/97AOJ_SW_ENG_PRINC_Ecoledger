@@ -1,4 +1,4 @@
-import axiosInstance from './axiosConfig';
+import { auditoriaApiInstance } from './axiosConfig';
 
 export interface RegistroAuditoria {
   id: string;
@@ -11,6 +11,9 @@ export interface RegistroAuditoria {
     detalhe: string;
   }>;
   processadoEm: string;
+  auditorId?: string;
+  observacoes?: string;
+  revisadoEm?: string;
 }
 
 export interface RevisaoAuditoria {
@@ -21,19 +24,19 @@ export interface RevisaoAuditoria {
 
 export const auditoriaApi = {
   getAuditoria: async (id: string): Promise<RegistroAuditoria> => {
-    const response = await axiosInstance.get<RegistroAuditoria>(`/auditoria/auditorias/${id}`);
+    const response = await auditoriaApiInstance.get<RegistroAuditoria>(`/auditorias/${id}`);
     return response.data;
   },
 
-  getHistoricoProdutor: async (producerId: string): Promise<{ auditorias: RegistroAuditoria[] }> => {
-    const response = await axiosInstance.get<{ auditorias: RegistroAuditoria[] }>(
-      `/auditoria/produtores/${producerId}/historico-auditorias`
+  getHistoricoProdutor: async (producerId: string): Promise<{ items: RegistroAuditoria[]; total: number }> => {
+    const response = await auditoriaApiInstance.get<{ items: RegistroAuditoria[]; total: number }>(
+      `/produtores/${producerId}/historico-auditorias`
     );
     return response.data;
   },
 
   revisarAuditoria: async (id: string, data: RevisaoAuditoria): Promise<RegistroAuditoria> => {
-    const response = await axiosInstance.post<RegistroAuditoria>(`/auditoria/auditorias/${id}/revisao`, data);
+    const response = await auditoriaApiInstance.post<RegistroAuditoria>(`/auditorias/${id}/revisao`, data);
     return response.data;
   },
 };

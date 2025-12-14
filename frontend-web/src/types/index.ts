@@ -48,6 +48,7 @@ export interface Movimentacao {
   quantidade: number;
   unidade: string;
   timestamp: string;
+  criadoEm?: string;
   localizacao?: {
     lat: number;
     lon: number;
@@ -86,9 +87,11 @@ export interface SeloVerde {
   producerId: string;
   status: 'ATIVO' | 'PENDENTE' | 'INATIVO';
   nivel?: 'BRONZE' | 'PRATA' | 'OURO';
-  pontuacao?: number;
-  motivos?: string[];
+  pontuacao: number;
+  versaoRegra?: string;
   ultimoCheck: string;
+  expiracaoEm?: string;
+  motivos?: string[];
   evidencias?: Array<{
     tipo: string;
     detalhe: string;
@@ -96,12 +99,10 @@ export interface SeloVerde {
 }
 
 export interface AlteracaoSelo {
-  id: string;
-  producerId: string;
-  deStatus: string;
-  paraStatus: string;
+  deStatus: 'ATIVO' | 'PENDENTE' | 'INATIVO';
+  paraStatus: 'ATIVO' | 'PENDENTE' | 'INATIVO';
   motivo: string;
-  timestamp: string;
+  criadoEm: string;
   evidencia?: string;
 }
 

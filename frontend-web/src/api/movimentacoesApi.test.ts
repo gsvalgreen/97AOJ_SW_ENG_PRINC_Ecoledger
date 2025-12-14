@@ -3,13 +3,13 @@ import { movimentacoesApi } from './movimentacoesApi';
 import type { Movimentacao, MovimentacaoCriacao } from '../types';
 
 vi.mock('./axiosConfig', () => ({
-  default: {
+  movimentacoesApiInstance: {
     post: vi.fn(),
     get: vi.fn(),
   },
 }));
 
-import axiosInstance from './axiosConfig';
+import { movimentacoesApiInstance } from './axiosConfig';
 
 describe('movimentacoesApi', () => {
   beforeEach(() => {
@@ -28,11 +28,11 @@ describe('movimentacoesApi', () => {
       };
 
       const mockResponse = { movimentacaoId: '1' };
-      (axiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (movimentacoesApiInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await movimentacoesApi.criar(mockData);
 
-      expect(axiosInstance.post).toHaveBeenCalledWith('/movimentacoes/movimentacoes', mockData, {
+      expect(movimentacoesApiInstance.post).toHaveBeenCalledWith('/movimentacoes/movimentacoes', mockData, {
         headers: {},
       });
       expect(result).toEqual(mockResponse);
@@ -49,11 +49,11 @@ describe('movimentacoesApi', () => {
       };
 
       const mockResponse = { movimentacaoId: '1' };
-      (axiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (movimentacoesApiInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       await movimentacoesApi.criar(mockData, 'idempotency-key');
 
-      expect(axiosInstance.post).toHaveBeenCalledWith('/movimentacoes/movimentacoes', mockData, {
+      expect(movimentacoesApiInstance.post).toHaveBeenCalledWith('/movimentacoes/movimentacoes', mockData, {
         headers: { 'X-Idempotency-Key': 'idempotency-key' },
       });
     });
@@ -71,11 +71,11 @@ describe('movimentacoesApi', () => {
         timestamp: '2024-01-01T00:00:00Z',
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (movimentacoesApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await movimentacoesApi.obter('1');
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/movimentacoes/movimentacoes/1');
+      expect(movimentacoesApiInstance.get).toHaveBeenCalledWith('/movimentacoes/1');
       expect(result).toEqual(mockResponse);
     });
   });
@@ -87,7 +87,7 @@ describe('movimentacoesApi', () => {
         total: 0,
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (movimentacoesApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await movimentacoesApi.listarPorProdutor('prod-1', {
         page: 1,
@@ -96,7 +96,7 @@ describe('movimentacoesApi', () => {
         toDate: '2024-12-31',
       });
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/movimentacoes/produtores/prod-1/movimentacoes', {
+      expect(movimentacoesApiInstance.get).toHaveBeenCalledWith('/produtores/prod-1/movimentacoes', {
         params: {
           page: 1,
           size: 20,
@@ -113,11 +113,11 @@ describe('movimentacoesApi', () => {
         total: 0,
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (movimentacoesApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await movimentacoesApi.listarPorProdutor('prod-1');
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/movimentacoes/produtores/prod-1/movimentacoes', {
+      expect(movimentacoesApiInstance.get).toHaveBeenCalledWith('/produtores/prod-1/movimentacoes', {
         params: undefined,
       });
       expect(result).toEqual(mockResponse);
@@ -130,11 +130,11 @@ describe('movimentacoesApi', () => {
         movimentacoes: [],
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (movimentacoesApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await movimentacoesApi.historicoCommodity('comm-1');
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/movimentacoes/commodities/comm-1/historico');
+      expect(movimentacoesApiInstance.get).toHaveBeenCalledWith('/commodities/comm-1/historico');
       expect(result).toEqual(mockResponse);
     });
   });
@@ -146,11 +146,11 @@ describe('movimentacoesApi', () => {
         uploadUrl: 'https://example.com/upload',
       };
 
-      (axiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (movimentacoesApiInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await movimentacoesApi.gerarUploadUrl('image/png');
 
-      expect(axiosInstance.post).toHaveBeenCalledWith('/movimentacoes/anexos/upload-url', {
+      expect(movimentacoesApiInstance.post).toHaveBeenCalledWith('/anexos/upload-url', {
         contentType: 'image/png',
       });
       expect(result).toEqual(mockResponse);
@@ -167,11 +167,11 @@ describe('movimentacoesApi', () => {
         size: 1024,
       };
 
-      (axiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (movimentacoesApiInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await movimentacoesApi.confirmarUpload('key-1');
 
-      expect(axiosInstance.post).toHaveBeenCalledWith('/movimentacoes/anexos/confirm', {
+      expect(movimentacoesApiInstance.post).toHaveBeenCalledWith('/anexos/confirm', {
         objectKey: 'key-1',
       });
       expect(result).toEqual(mockResponse);

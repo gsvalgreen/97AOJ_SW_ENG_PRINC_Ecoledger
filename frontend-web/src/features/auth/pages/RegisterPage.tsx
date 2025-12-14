@@ -65,7 +65,17 @@ const RegisterPage = () => {
 
     try {
       const idempotencyKey = `${data.email}-${Date.now()}`;
-      await usersApi.register(data, idempotencyKey);
+      
+      const payload = {
+        nome: data.nome,
+        email: data.email,
+        documento: data.documento,
+        role: data.role,
+        dadosFazenda: data.dadosFazenda || {},
+        anexos: [],
+      };
+      
+      await usersApi.register(payload, idempotencyKey);
       setSuccess(true);
       setTimeout(() => {
         navigate(ROUTES.LOGIN);

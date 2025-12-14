@@ -3,13 +3,14 @@ import { notificacoesApi } from './notificacoesApi';
 import type { PreferenciaNotificacao } from './notificacoesApi';
 
 vi.mock('./axiosConfig', () => ({
-  default: {
+  notificacoesApiInstance: {
     get: vi.fn(),
     patch: vi.fn(),
+    post: vi.fn(),
   },
 }));
 
-import axiosInstance from './axiosConfig';
+import { notificacoesApiInstance } from './axiosConfig';
 
 describe('notificacoesApi', () => {
   beforeEach(() => {
@@ -27,11 +28,11 @@ describe('notificacoesApi', () => {
         },
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (notificacoesApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await notificacoesApi.getPreferencias('user-1');
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/notificacoes/preferencias/user-1');
+      expect(notificacoesApiInstance.get).toHaveBeenCalledWith('/preferencias/user-1');
       expect(result).toEqual(mockResponse);
     });
   });
@@ -47,7 +48,7 @@ describe('notificacoesApi', () => {
         },
       };
 
-      (axiosInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (notificacoesApiInstance.patch as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await notificacoesApi.updatePreferencias('user-1', {
         canais: {
@@ -57,7 +58,7 @@ describe('notificacoesApi', () => {
         },
       });
 
-      expect(axiosInstance.patch).toHaveBeenCalledWith('/notificacoes/preferencias/user-1', {
+      expect(notificacoesApiInstance.patch).toHaveBeenCalledWith('/preferencias/user-1', {
         canais: {
           email: false,
           push: true,

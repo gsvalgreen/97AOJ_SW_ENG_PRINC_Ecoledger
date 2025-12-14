@@ -3,13 +3,13 @@ import { certificacaoApi } from './certificacaoApi';
 import type { SeloVerde, AlteracaoSelo } from '../types';
 
 vi.mock('./axiosConfig', () => ({
-  default: {
+  certificacaoApiInstance: {
     post: vi.fn(),
     get: vi.fn(),
   },
 }));
 
-import axiosInstance from './axiosConfig';
+import { certificacaoApiInstance } from './axiosConfig';
 
 describe('certificacaoApi', () => {
   beforeEach(() => {
@@ -26,11 +26,11 @@ describe('certificacaoApi', () => {
         ultimoCheck: '2024-01-01T00:00:00Z',
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (certificacaoApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await certificacaoApi.getSelo('prod-1');
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/certificacao/selos/prod-1');
+      expect(certificacaoApiInstance.get).toHaveBeenCalledWith('/selos/prod-1');
       expect(result).toEqual(mockResponse);
     });
   });
@@ -45,11 +45,11 @@ describe('certificacaoApi', () => {
         ultimoCheck: '2024-01-01T00:00:00Z',
       };
 
-      (axiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (certificacaoApiInstance.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await certificacaoApi.recalcularSelo('prod-1');
 
-      expect(axiosInstance.post).toHaveBeenCalledWith('/certificacao/selos/prod-1/recalcular');
+      expect(certificacaoApiInstance.post).toHaveBeenCalledWith('/selos/prod-1/recalcular');
       expect(result).toEqual(mockResponse);
     });
   });
@@ -59,21 +59,19 @@ describe('certificacaoApi', () => {
       const mockResponse = {
         alteracoes: [
           {
-            id: '1',
-            producerId: 'prod-1',
             deStatus: 'PENDENTE',
             paraStatus: 'ATIVO',
             motivo: 'Aprovado',
-            timestamp: '2024-01-01T00:00:00Z',
+            criadoEm: '2024-01-01T00:00:00Z',
           },
         ],
       };
 
-      (axiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
+      (certificacaoApiInstance.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: mockResponse });
 
       const result = await certificacaoApi.getHistoricoSelo('prod-1');
 
-      expect(axiosInstance.get).toHaveBeenCalledWith('/certificacao/selos/prod-1/historico');
+      expect(certificacaoApiInstance.get).toHaveBeenCalledWith('/selos/prod-1/historico');
       expect(result).toEqual(mockResponse);
     });
   });

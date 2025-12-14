@@ -1,4 +1,4 @@
-import axiosInstance from './axiosConfig';
+import { movimentacoesApiInstance } from './axiosConfig';
 import type { Movimentacao, MovimentacaoCriacao, MovimentacaoLista } from '../types';
 
 export interface MovimentacaoFilters {
@@ -12,35 +12,35 @@ export interface MovimentacaoFilters {
 export const movimentacoesApi = {
   criar: async (data: MovimentacaoCriacao, idempotencyKey?: string): Promise<{ movimentacaoId: string }> => {
     const headers = idempotencyKey ? { 'X-Idempotency-Key': idempotencyKey } : {};
-    const response = await axiosInstance.post<{ movimentacaoId: string }>('/movimentacoes/movimentacoes', data, {
+    const response = await movimentacoesApiInstance.post<{ movimentacaoId: string }>('/movimentacoes', data, {
       headers,
     });
     return response.data;
   },
 
   obter: async (id: string): Promise<Movimentacao> => {
-    const response = await axiosInstance.get<Movimentacao>(`/movimentacoes/movimentacoes/${id}`);
+    const response = await movimentacoesApiInstance.get<Movimentacao>(`/movimentacoes/${id}`);
     return response.data;
   },
 
   listarPorProdutor: async (producerId: string, filters?: MovimentacaoFilters): Promise<MovimentacaoLista> => {
-    const response = await axiosInstance.get<MovimentacaoLista>(
-      `/movimentacoes/produtores/${producerId}/movimentacoes`,
+    const response = await movimentacoesApiInstance.get<MovimentacaoLista>(
+      `/produtores/${producerId}/movimentacoes`,
       { params: filters }
     );
     return response.data;
   },
 
   historicoCommodity: async (commodityId: string): Promise<{ movimentacoes: Movimentacao[] }> => {
-    const response = await axiosInstance.get<{ movimentacoes: Movimentacao[] }>(
-      `/movimentacoes/commodities/${commodityId}/historico`
+    const response = await movimentacoesApiInstance.get<{ movimentacoes: Movimentacao[] }>(
+      `/commodities/${commodityId}/historico`
     );
     return response.data;
   },
 
   gerarUploadUrl: async (contentType: string): Promise<{ objectKey: string; uploadUrl: string }> => {
-    const response = await axiosInstance.post<{ objectKey: string; uploadUrl: string }>(
-      '/movimentacoes/anexos/upload-url',
+    const response = await movimentacoesApiInstance.post<{ objectKey: string; uploadUrl: string }>(
+      '/anexos/upload-url',
       { contentType }
     );
     return response.data;
@@ -53,7 +53,7 @@ export const movimentacoesApi = {
     hash: string;
     size: number;
   }> => {
-    const response = await axiosInstance.post('/movimentacoes/anexos/confirm', { objectKey });
+    const response = await movimentacoesApiInstance.post('/anexos/confirm', { objectKey });
     return response.data;
   },
 };
