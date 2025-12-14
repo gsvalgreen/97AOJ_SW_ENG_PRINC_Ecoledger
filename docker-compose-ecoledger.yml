@@ -149,6 +149,9 @@ services:
 
   # Movimentacao service built locally
   movimentacao-service:
+    build:
+      context: ./movimentacao-service
+      dockerfile: Dockerfile
     image: movimentacao-service:local
     container_name: ecoledger-movimentacao-service
     depends_on:
@@ -177,6 +180,9 @@ services:
 
   # Auditoria service built locally
   auditoria-service:
+    build:
+      context: ./auditoria-service
+      dockerfile: Dockerfile
     image: auditoria-service:local
     container_name: ecoledger-auditoria-service
     depends_on:
