@@ -29,7 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +66,7 @@ class KafkaIntegrationIT {
     @BeforeEach
     void setUp() {
         auditoriaRepository.deleteAll();
-        
+
         // Setup producer
         Map<String, Object> producerProps = new HashMap<>(
                 KafkaTestUtils.producerProps(embeddedKafkaBroker));
@@ -81,7 +81,7 @@ class KafkaIntegrationIT {
         consumerProps.put("key.deserializer", StringDeserializer.class);
         consumerProps.put("value.deserializer", JsonDeserializer.class);
         consumerProps.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-        
+
         consumer = new DefaultKafkaConsumerFactory<String, Object>(consumerProps).createConsumer();
         consumer.subscribe(List.of("auditoria.concluida"));
     }
@@ -98,7 +98,7 @@ class KafkaIntegrationIT {
         // given
         UUID movimentacaoId = UUID.randomUUID();
         String producerId = "kafka-test-producer";
-        
+
         MovimentacaoCriadaEvent event = new MovimentacaoCriadaEvent(
                 movimentacaoId,
                 producerId,
@@ -106,14 +106,15 @@ class KafkaIntegrationIT {
                 "ENTRADA",
                 new BigDecimal("100"),
                 "KG",
-                "BR-SP",
-                Instant.now(),
-                List.of(),
-                Instant.now()
+                OffsetDateTime.now(),
+                -23.5505,
+                -46.6333,
+                OffsetDateTime.now(),
+                List.of()
         );
 
         // when
-        producer.send(new ProducerRecord<>("movimentacao.criada", 
+        producer.send(new ProducerRecord<>("movimentacao.criada",
                 movimentacaoId.toString(), event)).get();
         producer.flush();
 
@@ -135,7 +136,7 @@ class KafkaIntegrationIT {
     void shouldHandleIdempotentMessages() throws Exception {
         // given
         UUID movimentacaoId = UUID.randomUUID();
-        
+
         MovimentacaoCriadaEvent event = new MovimentacaoCriadaEvent(
                 movimentacaoId,
                 "producer-1",
@@ -143,27 +144,26 @@ class KafkaIntegrationIT {
                 "ENTRADA",
                 new BigDecimal("100"),
                 "KG",
-                "BR-SP",
-                Instant.now(),
-                List.of(),
-                Instant.now()
+                OffsetDateTime.now(),
+                -23.5505,
+                -46.6333,
+                OffsetDateTime.now(),
+                List.of()
         );
 
         // when - send same message twice
-        producer.send(new ProducerRecord<>("movimentacao.criada", 
+        producer.send(new ProducerRecord<>("movimentacao.criada",
                 movimentacaoId.toString(), event)).get();
         producer.flush();
-        
+
         // Wait for first message to be processed
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
-            assertThat(auditoriaRepository.existsByMovimentacaoId(movimentacaoId)).isTrue();
-        });
-        
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(auditoriaRepository.existsByMovimentacaoId(movimentacaoId)).isTrue());
+
         // Send duplicate
-        producer.send(new ProducerRecord<>("movimentacao.criada", 
+        producer.send(new ProducerRecord<>("movimentacao.criada",
                 movimentacaoId.toString(), event)).get();
         producer.flush();
-        
+
         // Give time for potential duplicate processing
         Thread.sleep(2000);
 
@@ -178,7 +178,7 @@ class KafkaIntegrationIT {
     void shouldCreateReprovadoAuditOnValidationFailure() throws Exception {
         // given - quantity below minimum (configured as 1 in test profile)
         UUID movimentacaoId = UUID.randomUUID();
-        
+
         MovimentacaoCriadaEvent event = new MovimentacaoCriadaEvent(
                 movimentacaoId,
                 "producer-1",
@@ -186,14 +186,15 @@ class KafkaIntegrationIT {
                 "ENTRADA",
                 new BigDecimal("0"), // Below minimum
                 "KG",
-                "BR-SP",
-                Instant.now(),
-                List.of(),
-                Instant.now()
+                OffsetDateTime.now(),
+                -23.5505,
+                -46.6333,
+                OffsetDateTime.now(),
+                List.of()
         );
 
         // when
-        producer.send(new ProducerRecord<>("movimentacao.criada", 
+        producer.send(new ProducerRecord<>("movimentacao.criada",
                 movimentacaoId.toString(), event)).get();
         producer.flush();
 

@@ -18,7 +18,7 @@ class LocationRuleTest {
     @DisplayName("should pass when location is not required")
     void shouldPassWhenLocationNotRequired() {
         // given
-        RulesProperties properties = new RulesProperties("1.0.0", null, 
+        RulesProperties properties = new RulesProperties("1.0.0", null,
                 new RulesProperties.LocationRules(List.of(), false), null);
         LocationRule rule = new LocationRule(properties);
         MovimentacaoCriadaEvent event = createEventWithCoords(null, null);
@@ -111,14 +111,6 @@ class LocationRuleTest {
                 "ENTRADA",
                 new BigDecimal("100"),
                 "KG",
-                OffsetDateTime.now(),
-                lat,
-                lon,
-                OffsetDateTime.now(),
-                List.of()
-        );
-    }
-}
                 OffsetDateTime.now(),
                 lat,
                 lon,

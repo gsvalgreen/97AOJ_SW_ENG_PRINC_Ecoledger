@@ -23,13 +23,13 @@ public class LocalFeatureTests {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient client = HttpClient.newHttpClient();
-    private final String base = "http://localhost:8080";
+    private final String base = "http://localhost:8082";
 
     @BeforeAll
     public static void cleanDatabase() {
-        String url = System.getenv().getOrDefault("SPRING_DATASOURCE_URL", "jdbc:postgresql://localhost:5433/movimentacao");
-        String user = System.getenv().getOrDefault("SPRING_DATASOURCE_USERNAME", "ecoledger");
-        String pass = System.getenv().getOrDefault("SPRING_DATASOURCE_PASSWORD", "ecoledger");
+        String url = System.getenv().getOrDefault("SPRING_DATASOURCE_URL", "jdbc:postgresql://localhost:5432/movimentacao");
+        String user = System.getenv().getOrDefault("SPRING_DATASOURCE_USERNAME", "ecoledger_movimentacao");
+        String pass = System.getenv().getOrDefault("SPRING_DATASOURCE_PASSWORD", "ecoledger_movimentacao");
         try (Connection conn = DriverManager.getConnection(url, user, pass); Statement st = conn.createStatement()) {
             st.execute("TRUNCATE TABLE movimentacao_anexos, idempotency_records, movimentacoes RESTART IDENTITY CASCADE");
             System.out.println("[LocalFeatureTests] Database tables truncated successfully");
