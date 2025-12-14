@@ -3,9 +3,9 @@ package steps;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
+import io.cucumber.java.pt.Dado;
+import io.cucumber.java.pt.Entao;
+import io.cucumber.java.pt.Quando;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -28,7 +28,7 @@ public class ExtraSteps {
     private int lastGetStatus;
     private String lastGetResponseBody;
 
-    @When("eu registro uma movimentacao valida para o produtor {string} com idempotency key {string}")
+    @Quando("eu registro uma movimentacao valida para o produtor {string} com idempotency key {string}")
     public void register_with_idempotency(String producerId, String key) throws Exception {
         // create attachment via direct flow
         String attachmentUrl = null;
@@ -120,7 +120,7 @@ public class ExtraSteps {
         }
     }
 
-    @When("eu registro novamente a mesma movimentacao com idempotency key {string}")
+    @Quando("eu registro novamente a mesma movimentacao com idempotency key {string}")
     public void register_again_with_idempotency(String key) throws Exception {
         if (lastPayload == null) fail("No previous payload to re-send");
         HttpRequest req = HttpRequest.newBuilder()
@@ -142,14 +142,14 @@ public class ExtraSteps {
         }
     }
 
-    @Then("os dois ids retornados são iguais")
+    @Entao("os dois ids retornados são iguais")
     public void assert_ids_equal() {
         assertNotNull(firstId);
         assertNotNull(secondId);
         assertEquals(firstId, secondId);
     }
 
-    @When("eu registro uma movimentacao com anexo e hash invalido para o produtor {string}")
+    @Quando("eu registro uma movimentacao com anexo e hash invalido para o produtor {string}")
     public void register_with_invalid_hash(String producerId) throws Exception {
         // create attachment
         String attachmentUrl = null;
@@ -230,7 +230,7 @@ public class ExtraSteps {
         lastResponseBody = resp.body();
     }
 
-    @Then("a API de movimentacao retorna 400")
+    @Entao("a API de movimentacao retorna 400")
     public void assert_mov_returned_400() {
         System.out.println("Status: " + lastStatus);
         System.out.println("Body: " + lastResponseBody);
@@ -243,7 +243,7 @@ public class ExtraSteps {
         fail("expected 400 Bad Request for invalid attachment hash but was: " + lastStatus);
     }
 
-    @Then("eu consulto a movimentacao criada e recebo 200")
+    @Entao("eu consulto a movimentacao criada e recebo 200")
     public void get_created_movimentation_and_assert() throws Exception {
         // attempt to use firstId from previous flow or parse lastResponseBody
         String id = firstId;
@@ -271,7 +271,7 @@ public class ExtraSteps {
         assertEquals(200, lastGetStatus);
     }
 
-    @Given("o banco está limpo para produtor {string}")
+    @Dado("o banco está limpo para produtor {string}")
     public void db_clean_for_producer(String producerId) throws Exception {
         // best effort: truncate movimentacoes and anexos
         try (var conn = java.sql.DriverManager.getConnection("jdbc:postgresql://localhost:5432/movimentacao","ecoledger_admin","ecoledger_admin");
@@ -283,7 +283,7 @@ public class ExtraSteps {
         }
     }
 
-    @When("eu crio {int} movimentacoes validas para o produtor {string}")
+    @Quando("eu crio {int} movimentacoes validas para o produtor {string}")
     public void create_n_movements_for_producer(Integer n, String producerId) throws Exception {
         for (int i=0;i<n;i++) {
             JsonObject local = new JsonObject();
@@ -310,7 +310,7 @@ public class ExtraSteps {
         }
     }
 
-    @When("eu solicito GET {word}")
+    @Quando("eu solicito GET {word}")
     public void get_movements_paginated(String urlPath) throws Exception {
         String url = urlPath.startsWith("http") ? urlPath : "http://localhost:8082" + urlPath;
         HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofSeconds(10)).GET().build();
@@ -319,7 +319,7 @@ public class ExtraSteps {
         lastGetResponseBody = resp.body();
     }
 
-    @Then("a resposta contém no máximo {int} itens e total >= {int}")
+    @Entao("a resposta contém no máximo {int} itens e total >= {int}")
     public void assert_pagination_counts(Integer maxItems, Integer totalAtLeast) throws Exception {
         assertEquals(200, lastGetStatus);
         JsonObject jo = gson.fromJson(lastGetResponseBody, JsonObject.class);
@@ -330,7 +330,7 @@ public class ExtraSteps {
         assertTrue(total >= totalAtLeast, "total >= expected");
     }
 
-    @When("eu aplico uma revisao manual para a primeira auditoria do produtor {string} com auditor {string} e resultado {string}")
+    @Quando("eu aplico uma revisao manual para a primeira auditoria do produtor {string} com auditor {string} e resultado {string}")
     public void apply_manual_review(String producerId, String auditorId, String resultado) throws Exception {
         // fetch history
         HttpRequest req = HttpRequest.newBuilder()

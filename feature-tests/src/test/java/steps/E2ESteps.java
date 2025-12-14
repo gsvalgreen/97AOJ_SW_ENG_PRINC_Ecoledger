@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
+import io.cucumber.java.pt.Dado;
+import io.cucumber.java.pt.Entao;
+import io.cucumber.java.pt.Quando;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -30,7 +30,7 @@ public class E2ESteps {
     private String lastProducerId;
     private String attachmentUrl;
 
-    @Given("os serviços de movimentação e auditoria estão disponíveis em localhost")
+    @Dado("os serviços de movimentação e auditoria estão disponíveis em localhost")
     public void services_available() {
         String[] services = new String[]{"http://localhost:8082", "http://localhost:8083"};
         String[] probes = new String[]{"/actuator/health", "/"};
@@ -58,7 +58,7 @@ public class E2ESteps {
         throw new IllegalStateException("required services not available: movimentacao/auditoria");
     }
 
-    @When("eu anexo um arquivo valido para o produtor {string}")
+    @Quando("eu anexo um arquivo valido para o produtor {string}")
     public void upload_valid_attachment(String producerId) throws Exception {
         lastProducerId = producerId;
         // request signed upload metadata
@@ -120,7 +120,7 @@ public class E2ESteps {
         attachmentUrl = null;
     }
 
-    @When("eu registro uma movimentacao valida para o produtor {string} via API de movimentacao")
+    @Quando("eu registro uma movimentacao valida para o produtor {string} via API de movimentacao")
     public void register_valid_movement(String producerId) throws Exception {
         // reset last ids
         lastCreatedId = null;
@@ -165,7 +165,7 @@ public class E2ESteps {
         movimentacaoResponseStatus = resp.statusCode();
     }
 
-    @When("eu registro uma movimentacao invalida para o produtor {string} via API de movimentacao")
+    @Quando("eu registro uma movimentacao invalida para o produtor {string} via API de movimentacao")
     public void register_invalid_movement(String producerId) throws Exception {
         lastProducerId = producerId;
 
@@ -195,22 +195,22 @@ public class E2ESteps {
         movimentacaoResponseStatus = resp.statusCode();
     }
 
-    @Then("a API de movimentacao retorna 201")
+    @Entao("a API de movimentacao retorna 201")
     public void assert_mov_returned_201() {
         System.out.println("Movimentacao response status: " + movimentacaoResponseStatus);
         System.out.println("Movimentacao response body: " + movimentacaoResponseBody);
         assertEquals(201, movimentacaoResponseStatus, "expected 201 Created from movimentacao API");
     }
 
-    @Then("o serviço de auditoria registra uma auditoria para o produtor {string} dentro de {int} seconds")
-    public void assert_auditoria_created_for_producer(String producerId, Integer seconds) throws Exception {
-        boolean found = pollForAuditoria(producerId, seconds);
+    @Entao("o serviço de auditoria registra uma auditoria para o produtor {string} dentro de {int} segundos")
+    public void assert_auditoria_created_for_producer(String producerId, Integer segundos) throws Exception {
+        boolean found = pollForAuditoria(producerId, segundos);
         assertTrue(found, "Expected an auditoria record for producer " + producerId);
     }
 
-    @Then("a auditoria para o produtor {string} é publicada com resultado {string} dentro de {int} seconds")
-    public void assert_auditoria_result_for_producer(String producerId, String expectedResult, Integer seconds) throws Exception {
-        long deadline = System.currentTimeMillis() + seconds * 1000L;
+    @Entao("a auditoria para o produtor {string} é publicada com resultado {string} dentro de {int} segundos")
+    public void assert_auditoria_result_for_producer(String producerId, String expectedResult, Integer segundos) throws Exception {
+        long deadline = System.currentTimeMillis() + segundos * 1000L;
         while (System.currentTimeMillis() < deadline) {
             HttpRequest req = HttpRequest.newBuilder()
                     .uri(URI.create("http://localhost:8083/produtores/" + producerId + "/historico-auditorias"))
@@ -246,19 +246,8 @@ public class E2ESteps {
         fail("Expected auditoria with result '" + expectedResult + "' for producer " + producerId);
     }
 
-    // Portuguese aliases to support feature files that use "segundos"
-    @Then("o serviço de auditoria registra uma auditoria para o produtor {string} dentro de {int} segundos")
-    public void assert_auditoria_created_for_producer_pt(String producerId, Integer seconds) throws Exception {
-        assert_auditoria_created_for_producer(producerId, seconds);
-    }
-
-    @Then("a auditoria para o produtor {string} é publicada com resultado {string} dentro de {int} segundos")
-    public void assert_auditoria_result_for_producer_pt(String producerId, String expectedResult, Integer seconds) throws Exception {
-        assert_auditoria_result_for_producer(producerId, expectedResult, seconds);
-    }
-
-    private boolean pollForAuditoria(String producerId, int seconds) throws Exception {
-        long deadline = System.currentTimeMillis() + seconds * 1000L;
+    private boolean pollForAuditoria(String producerId, int segundos) throws Exception {
+        long deadline = System.currentTimeMillis() + segundos * 1000L;
         while (System.currentTimeMillis() < deadline) {
             HttpRequest req = HttpRequest.newBuilder()
                     .uri(URI.create("http://localhost:8083/produtores/" + producerId + "/historico-auditorias"))
@@ -285,12 +274,12 @@ public class E2ESteps {
         return false;
     }
 
-    @When("eu registro uma movimentacao valida para o produtor {string}")
+    @Quando("eu registro uma movimentacao valida para o produtor {string}")
     public void register_valid_movement_short(String producerId) throws Exception {
         register_valid_movement(producerId);
     }
 
-    @Given("os serviços de movimentação, auditoria e certificacao estão disponíveis em localhost")
+    @Dado("os serviços de movimentação, auditoria e certificacao estão disponíveis em localhost")
     public void services_all_available() {
         String[] services = new String[]{"http://localhost:8082", "http://localhost:8083", "http://localhost:8085"};
         String[] probes = new String[]{"/actuator/health", "/"};
@@ -318,9 +307,9 @@ public class E2ESteps {
         throw new IllegalStateException("required services not available: movimentacao/auditoria/certificacao");
     }
 
-    @Then("o selo para o produtor {string} tem status {string} dentro de {int} segundos")
-    public void assert_selo_status_for_producer(String producerId, String expectedStatus, Integer seconds) throws Exception {
-        long deadline = System.currentTimeMillis() + seconds * 1000L;
+    @Entao("o selo para o produtor {string} tem status {string} dentro de {int} segundos")
+    public void assert_selo_status_for_producer(String producerId, String expectedStatus, Integer segundos) throws Exception {
+        long deadline = System.currentTimeMillis() + segundos * 1000L;
         while (System.currentTimeMillis() < deadline) {
             try {
                 HttpRequest req = HttpRequest.newBuilder()
@@ -342,7 +331,7 @@ public class E2ESteps {
         fail("Expected selo status '" + expectedStatus + "' for producer " + producerId);
     }
 
-    @When("eu solicito recálculo do selo para o produtor {string}")
+    @Quando("eu solicito recálculo do selo para o produtor {string}")
     public void request_recalculate_selo(String producerId) throws Exception {
         JsonObject payload = new JsonObject();
         payload.addProperty("motivo", "feature-tests-recalc");
@@ -355,9 +344,9 @@ public class E2ESteps {
         try { client.send(req, HttpResponse.BodyHandlers.ofString()); } catch (Exception ignored) {}
     }
 
-    @Then("o historico de selo para o produtor {string} contém pelo menos {int} entradas dentro de {int} segundos")
-    public void assert_selo_history_contains(String producerId, Integer minEntries, Integer seconds) throws Exception {
-        long deadline = System.currentTimeMillis() + seconds * 1000L;
+    @Entao("o historico de selo para o produtor {string} contém pelo menos {int} entradas dentro de {int} segundos")
+    public void assert_selo_history_contains(String producerId, Integer minEntries, Integer segundos) throws Exception {
+        long deadline = System.currentTimeMillis() + segundos * 1000L;
         while (System.currentTimeMillis() < deadline) {
             try {
                 HttpRequest req = HttpRequest.newBuilder()

@@ -2,9 +2,9 @@ package steps;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
+import io.cucumber.java.pt.Dado;
+import io.cucumber.java.pt.Entao;
+import io.cucumber.java.pt.Quando;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -22,7 +22,7 @@ public class UsersSteps {
     private int lastStatus;
     private String lastBody;
 
-    @Given("o serviço de usuarios está disponível em localhost:8084")
+    @Dado("o serviço de usuarios está disponível em localhost:8084")
     public void users_service_available() {
         var base = "http://localhost:8084";
         String[] probes = new String[]{"/actuator/health", "/"};
@@ -44,7 +44,7 @@ public class UsersSteps {
         throw new IllegalStateException("users-service not available at " + base);
     }
 
-    @When("eu submeter um cadastro valido")
+    @Quando("eu submeter um cadastro valido")
     public void submit_valid_cadastro() throws Exception {
         JsonObject payload = new JsonObject();
         String unique = String.valueOf(System.currentTimeMillis());
@@ -74,7 +74,7 @@ public class UsersSteps {
         }
     }
 
-    @Then("o serviço retorna 201 e eu consigo recuperar o cadastro criado")
+    @Entao("o serviço retorna 201 e eu consigo recuperar o cadastro criado")
     public void assert_created_and_get() throws Exception {
         assertEquals(201, lastStatus, "expected 201 Created from users-service");
         assertNotNull(lastCadastroId, "expected cadastroId in response");
@@ -89,7 +89,7 @@ public class UsersSteps {
         assertTrue(gresp.body().contains("email") || gresp.body().contains("nome"));
     }
 
-    @When("eu submeter um cadastro inválido")
+    @Quando("eu submeter um cadastro inválido")
     public void submit_invalid_cadastro() throws Exception {
         // missing required fields
         JsonObject payload = new JsonObject();
@@ -107,12 +107,12 @@ public class UsersSteps {
         lastBody = resp.body();
     }
 
-    @Then("a API retorna 400")
+    @Entao("a API retorna 400")
     public void assert_returns_400() {
         assertEquals(400, lastStatus, "expected 400 Bad Request for invalid cadastro");
     }
 
-    @When("eu consulto usuarios {word} sem autenticação")
+    @Quando("eu consulto usuarios {word} sem autenticação")
     public void get_user_without_auth(String id) throws Exception {
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8084/usuarios/" + id))
@@ -124,7 +124,7 @@ public class UsersSteps {
         lastBody = resp.body();
     }
 
-    @When("eu atualizo usuarios {word} status sem autenticação")
+    @Quando("eu atualizo usuarios {word} status sem autenticação")
     public void patch_status_without_auth(String id) throws Exception {
         JsonObject payload = new JsonObject();
         payload.addProperty("status", "APROVADO");
@@ -140,7 +140,7 @@ public class UsersSteps {
         lastBody = resp.body();
     }
 
-    @Then("a resposta deve ser 401")
+    @Entao("a resposta deve ser 401")
     public void assert_401() {
         assertTrue(lastStatus == 401 || lastStatus == 403, "expected 401/403 but was: " + lastStatus);
     }
