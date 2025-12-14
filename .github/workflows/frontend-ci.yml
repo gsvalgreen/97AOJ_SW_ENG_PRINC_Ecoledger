@@ -52,17 +52,16 @@ jobs:
         if: env.SONAR_TOKEN != ''
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: sonarsource/sonarcloud-github-action@v2
+          SONAR_HOST_URL: https://sonarcloud.io
+        uses: sonarsource/sonarqube-scan-action@v6
         with:
-          organization: gsvalgreen
-          token: ${{ env.SONAR_TOKEN }}
-          projectKey: gsvalgreen_97AOJ_SW_ENG_PRINC_Ecoledger_frontend-web
-          projectName: ECO Ledger - Frontend Web
-          extraProperties: |
-            sonar.sources=frontend-web/src
-            sonar.tests=frontend-web/src
-            sonar.javascript.lcov.reportPaths=frontend-web/coverage/lcov.info
+          projectBaseDir: frontend-web
+          args: >-
+            -Dsonar.projectKey=gsvalgreen_97AOJ_SW_ENG_PRINC_Ecoledger_frontend-web
+            -Dsonar.organization=gsvalgreen
+            -Dsonar.sources=src
+            -Dsonar.tests=src
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
