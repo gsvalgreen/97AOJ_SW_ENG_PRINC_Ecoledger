@@ -1,0 +1,60 @@
+name: Frontend Web CI
+
+on:
+  push:
+    paths:
+      - 'frontend-web/**'
+  pull_request:
+    paths:
+      - 'frontend-web/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: frontend-web
+        run: npm ci
+
+      - name: Build (Vite)
+        working-directory: frontend-web
+        run: npx vite build --mode production
+
+      - name: Run tests (Vitest)
+        working-directory: frontend-web
+        # --run ensures tests execute in CI; --coverage will generate coverage reports
+        run: npm test -- --run --coverage
+
+      - name: SonarCloud Scan
+        if: env.SONAR_TOKEN != ''
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          # install sonar-scanner CLI and run scan including LCOV coverage report
+          npm install -g sonar-scanner-cli
+          sonar-scanner \
+            -Dsonar.projectKey=gsvalgreen_97AOJ_SW_ENG_PRINC_Ecoledger_frontend-web \
+            -Dsonar.organization=gsvalgreen \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.sources=frontend-web/src \
+            -Dsonar.tests=frontend-web/src \
+            -Dsonar.javascript.lcov.reportPaths=frontend-web/coverage/lcov.info \
+            -Dsonar.login=${SONAR_TOKEN}
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-web-coverage
+          path: frontend-web/coverage
