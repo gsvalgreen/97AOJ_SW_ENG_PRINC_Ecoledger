@@ -1,5 +1,6 @@
 plugins {
     java
+    idea
 }
 
 java {
@@ -12,14 +13,21 @@ repositories {
     mavenCentral()
 }
 
+val cucumberVersion = "7.33.0"
+val junitBomVersion = "5.14.1"
+val cucumberReportsPath = "build/reports/cucumber"
+
 dependencies {
-    testImplementation("io.cucumber:cucumber-java:7.33.0")
-    testImplementation("io.cucumber:cucumber-junit-platform-engine:7.33.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-    testImplementation("org.junit.platform:junit-platform-suite:1.10.1")
-    testImplementation("org.junit.platform:junit-platform-engine:1.10.0")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.0")
+
+    testImplementation(platform("org.junit:junit-bom:$junitBomVersion"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.junit.platform:junit-platform-suite")
+    testImplementation("org.junit.platform:junit-platform-engine")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testImplementation("io.cucumber:cucumber-java:$cucumberVersion")
+    testImplementation("io.cucumber:cucumber-junit-platform-engine:$cucumberVersion")
     testImplementation("com.google.code.gson:gson:2.10.1")
     testImplementation("org.slf4j:slf4j-simple:2.0.9")
     testImplementation("org.postgresql:postgresql:42.7.7")
@@ -27,4 +35,16 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    val cucumberPlugins = listOf(
+        "pretty",
+        "html:$cucumberReportsPath/index.html",
+        "json:$cucumberReportsPath/report.json",
+        "summary"
+    )
+    systemProperty("cucumber.plugin", cucumberPlugins.joinToString(","))
+    systemProperty("cucumber.publish.quiet", "true")
+    doFirst {
+        file(cucumberReportsPath).mkdirs()
+    }
+    outputs.dir(cucumberReportsPath)
 }
