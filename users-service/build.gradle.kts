@@ -92,6 +92,8 @@ dependencies {
     integrationTestImplementation("com.adobe.testing:s3mock:4.11.0")
     integrationTestImplementation("com.adobe.testing:s3mock-testcontainers:4.11.0")
     integrationTestImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.2")
+    // Awaitility for async waits in integration tests
+    integrationTestImplementation("org.awaitility:awaitility:4.2.0")
 }
 
 tasks.test {

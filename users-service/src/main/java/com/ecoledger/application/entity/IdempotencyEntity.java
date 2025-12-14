@@ -8,6 +8,7 @@ import java.time.Instant;
 public class IdempotencyEntity {
 
     @Id
+    @Column(name = "idempotency_key")
     private String key;
 
     @Column(nullable = false)
