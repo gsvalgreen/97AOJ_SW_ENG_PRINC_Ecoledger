@@ -124,6 +124,7 @@ Configuração
 - [x] OpenAPI: alinhar `movimentacao.yaml`, incluir exemplos e documentar erros/response codes.
 - [ ] Observabilidade: healthchecks, métricas (Micrometer), tracing e configuração para CI/Prod (apenas logs básicos implementados).
 - [ ] Testes de contrato/consumidor para Auditoria e Notificações (PACT/WireMock/contract tests).
+- [ ] Rejeitar anexos com hash mismatch (cenário presente nos feature-tests; atualmente os testes emitem um warning quando o serviço aceita hashes inválidos).
 - [ ] Revisar índices DB (producerId+timestamp, commodityId+timestamp) e adicionar migrations faltantes se necessário.
 - [ ] Segurança: validar configuração JWT (audience), permissões por papel (produtor/analista/auditor) e rate limiting.
 - [ ] CI: incluir MinIO mock e EmbeddedKafka nas pipelines de integração; documentar variáveis obrigatórias no README.

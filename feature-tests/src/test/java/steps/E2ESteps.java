@@ -18,10 +18,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class E2ESteps {
 
+    private String lastCreatedId;
+    private String lastCreatedIdSecond;
+    private String lastGetResponseBody;
+    private int lastGetStatus;
+
     private final HttpClient client = HttpClient.newHttpClient();
     private final Gson gson = new Gson();
-    private String movimentacaoResponseBody;
-    private int movimentacaoResponseStatus;
+    public static String movimentacaoResponseBody;
+    public static int movimentacaoResponseStatus;
     private String lastProducerId;
     private String attachmentUrl;
 
@@ -94,7 +99,12 @@ public class E2ESteps {
 
     @When("eu registro uma movimentacao valida para o produtor {string} via API de movimentacao")
     public void register_valid_movement(String producerId) throws Exception {
+        // reset last ids
+        lastCreatedId = null;
+        lastCreatedIdSecond = null;
         lastProducerId = producerId;
+
+        // existing implementation continues below
         JsonObject local = new JsonObject();
         local.addProperty("lat", -23.55052);
         local.addProperty("lon", -46.633308);
@@ -250,5 +260,10 @@ public class E2ESteps {
             Thread.sleep(1000);
         }
         return false;
+    }
+
+    @When("eu registro uma movimentacao valida para o produtor {string}")
+    public void register_valid_movement_short(String producerId) throws Exception {
+        register_valid_movement(producerId);
     }
 }
