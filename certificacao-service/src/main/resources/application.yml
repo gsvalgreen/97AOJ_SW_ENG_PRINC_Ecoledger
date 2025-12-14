@@ -1,0 +1,63 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: certificacao-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/certificacao}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+certificacao:
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    topics:
+      auditoria-concluida: auditoria.concluida
+      selo-atualizado: certificacao.events
+    consumer:
+      group-id: certificacao-service
+      max-retries: 3
+      retry-backoff-ms: 1000
+  selo:
+    expiration-days: ${SELO_EXPIRATION_DIAS:180}
+    bronze-threshold: 70
+    prata-threshold: 80
+    ouro-threshold: 90
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.ecoledger: DEBUG
+    org.springframework.kafka: INFO
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] [%X{traceId}] %-5level %logger{36} - %msg%n"
