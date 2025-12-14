@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/notificacoes/enviar",
+    "headers": {
+      "Content-Type": {
+        "contains": "application/json"
+      }
+    }
+  },
+  "response": {
+    "status": 202,
+    "body": "{ \"notificacaoId\": \"{{randomValue type='UUID'}}\" }",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"]
+  }
+}

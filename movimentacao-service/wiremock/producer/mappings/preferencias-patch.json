@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "PATCH",
+    "urlPathPattern": "/preferencias/.*",
+    "headers": {
+      "Content-Type": {
+        "contains": "application/json"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": "{{{request.body}}}",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"]
+  }
+}

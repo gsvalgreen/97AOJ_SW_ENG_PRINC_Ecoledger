@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/preferencias/.*"
+  },
+  "response": {
+    "status": 200,
+    "body": "{ \"userId\": \"{{request.pathSegments.[1]}}\", \"canais\": { \"email\": true, \"push\": true, \"webhook\": false } }",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"]
+  }
+}
