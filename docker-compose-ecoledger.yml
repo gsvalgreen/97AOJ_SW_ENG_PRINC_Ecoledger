@@ -260,6 +260,31 @@ services:
     networks:
       - ecoledger
 
+  # Frontend web application
+  frontend-web:
+    build:
+      context: ./frontend-web
+      dockerfile: Dockerfile
+    image: frontend-web:local
+    container_name: ecoledger-frontend-web
+    depends_on:
+      movimentacao-service:
+        condition: service_started
+      auditoria-service:
+        condition: service_healthy
+      users-service:
+        condition: service_started
+      certificacao-service:
+        condition: service_healthy
+    ports:
+      - "3000:80"
+    environment:
+      # Frontend will be built with VITE_MOCK_API=true (set in Dockerfile)
+      # In production, you would configure API endpoints here
+      NODE_ENV: production
+    networks:
+      - ecoledger
+
 networks:
   ecoledger:
     driver: bridge
