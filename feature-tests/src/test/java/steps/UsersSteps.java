@@ -24,7 +24,24 @@ public class UsersSteps {
 
     @Given("o serviço de usuarios está disponível em localhost:8084")
     public void users_service_available() {
-        // noop - assume docker-compose exposes users-service on localhost:8084
+        var base = "http://localhost:8084";
+        String[] probes = new String[]{"/actuator/health", "/"};
+        long deadline = System.currentTimeMillis() + 30_000L;
+        while (System.currentTimeMillis() < deadline) {
+            for (String p : probes) {
+                try {
+                    HttpRequest req = HttpRequest.newBuilder()
+                            .uri(URI.create(base + p))
+                            .timeout(Duration.ofSeconds(3))
+                            .GET()
+                            .build();
+                    HttpResponse<String> r = client.send(req, HttpResponse.BodyHandlers.ofString());
+                    if (r.statusCode() >= 200 && r.statusCode() < 400) return;
+                } catch (Exception ignored) {}
+            }
+            try { Thread.sleep(1000L); } catch (InterruptedException ignored) {}
+        }
+        throw new IllegalStateException("users-service not available at " + base);
     }
 
     @When("eu submeter um cadastro valido")

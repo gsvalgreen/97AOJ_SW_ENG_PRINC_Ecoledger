@@ -21,6 +21,7 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/usuarios/auth/**", "/usuarios/cadastros").permitAll()
                         .requestMatchers("/usuarios/cadastros/**").permitAll()
                         .requestMatchers("/usuarios/*/status").hasAuthority("SCOPE_admin:usuarios")

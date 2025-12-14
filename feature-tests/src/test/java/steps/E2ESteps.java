@@ -32,7 +32,30 @@ public class E2ESteps {
 
     @Given("os serviços de movimentação e auditoria estão disponíveis em localhost")
     public void services_available() {
-        // noop - assume docker-compose will expose services on localhost:8082 and 8083
+        String[] services = new String[]{"http://localhost:8082", "http://localhost:8083"};
+        String[] probes = new String[]{"/actuator/health", "/"};
+        long deadline = System.currentTimeMillis() + 30_000L;
+        while (System.currentTimeMillis() < deadline) {
+            boolean allUp = true;
+            for (String base : services) {
+                boolean up = false;
+                for (String p : probes) {
+                    try {
+                        HttpRequest req = HttpRequest.newBuilder()
+                                .uri(URI.create(base + p))
+                                .timeout(Duration.ofSeconds(3))
+                                .GET()
+                                .build();
+                        HttpResponse<String> r = client.send(req, HttpResponse.BodyHandlers.ofString());
+                        if (r.statusCode() >= 200 && r.statusCode() < 400) { up = true; break; }
+                    } catch (Exception ignored) {}
+                }
+                if (!up) { allUp = false; break; }
+            }
+            if (allUp) return;
+            try { Thread.sleep(1000L); } catch (InterruptedException ignored) {}
+        }
+        throw new IllegalStateException("required services not available: movimentacao/auditoria");
     }
 
     @When("eu anexo um arquivo valido para o produtor {string}")
