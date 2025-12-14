@@ -29,6 +29,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: frontend-web/package-lock.json
 
       - name: Install dependencies
         working-directory: frontend-web
@@ -54,9 +55,9 @@ jobs:
             -Dsonar.projectKey=gsvalgreen_97AOJ_SW_ENG_PRINC_Ecoledger_frontend-web \
             -Dsonar.organization=gsvalgreen \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.sources=frontend-web/src \
-            -Dsonar.tests=frontend-web/src \
-            -Dsonar.javascript.lcov.reportPaths=frontend-web/coverage/lcov.info \
+            -Dsonar.sources=src \
+            -Dsonar.tests=src \
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
             -Dsonar.login=${SONAR_TOKEN}
 
       - name: Upload coverage artifact
