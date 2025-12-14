@@ -3,6 +3,13 @@ package com.ecoledger.movimentacao.application.controller;
 import com.ecoledger.movimentacao.application.service.AttachmentStorageService;
 import com.ecoledger.movimentacao.application.service.AttachmentStorageService.AttachmentConfirmation;
 import com.ecoledger.movimentacao.config.S3Properties;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +25,8 @@ import static software.amazon.awssdk.core.sync.RequestBody.fromBytes;
 
 @RestController
 @RequestMapping
+@Tag(name = "Anexos")
+@SecurityRequirement(name = "bearerAuth")
 public class AnexoController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AnexoController.class);
@@ -34,16 +43,30 @@ public class AnexoController {
         this.s3Client = s3Client;
     }
 
-    public record SignedUploadRequest(String contentType) {
+    @Schema(description = "Dados necessários para solicitar uma URL de upload")
+    public record SignedUploadRequest(
+            @Schema(description = "Tipo de conteúdo esperado para o anexo", example = "image/png")
+            String contentType
+    ) {
     }
 
-    public record SignedUploadResponse(String objectKey, String uploadUrl) {
+    @Schema(description = "Resposta contendo a URL assinada para upload")
+    public record SignedUploadResponse(
+            @Schema(description = "Chave gerada para o objeto") String objectKey,
+            @Schema(description = "URL simulada de upload") String uploadUrl
+    ) {
     }
 
-    public record ConfirmUploadRequest(String objectKey) {
+    @Schema(description = "Requisição para confirmar um upload realizado")
+    public record ConfirmUploadRequest(
+            @Schema(description = "Chave do objeto enviado") String objectKey
+    ) {
     }
 
     @PostMapping("/anexos/upload-url")
+    @Operation(summary = "Gerar URL de upload de anexo", description = "Gera uma URL simulada para upload direto do anexo.")
+    @ApiResponse(responseCode = "200", description = "URL gerada",
+            content = @Content(schema = @Schema(implementation = SignedUploadResponse.class)))
     public ResponseEntity<SignedUploadResponse> createUploadUrl(@RequestBody SignedUploadRequest request) {
         String key = UUID.randomUUID().toString();
         String base = s3Properties.publicBaseUrl();
@@ -66,6 +89,7 @@ public class AnexoController {
     }
 
     @PostMapping("/anexos/upload-proxy")
+    @Hidden
     public ResponseEntity<Void> uploadProxy(@RequestParam String objectKey,
                                             @RequestBody byte[] body,
                                             @RequestHeader(name = "Content-Type", required = false) String contentType) {
@@ -86,6 +110,9 @@ public class AnexoController {
     }
 
     @PostMapping("/anexos/confirm")
+    @Operation(summary = "Confirmar upload de anexo", description = "Confirma o upload previamente solicitado e retorna os metadados finais.")
+    @ApiResponse(responseCode = "200", description = "Upload confirmado",
+            content = @Content(schema = @Schema(implementation = AttachmentConfirmation.class)))
     public ResponseEntity<AttachmentConfirmation> confirmUpload(@RequestBody ConfirmUploadRequest request) {
         AttachmentConfirmation info = attachmentStorageService.confirmUpload(request.objectKey());
         return ResponseEntity.ok(info);

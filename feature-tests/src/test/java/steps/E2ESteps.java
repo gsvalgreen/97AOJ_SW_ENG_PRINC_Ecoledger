@@ -357,10 +357,13 @@ public class E2ESteps {
                 HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
                 if (resp.statusCode() == 200 && resp.body() != null && !resp.body().isBlank()) {
                     JsonObject jo = gson.fromJson(resp.body(), JsonObject.class);
+                    JsonArray arr = null;
                     if (jo.has("alteracoes")) {
-                        JsonArray arr = jo.getAsJsonArray("alteracoes");
-                        if (arr.size() >= minEntries) return;
+                        arr = jo.getAsJsonArray("alteracoes");
+                    } else if (jo.has("items")) {
+                        arr = jo.getAsJsonArray("items");
                     }
+                    if (arr != null && arr.size() >= minEntries) return;
                 }
             } catch (Exception ignored) {}
             Thread.sleep(1000);

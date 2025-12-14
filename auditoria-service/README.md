@@ -20,6 +20,11 @@ Serviço de validação e auditoria do ECO LEDGER. Responsável por consumir eve
 
 ## API REST
 
+### Documentação OpenAPI
+
+- Swagger UI: http://localhost:8082/swagger-ui/index.html
+- OpenAPI JSON: http://localhost:8082/v3/api-docs (reflete `planos/api-contracts/auditoria.yaml`)
+
 ### Endpoints
 
 | Método | Endpoint | Descrição |

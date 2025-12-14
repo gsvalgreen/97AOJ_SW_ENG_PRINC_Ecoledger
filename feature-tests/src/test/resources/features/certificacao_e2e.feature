@@ -15,3 +15,11 @@ Funcionalidade: Integração Certificacao (E2E)
     Quando eu registro uma movimentacao invalida para o produtor "producer-e2e-2" via API de movimentacao
     Então a auditoria para o produtor "producer-e2e-2" é publicada com resultado "REPROVADO" dentro de 30 segundos
     Então o selo para o produtor "producer-e2e-2" tem status "INATIVO" dentro de 30 segundos
+
+  Cenário: Recalculo manual gera histórico do selo
+    E o selo para o produtor "producer-recalc" está limpo
+    Quando eu registro uma movimentacao valida para o produtor "producer-recalc" via API de movimentacao
+    Então a API de movimentacao retorna 201
+    E o serviço de auditoria registra uma auditoria para o produtor "producer-recalc" dentro de 30 segundos
+    Quando eu solicito recálculo do selo para o produtor "producer-recalc"
+    Então o historico de selo para o produtor "producer-recalc" contém pelo menos 1 entradas dentro de 30 segundos

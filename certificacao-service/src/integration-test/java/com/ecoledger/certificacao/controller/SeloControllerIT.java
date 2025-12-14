@@ -63,10 +63,10 @@ class SeloControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"motivo\":\"verificacao-periodica\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").isNotEmpty());
+                .andExpect(jsonPath("$.novoStatus").isNotEmpty());
 
         mockMvc.perform(get("/selos/{producerId}/historico", producerId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.alteracoes").isArray());
+                .andExpect(jsonPath("$.items").isArray());
     }
 }

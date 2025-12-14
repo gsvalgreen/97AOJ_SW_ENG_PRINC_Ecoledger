@@ -1,5 +1,6 @@
 package com.ecoledger.movimentacao.application.controller;
 
+import com.ecoledger.movimentacao.application.dto.HistoricoMovimentacaoResponse;
 import com.ecoledger.movimentacao.application.dto.MovimentacaoDetailResponse;
 import com.ecoledger.movimentacao.domain.model.Movimentacao;
 import com.ecoledger.movimentacao.domain.repository.MovimentacaoRepository;
@@ -118,10 +119,10 @@ class MovimentacaoCommodityHistoryIT {
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
-        MovimentacaoDetailResponse[] arr =
-                objectMapper.readValue(content, MovimentacaoDetailResponse[].class);
+        HistoricoMovimentacaoResponse response =
+                objectMapper.readValue(content, HistoricoMovimentacaoResponse.class);
 
-        List<MovimentacaoDetailResponse> items = List.of(arr);
+        List<MovimentacaoDetailResponse> items = response.movimentacoes();
         assertThat(items).hasSize(2);
         // First item should have the most recent timestamp
         assertThat(items.get(0).timestamp()).isAfterOrEqualTo(items.get(1).timestamp());
