@@ -251,6 +251,12 @@ services:
       KAFKA_ENABLED: "true"
       KAFKA_BOOTSTRAP: kafka:9092
       SELO_EXPIRATION_DIAS: 180
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
     networks:
       - ecoledger
 

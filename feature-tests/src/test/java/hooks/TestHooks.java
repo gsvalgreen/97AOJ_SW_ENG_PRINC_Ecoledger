@@ -17,6 +17,7 @@ public class TestHooks {
     public void prepare() {
         waitForService("http://localhost:8082/actuator/health", 60);
         waitForService("http://localhost:8083/actuator/health", 60);
+        waitForService("http://localhost:8085/actuator/health", 60);
 
         // attempt to truncate tables in movimentacao and auditoria databases to keep tests idempotent
         truncateDb("jdbc:postgresql://localhost:5432/movimentacao", "ecoledger_admin", "ecoledger_admin", "movimentacao_anexos");
@@ -25,6 +26,10 @@ public class TestHooks {
         // auditoria tables
         truncateDb("jdbc:postgresql://localhost:5432/auditoria", "ecoledger_admin", "ecoledger_admin", "auditoria_evidencias");
         truncateDb("jdbc:postgresql://localhost:5432/auditoria", "ecoledger_admin", "ecoledger_admin", "registro_auditorias");
+        // certificacao tables
+        truncateDb("jdbc:postgresql://localhost:5432/certificacao", "ecoledger_admin", "ecoledger_admin", "selo_motivos");
+        truncateDb("jdbc:postgresql://localhost:5432/certificacao", "ecoledger_admin", "ecoledger_admin", "alteracoes_selo");
+        truncateDb("jdbc:postgresql://localhost:5432/certificacao", "ecoledger_admin", "ecoledger_admin", "selos");
 
         // ensure an initial attachment exists for tests (upload-url -> upload-proxy -> confirm)
         try {

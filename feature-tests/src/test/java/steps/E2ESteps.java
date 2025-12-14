@@ -289,4 +289,93 @@ public class E2ESteps {
     public void register_valid_movement_short(String producerId) throws Exception {
         register_valid_movement(producerId);
     }
+
+    @Given("os serviços de movimentação, auditoria e certificacao estão disponíveis em localhost")
+    public void services_all_available() {
+        String[] services = new String[]{"http://localhost:8082", "http://localhost:8083", "http://localhost:8085"};
+        String[] probes = new String[]{"/actuator/health", "/"};
+        long deadline = System.currentTimeMillis() + 30_000L;
+        while (System.currentTimeMillis() < deadline) {
+            boolean allUp = true;
+            for (String base : services) {
+                boolean up = false;
+                for (String p : probes) {
+                    try {
+                        HttpRequest req = HttpRequest.newBuilder()
+                                .uri(URI.create(base + p))
+                                .timeout(Duration.ofSeconds(3))
+                                .GET()
+                                .build();
+                        HttpResponse<String> r = client.send(req, HttpResponse.BodyHandlers.ofString());
+                        if (r.statusCode() >= 200 && r.statusCode() < 400) { up = true; break; }
+                    } catch (Exception ignored) {}
+                }
+                if (!up) { allUp = false; break; }
+            }
+            if (allUp) return;
+            try { Thread.sleep(1000L); } catch (InterruptedException ignored) {}
+        }
+        throw new IllegalStateException("required services not available: movimentacao/auditoria/certificacao");
+    }
+
+    @Then("o selo para o produtor {string} tem status {string} dentro de {int} segundos")
+    public void assert_selo_status_for_producer(String producerId, String expectedStatus, Integer seconds) throws Exception {
+        long deadline = System.currentTimeMillis() + seconds * 1000L;
+        while (System.currentTimeMillis() < deadline) {
+            try {
+                HttpRequest req = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:8085/selos/" + producerId))
+                        .timeout(Duration.ofSeconds(5))
+                        .GET()
+                        .build();
+                HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                if (resp.statusCode() == 200 && resp.body() != null && !resp.body().isBlank()) {
+                    JsonObject jo = gson.fromJson(resp.body(), JsonObject.class);
+                    if (jo.has("status")) {
+                        String status = jo.get("status").getAsString();
+                        if (status.equalsIgnoreCase(expectedStatus)) return; // success
+                    }
+                }
+            } catch (Exception e) { /* ignore */ }
+            Thread.sleep(1000);
+        }
+        fail("Expected selo status '" + expectedStatus + "' for producer " + producerId);
+    }
+
+    @When("eu solicito recálculo do selo para o produtor {string}")
+    public void request_recalculate_selo(String producerId) throws Exception {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("motivo", "feature-tests-recalc");
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8085/selos/" + producerId + "/recalcular"))
+                .timeout(Duration.ofSeconds(10))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(payload)))
+                .build();
+        try { client.send(req, HttpResponse.BodyHandlers.ofString()); } catch (Exception ignored) {}
+    }
+
+    @Then("o historico de selo para o produtor {string} contém pelo menos {int} entradas dentro de {int} segundos")
+    public void assert_selo_history_contains(String producerId, Integer minEntries, Integer seconds) throws Exception {
+        long deadline = System.currentTimeMillis() + seconds * 1000L;
+        while (System.currentTimeMillis() < deadline) {
+            try {
+                HttpRequest req = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:8085/selos/" + producerId + "/historico"))
+                        .timeout(Duration.ofSeconds(5))
+                        .GET()
+                        .build();
+                HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                if (resp.statusCode() == 200 && resp.body() != null && !resp.body().isBlank()) {
+                    JsonObject jo = gson.fromJson(resp.body(), JsonObject.class);
+                    if (jo.has("alteracoes")) {
+                        JsonArray arr = jo.getAsJsonArray("alteracoes");
+                        if (arr.size() >= minEntries) return;
+                    }
+                }
+            } catch (Exception ignored) {}
+            Thread.sleep(1000);
+        }
+        fail("Expected at least " + minEntries + " history entries for producer " + producerId);
+    }
 }
