@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  wiremock:
+    image: wiremock/wiremock:3.13.2
+    container_name: wiremock-producer
+    command: ["--local-response-templating","--verbose"]
+    ports:
+      - "8089:8080" # producer stubs available on http://localhost:8089
+    volumes:
+      - ./wiremock/producer:/home/wiremock
+    networks:
+      - wmnet
+
+networks:
+  wmnet:
+    driver: bridge
