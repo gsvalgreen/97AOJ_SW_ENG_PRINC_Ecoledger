@@ -1,4 +1,4 @@
-x# ECO LEDGER - Guia de Execução Docker
+# ECO LEDGER - Guia de Execução Docker
 
 Este documento descreve como executar o projeto ECO LEDGER utilizando Docker Compose.
 
