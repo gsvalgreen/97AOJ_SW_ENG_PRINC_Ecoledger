@@ -49,9 +49,10 @@ class UsuarioServiceImplTest {
                 "Nome Teste",
                 "teste@example.com",
                 "12345678900",
+                "senha123",
                 "role",
-                Map.of("fazenda", "x"),
-                List.of(Map.of("anexo", "v"))
+                Map.<String,Object>of("fazenda", "x"),
+                List.<Map<String,Object>>of(Map.<String,Object>of("anexo", "v"))
         );
 
         when(idempotencyService.findCadastroIdByKey("idem-key")).thenReturn(Optional.empty());

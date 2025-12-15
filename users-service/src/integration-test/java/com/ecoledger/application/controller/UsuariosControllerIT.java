@@ -81,6 +81,7 @@ class UsuariosControllerIT {
         payload.put("nome", "IT User");
         payload.put("email", "it@example.com");
         payload.put("documento", "11122233344");
+        payload.put("senha", "senha123");
         payload.put("role", "role-x");
         payload.set("dadosFazenda", mapper.createObjectNode().put("faz", "v"));
         payload.set("anexos", mapper.createArrayNode());

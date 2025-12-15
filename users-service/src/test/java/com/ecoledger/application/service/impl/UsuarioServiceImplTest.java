@@ -5,6 +5,7 @@ import com.ecoledger.application.entity.*;
 import com.ecoledger.application.service.IdempotencyService;
 import com.ecoledger.events.EventPublisher;
 import com.ecoledger.integration.NotificationClient;
+import com.ecoledger.integration.security.JwtService;
 import com.ecoledger.repository.CadastroRepository;
 import com.ecoledger.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +38,8 @@ class UsuarioServiceImplTest {
     EventPublisher eventPublisher;
     @Mock
     NotificationClient notificationClient;
+    @Mock
+    JwtService jwtService;
 
     @InjectMocks
     UsuarioServiceImpl service;
@@ -70,7 +73,7 @@ class UsuarioServiceImplTest {
         when(idempotencyService.findCadastroIdByKey(key)).thenReturn(Optional.of(cid));
         when(cadastroRepository.findById(cid)).thenReturn(Optional.of(sampleCadastro));
 
-        var dto = new CadastroCriacaoDto("n","e","d","r", java.util.Map.of(), List.of());
+        var dto = new CadastroCriacaoDto("n","e","d","senha","r", java.util.Map.<String,Object>of(), List.<java.util.Map<String,Object>>of());
         var resp = service.createCadastro(key, dto);
 
         assertEquals(sampleCadastro.getStatus(), resp.status());
@@ -93,7 +96,7 @@ class UsuarioServiceImplTest {
             return c;
         });
 
-        var dto = new CadastroCriacaoDto("nome","email","doc","role", java.util.Map.of(), List.of());
+        var dto = new CadastroCriacaoDto("nome","email","doc","senha","role", java.util.Map.<String,Object>of(), List.<java.util.Map<String,Object>>of());
         var resp = service.createCadastro(key, dto);
 
         assertNotNull(resp.cadastroId());
@@ -147,7 +150,13 @@ class UsuarioServiceImplTest {
     void authenticate_success_and_failure() {
         var u = new UsuarioEntity();
         try { var f = UsuarioEntity.class.getDeclaredField("id"); f.setAccessible(true); f.set(u, UUID.randomUUID()); } catch (Exception ignored) {}
+        u.setSenha("pw");
+        u.setEmail("x@x");
+        u.setRole("role");
         when(usuarioRepository.findByEmail("x@x" )).thenReturn(Optional.of(u));
+        when(jwtService.generateAccessToken(anyString(), anyString(), anyString())).thenReturn("access.token");
+        when(jwtService.generateRefreshToken(anyString())).thenReturn("refresh.token");
+        when(jwtService.getExpirationInSeconds()).thenReturn(100L);
         var t = service.authenticate("x@x", "pw");
         assertTrue(t.accessToken().startsWith("access."));
 

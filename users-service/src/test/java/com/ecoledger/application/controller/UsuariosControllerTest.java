@@ -18,7 +18,7 @@ public class UsuariosControllerTest {
         UsuarioService svc = mock(UsuarioService.class);
         UsuariosController ctrl = new UsuariosController(svc);
 
-        var dto = new CadastroCriacaoDto("nome","email@example.com","DOC123","produtor", Map.of("fazenda","x"), List.of());
+        var dto = new CadastroCriacaoDto("nome","email@example.com","DOC123","senha123","produtor", Map.<String,Object>of("fazenda","x"), List.<Map<String,Object>>of());
         var resp = new RespostaCadastroDto("cid","PENDING");
         when(svc.createCadastro("key", dto)).thenReturn(resp);
 
