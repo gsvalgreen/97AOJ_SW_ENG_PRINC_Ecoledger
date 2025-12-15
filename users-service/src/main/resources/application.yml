@@ -19,6 +19,11 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
 
+jwt:
+  secret: ${JWT_SECRET:ecoledger-secret-key-minimum-256-bits-for-hs256-algorithm-security}
+  expiration: ${JWT_EXPIRATION:3600000}  # 1 hora em ms
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:86400000}  # 24 horas em ms
+
 management:
   endpoints:
     web:

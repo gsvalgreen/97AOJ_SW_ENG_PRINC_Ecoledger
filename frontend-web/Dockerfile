@@ -17,8 +17,13 @@ COPY src ./src
 
 RUN npm ci --silent
 
-# Enable mock API during build so built assets talk to mock instead of real backends
-ENV VITE_MOCK_API=true
+# Disable mock API to use real backend services
+# Frontend runs in browser, so it needs localhost URLs (not internal Docker service names)
+ENV VITE_MOCK_API=false
+ENV VITE_USERS_API_URL=http://localhost:8084
+ENV VITE_MOVIMENTACOES_API_URL=http://localhost:8082
+ENV VITE_CERTIFICACAO_API_URL=http://localhost:8085
+ENV VITE_AUDITORIA_API_URL=http://localhost:8083
 
 # Build the app
 # Use Vite build directly to avoid TypeScript typecheck failures during container build

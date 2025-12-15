@@ -5,6 +5,7 @@ import com.ecoledger.application.entity.*;
 import com.ecoledger.application.service.IdempotencyService;
 import com.ecoledger.events.EventPublisher;
 import com.ecoledger.integration.NotificationClient;
+import com.ecoledger.integration.security.JwtService;
 import com.ecoledger.repository.*;
 import com.ecoledger.application.service.UsuarioService;
 import org.springframework.stereotype.Service;
@@ -22,17 +23,20 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final IdempotencyService idempotencyService;
     private final EventPublisher eventPublisher;
     private final NotificationClient notificationClient;
+    private final JwtService jwtService;
 
     public UsuarioServiceImpl(CadastroRepository cadastroRepository,
                               UsuarioRepository usuarioRepository,
                               IdempotencyService idempotencyService,
                               EventPublisher eventPublisher,
-                              NotificationClient notificationClient) {
+                              NotificationClient notificationClient,
+                              JwtService jwtService) {
         this.cadastroRepository = cadastroRepository;
         this.usuarioRepository = usuarioRepository;
         this.idempotencyService = idempotencyService;
         this.eventPublisher = eventPublisher;
         this.notificationClient = notificationClient;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -114,7 +118,16 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new IllegalArgumentException("Credenciais inválidas");
         }
         
-        return new TokenAuthDto("access."+u.get().getId().toString(), "refresh."+u.get().getId().toString(), 3600L);
+        // Gerar tokens JWT reais
+        String accessToken = jwtService.generateAccessToken(
+            u.get().getId().toString(),
+            u.get().getEmail(),
+            u.get().getRole()
+        );
+        String refreshToken = jwtService.generateRefreshToken(u.get().getId().toString());
+        Long expiresIn = jwtService.getExpirationInSeconds();
+        
+        return new TokenAuthDto(accessToken, refreshToken, expiresIn);
     }
 
     @Override
