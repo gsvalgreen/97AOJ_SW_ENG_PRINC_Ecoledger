@@ -61,7 +61,7 @@ const LoginPage = () => {
       }
 
       console.log('[LOGIN] Buscando dados do usuário...');
-      const user = await usersApi.getUsuario(userId);
+      const user = await usersApi.getUsuario(userId, authData.accessToken);
       console.log('[LOGIN] Usuário:', user.nome, '- Role:', user.role);
       
       // Salvar autenticação

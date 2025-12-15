@@ -39,7 +39,7 @@ public class UserProvisioner {
 
     public UserProvisioner() {
         this.baseUrl = normalize(resolveConfig("USERS_SERVICE_BASE_URL", "http://localhost:8084"));
-        this.jwtSecret = resolveConfig("USERS_JWT_SECRET", "changeitchangeitchangeitchangeit");
+        this.jwtSecret = resolveConfig("USERS_JWT_SECRET", "ecoledger-secret-key-minimum-256-bits-for-hs256-algorithm-security");
         this.dbUrl = resolveConfig("USERS_DB_URL", "jdbc:postgresql://localhost:5432/users");
         this.dbUser = resolveConfig("USERS_DB_USERNAME", "ecoledger_admin");
         this.dbPassword = resolveConfig("USERS_DB_PASSWORD", "ecoledger_admin");
@@ -77,6 +77,7 @@ public class UserProvisioner {
             payload.addProperty("nome", "FT Produtor " + alias);
             payload.addProperty("email", "ft+" + uniqueSuffix + "@example.com");
             payload.addProperty("documento", generateDocumento());
+            payload.addProperty("senha", "Senha@123");
             payload.addProperty("role", "produtor");
 
             JsonObject fazenda = new JsonObject();

@@ -54,6 +54,7 @@ public class UsersSteps {
         payload.addProperty("nome", "Teste " + unique);
         payload.addProperty("email", "tester+" + unique + "@example.com");
         payload.addProperty("documento", "DOC" + unique);
+        payload.addProperty("senha", "Senha@123");
         payload.addProperty("role", "produtor");
         var dados = new com.google.gson.JsonObject();
         dados.addProperty("fazenda", "x");
@@ -134,6 +135,10 @@ public class UsersSteps {
         // missing required fields
         JsonObject payload = new JsonObject();
         payload.addProperty("nome", "");
+        payload.addProperty("email", "");
+        payload.addProperty("documento", "");
+        payload.addProperty("senha", "");
+        payload.addProperty("role", "");
 
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8084/usuarios/cadastros"))

@@ -176,7 +176,7 @@ services:
       MOVIMENTACAO_KAFKA_ENABLED: "true"
       MOVIMENTACAO_S3_LENIENT_WHEN_MISSING: "true"
       PRODUCER_APPROVAL_BASE_URL: http://users-service:8080
-      PRODUCER_APPROVAL_AUTH_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb3ZpbWVudGFjYW8tc2VydmljZSIsInNjb3BlcyI6InVzdWFyaW9zOnJlYWQiLCJpYXQiOjE3NjU3NTgxNzQsImV4cCI6MTkyMzQzODE3NH0.F_4qcCxaynfkN6g4aDT6850nFZhpy5_Lmx7Hk-eWxd0
+      PRODUCER_APPROVAL_AUTH_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb3ZpbWVudGFjYW8tc2VydmljZSIsInNjb3BlcyI6InVzdWFyaW9zOnJlYWQiLCJpYXQiOjE3NjU3NjI1MzAsImV4cCI6MTkyMzQ0MjUzMH0.6VsmHz5xVNJiHFo3tQeuJSvCW7K9zlvutFvs-O0I-N0
     networks:
       - ecoledger
 
@@ -230,6 +230,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ecoledger_users
       KAFKA_BOOTSTRAP: kafka:9092
       NOTIFY_ENDPOINT: http://wiremock:8080/notificacoes/enviar
+      JWT_SECRET: ecoledger-secret-key-minimum-256-bits-for-hs256-algorithm-security
     networks:
       - ecoledger
 
