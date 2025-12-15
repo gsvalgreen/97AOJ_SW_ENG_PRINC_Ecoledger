@@ -43,43 +43,36 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      console.log('[LOGIN] Iniciando login com:', { email: data.email });
+      console.log('[LOGIN] Iniciando login...');
       const authData = await usersApi.login(data);
-      console.log('[LOGIN] Token recebido:', authData);
+      console.log('[LOGIN] Token recebido');
       
-      // Decodificar token JWT
+      // Decodificar token JWT para extrair userId
       const tokenParts = authData.accessToken.split('.');
-      console.log('[LOGIN] Token parts:', tokenParts.length);
-      
       if (tokenParts.length !== 3) {
-        throw new Error(`Token inválido: esperado 3 partes (header.payload.signature), recebido ${tokenParts.length}`);
+        throw new Error('Token inválido');
       }
       
       const tokenPayload = JSON.parse(atob(tokenParts[1]));
-      console.log('[LOGIN] Token payload:', tokenPayload);
-      
       const userId = tokenPayload.sub || tokenPayload.userId;
-      console.log('[LOGIN] User ID extraído:', userId);
       
       if (!userId) {
-        throw new Error('Token inválido: ID do usuário não encontrado no payload');
+        throw new Error('Token inválido: ID do usuário não encontrado');
       }
 
-      console.log('[LOGIN] Buscando dados do usuário:', userId);
+      console.log('[LOGIN] Buscando dados do usuário...');
       const user = await usersApi.getUsuario(userId);
-      console.log('[LOGIN] Dados do usuário:', user);
+      console.log('[LOGIN] Usuário:', user.nome, '- Role:', user.role);
       
+      // Salvar autenticação
       setAuth(authData, user);
-      console.log('[LOGIN] Auth state atualizado');
 
-      const role = user.role;
-      console.log('[LOGIN] Redirecionando para dashboard:', role);
-      
-      if (role === 'produtor') {
+      // Redirecionar baseado na role
+      if (user.role === 'produtor') {
         navigate(ROUTES.DASHBOARD_PRODUTOR);
-      } else if (role === 'analista') {
+      } else if (user.role === 'analista') {
         navigate(ROUTES.DASHBOARD_ANALISTA);
-      } else if (role === 'auditor') {
+      } else if (user.role === 'auditor') {
         navigate(ROUTES.DASHBOARD_AUDITOR);
       } else {
         navigate(ROUTES.DASHBOARD);
