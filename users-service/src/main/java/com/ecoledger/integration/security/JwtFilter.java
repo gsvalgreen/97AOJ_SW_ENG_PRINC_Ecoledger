@@ -33,12 +33,12 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 Claims claims = jwtService.parse(header);
                 String sub = claims.getSubject();
-                String scope = OptionalOf(claims, "scopes");
-                List<SimpleGrantedAuthority> auth = Arrays.stream(scope.split(" "))
-                        .filter(s -> !s.isBlank())
-                        .map(s -> new SimpleGrantedAuthority("SCOPE_" + s))
-                        .collect(Collectors.toList());
-                var authentication = new UsernamePasswordAuthenticationToken(sub, null, auth);
+                
+                // Criar lista de authorities vazia - não usamos scopes por enquanto
+                // Autenticação é baseada apenas na validade do token
+                List<SimpleGrantedAuthority> authorities = List.of();
+                
+                var authentication = new UsernamePasswordAuthenticationToken(sub, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
                 // invalid token -> clear context (unauthenticated)

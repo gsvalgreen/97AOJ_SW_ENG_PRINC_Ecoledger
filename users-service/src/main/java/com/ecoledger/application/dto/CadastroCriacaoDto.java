@@ -16,6 +16,7 @@ public record CadastroCriacaoDto(
         @Email @NotBlank String email,
         @Schema(description = "Documento oficial (CPF/CNPJ) do usuário.", example = "12345678900")
         @NotBlank String documento,
+        @NotBlank String senha,
         @Schema(description = "Perfil do usuário dentro da plataforma.", example = "produtor", allowableValues = {"produtor", "analista", "auditor"})
         @NotBlank String role,
         @Schema(description = "Dados complementares sobre a fazenda.", additionalProperties = Schema.AdditionalPropertiesValue.TRUE)

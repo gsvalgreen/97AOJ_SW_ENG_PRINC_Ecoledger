@@ -1,21 +1,21 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Container,
-  Paper,
-  Box,
-  TextField,
-  Button,
-  Typography,
   Alert,
+  Box,
+  Button,
   CircularProgress,
+  Container,
   MenuItem,
-  Stepper,
+  Paper,
   Step,
   StepLabel,
+  Stepper,
+  TextField,
+  Typography,
 } from '@mui/material';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { usersApi } from '../../../api/usersApi';
 import { ROUTES } from '../../../utils/constants';
@@ -26,6 +26,8 @@ const registerSchema = z.object({
   nome: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
   email: z.string().email('Email inválido'),
   documento: z.string().min(11, 'Documento inválido'),
+  senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
+  confirmarSenha: z.string().min(6, 'Confirmação de senha obrigatória'),
   role: z.enum(['produtor', 'analista', 'auditor']),
   dadosFazenda: z
     .object({
@@ -34,6 +36,9 @@ const registerSchema = z.object({
       localizacao: z.string().optional(),
     })
     .optional(),
+}).refine((data) => data.senha === data.confirmarSenha, {
+  message: 'As senhas não coincidem',
+  path: ['confirmarSenha'],
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -70,6 +75,7 @@ const RegisterPage = () => {
         nome: data.nome,
         email: data.email,
         documento: data.documento,
+        senha: data.senha,
         role: data.role,
         dadosFazenda: data.dadosFazenda || {},
         anexos: [],
@@ -171,6 +177,30 @@ const RegisterPage = () => {
                   {...register('documento')}
                   error={!!errors.documento}
                   helperText={errors.documento?.message}
+                />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="senha"
+                  label="Senha"
+                  type="password"
+                  autoComplete="new-password"
+                  {...register('senha')}
+                  error={!!errors.senha}
+                  helperText={errors.senha?.message}
+                />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="confirmarSenha"
+                  label="Confirmar Senha"
+                  type="password"
+                  autoComplete="new-password"
+                  {...register('confirmarSenha')}
+                  error={!!errors.confirmarSenha}
+                  helperText={errors.confirmarSenha?.message}
                 />
                 <TextField
                   margin="normal"

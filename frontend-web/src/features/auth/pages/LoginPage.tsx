@@ -1,20 +1,20 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
   Container,
   Paper,
-  Box,
   TextField,
-  Button,
   Typography,
-  Alert,
-  CircularProgress,
 } from '@mui/material';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import { useAuthStore } from '../../../store/authStore';
 import { usersApi } from '../../../api/usersApi';
+import { useAuthStore } from '../../../store/authStore';
 import { ROUTES } from '../../../utils/constants';
 
 const loginSchema = z.object({
@@ -43,19 +43,38 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
+      console.log('[LOGIN] Iniciando login com:', { email: data.email });
       const authData = await usersApi.login(data);
+      console.log('[LOGIN] Token recebido:', authData);
       
-      const tokenPayload = JSON.parse(atob(authData.accessToken.split('.')[1]));
+      // Decodificar token JWT
+      const tokenParts = authData.accessToken.split('.');
+      console.log('[LOGIN] Token parts:', tokenParts.length);
+      
+      if (tokenParts.length !== 3) {
+        throw new Error(`Token inválido: esperado 3 partes (header.payload.signature), recebido ${tokenParts.length}`);
+      }
+      
+      const tokenPayload = JSON.parse(atob(tokenParts[1]));
+      console.log('[LOGIN] Token payload:', tokenPayload);
+      
       const userId = tokenPayload.sub || tokenPayload.userId;
+      console.log('[LOGIN] User ID extraído:', userId);
       
       if (!userId) {
-        throw new Error('Token inválido: ID do usuário não encontrado');
+        throw new Error('Token inválido: ID do usuário não encontrado no payload');
       }
 
+      console.log('[LOGIN] Buscando dados do usuário:', userId);
       const user = await usersApi.getUsuario(userId);
+      console.log('[LOGIN] Dados do usuário:', user);
+      
       setAuth(authData, user);
+      console.log('[LOGIN] Auth state atualizado');
 
       const role = user.role;
+      console.log('[LOGIN] Redirecionando para dashboard:', role);
+      
       if (role === 'produtor') {
         navigate(ROUTES.DASHBOARD_PRODUTOR);
       } else if (role === 'analista') {
@@ -66,6 +85,7 @@ const LoginPage = () => {
         navigate(ROUTES.DASHBOARD);
       }
     } catch (err: unknown) {
+      console.error('[LOGIN] Erro:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
