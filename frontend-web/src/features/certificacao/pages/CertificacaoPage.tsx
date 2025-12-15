@@ -230,7 +230,7 @@ const CertificacaoPage = () => {
               </Grid>
             )}
 
-            {historico.length > 0 && (
+            {historico?.length > 0 && (
               <Grid item xs={12}>
                 <Paper elevation={2} sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
@@ -244,7 +244,7 @@ const CertificacaoPage = () => {
                           <TimelineDot color={getStatusColor(alteracao.paraStatus) as 'success' | 'warning' | 'error'}>
                             {getStatusIcon(alteracao.paraStatus)}
                           </TimelineDot>
-                          {index < historico.length - 1 && <TimelineConnector />}
+                          {index < historico?.length - 1 && <TimelineConnector />}
                         </TimelineSeparator>
                         <TimelineContent>
                           <Typography variant="subtitle2">
