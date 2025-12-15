@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import io.cucumber.java.pt.Dado;
 import io.cucumber.java.pt.Entao;
 import io.cucumber.java.pt.Quando;
+import support.ScenarioContext;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -59,7 +60,8 @@ public class E2ESteps {
     }
 
     @Quando("eu anexo um arquivo valido para o produtor {string}")
-    public void upload_valid_attachment(String producerId) throws Exception {
+    public void upload_valid_attachment(String producerIdAlias) throws Exception {
+        String producerId = resolveProducerId(producerIdAlias);
         lastProducerId = producerId;
         // request signed upload metadata
         JsonObject reqBody = new JsonObject();
@@ -85,7 +87,7 @@ public class E2ESteps {
         String objectKey = u.get("objectKey").getAsString();
 
         // upload bytes via proxy (application will push to MinIO)
-        byte[] bytes = ("Teste de anexo para " + producerId).getBytes();
+        byte[] bytes = ("Teste de anexo para " + producerIdAlias).getBytes();
         HttpRequest proxyReq = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8082/anexos/upload-proxy?objectKey=" + objectKey))
                 .timeout(Duration.ofSeconds(10))
@@ -125,7 +127,8 @@ public class E2ESteps {
         // reset last ids
         lastCreatedId = null;
         lastCreatedIdSecond = null;
-        lastProducerId = producerId;
+        String resolvedProducerId = resolveProducerId(producerId);
+        lastProducerId = resolvedProducerId;
 
         // existing implementation continues below
         JsonObject local = new JsonObject();
@@ -133,7 +136,7 @@ public class E2ESteps {
         local.addProperty("lon", -46.633308);
 
         JsonObject body = new JsonObject();
-        body.addProperty("producerId", producerId);
+        body.addProperty("producerId", resolvedProducerId);
         body.addProperty("commodityId", "commodity-1");
         body.addProperty("tipo", "PRODUCAO");
         body.addProperty("quantidade", 10.0);
@@ -167,14 +170,15 @@ public class E2ESteps {
 
     @Quando("eu registro uma movimentacao invalida para o produtor {string} via API de movimentacao")
     public void register_invalid_movement(String producerId) throws Exception {
-        lastProducerId = producerId;
+        String resolvedProducerId = resolveProducerId(producerId);
+        lastProducerId = resolvedProducerId;
 
         JsonObject local = new JsonObject();
         local.addProperty("lat", -23.55052);
         local.addProperty("lon", -46.633308);
 
         JsonObject body = new JsonObject();
-        body.addProperty("producerId", producerId);
+        body.addProperty("producerId", resolvedProducerId);
         body.addProperty("commodityId", "commodity-1");
         body.addProperty("tipo", "PRODUCAO");
         // set a quantity above default maxThreshold (10000) to trigger REPROVADO in RulesEngine
@@ -204,16 +208,18 @@ public class E2ESteps {
 
     @Entao("o serviço de auditoria registra uma auditoria para o produtor {string} dentro de {int} segundos")
     public void assert_auditoria_created_for_producer(String producerId, Integer segundos) throws Exception {
-        boolean found = pollForAuditoria(producerId, segundos);
-        assertTrue(found, "Expected an auditoria record for producer " + producerId);
+        String resolvedProducerId = resolveProducerId(producerId);
+        boolean found = pollForAuditoria(resolvedProducerId, segundos);
+        assertTrue(found, "Expected an auditoria record for producer " + producerId + " (id " + resolvedProducerId + ")");
     }
 
     @Entao("a auditoria para o produtor {string} é publicada com resultado {string} dentro de {int} segundos")
     public void assert_auditoria_result_for_producer(String producerId, String expectedResult, Integer segundos) throws Exception {
+        String resolvedProducerId = resolveProducerId(producerId);
         long deadline = System.currentTimeMillis() + segundos * 1000L;
         while (System.currentTimeMillis() < deadline) {
             HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8083/produtores/" + producerId + "/historico-auditorias"))
+                    .uri(URI.create("http://localhost:8083/produtores/" + resolvedProducerId + "/historico-auditorias"))
                     .timeout(Duration.ofSeconds(5))
                     .GET()
                     .build();
@@ -243,7 +249,7 @@ public class E2ESteps {
             }
             Thread.sleep(1000);
         }
-        fail("Expected auditoria with result '" + expectedResult + "' for producer " + producerId);
+        fail("Expected auditoria with result '" + expectedResult + "' for producer " + producerId + " (id " + resolvedProducerId + ")");
     }
 
     private boolean pollForAuditoria(String producerId, int segundos) throws Exception {
@@ -309,11 +315,12 @@ public class E2ESteps {
 
     @Entao("o selo para o produtor {string} tem status {string} dentro de {int} segundos")
     public void assert_selo_status_for_producer(String producerId, String expectedStatus, Integer segundos) throws Exception {
+        String resolvedProducerId = resolveProducerId(producerId);
         long deadline = System.currentTimeMillis() + segundos * 1000L;
         while (System.currentTimeMillis() < deadline) {
             try {
                 HttpRequest req = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8085/selos/" + producerId))
+                        .uri(URI.create("http://localhost:8085/selos/" + resolvedProducerId))
                         .timeout(Duration.ofSeconds(5))
                         .GET()
                         .build();
@@ -328,15 +335,16 @@ public class E2ESteps {
             } catch (Exception e) { /* ignore */ }
             Thread.sleep(1000);
         }
-        fail("Expected selo status '" + expectedStatus + "' for producer " + producerId);
+        fail("Expected selo status '" + expectedStatus + "' for producer " + producerId + " (id " + resolvedProducerId + ")");
     }
 
     @Quando("eu solicito recálculo do selo para o produtor {string}")
     public void request_recalculate_selo(String producerId) throws Exception {
+        String resolvedProducerId = resolveProducerId(producerId);
         JsonObject payload = new JsonObject();
         payload.addProperty("motivo", "feature-tests-recalc");
         HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8085/selos/" + producerId + "/recalcular"))
+                .uri(URI.create("http://localhost:8085/selos/" + resolvedProducerId + "/recalcular"))
                 .timeout(Duration.ofSeconds(10))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(payload)))
@@ -346,11 +354,12 @@ public class E2ESteps {
 
     @Entao("o historico de selo para o produtor {string} contém pelo menos {int} entradas dentro de {int} segundos")
     public void assert_selo_history_contains(String producerId, Integer minEntries, Integer segundos) throws Exception {
+        String resolvedProducerId = resolveProducerId(producerId);
         long deadline = System.currentTimeMillis() + segundos * 1000L;
         while (System.currentTimeMillis() < deadline) {
             try {
                 HttpRequest req = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8085/selos/" + producerId + "/historico"))
+                        .uri(URI.create("http://localhost:8085/selos/" + resolvedProducerId + "/historico"))
                         .timeout(Duration.ofSeconds(5))
                         .GET()
                         .build();
@@ -368,6 +377,10 @@ public class E2ESteps {
             } catch (Exception ignored) {}
             Thread.sleep(1000);
         }
-        fail("Expected at least " + minEntries + " history entries for producer " + producerId);
+        fail("Expected at least " + minEntries + " history entries for producer " + producerId + " (id " + resolvedProducerId + ")");
+    }
+
+    private String resolveProducerId(String alias) {
+        return ScenarioContext.resolveProducerId(alias);
     }
 }

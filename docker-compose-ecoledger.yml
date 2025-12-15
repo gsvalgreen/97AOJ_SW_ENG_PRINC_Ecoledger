@@ -135,7 +135,7 @@ services:
     networks:
       - ecoledger
 
-  # WireMock used as temporary user-service substitute
+  # WireMock used for auxiliary stubs (e.g. notificacoes, preferencias)
   wiremock:
     image: wiremock/wiremock:3.13.2
     container_name: wiremock-producer
@@ -175,7 +175,8 @@ services:
       S3_USE_PATH_STYLE: "true"
       MOVIMENTACAO_KAFKA_ENABLED: "true"
       MOVIMENTACAO_S3_LENIENT_WHEN_MISSING: "true"
-      PRODUCER_APPROVAL_BASE_URL: http://wiremock:8080
+      PRODUCER_APPROVAL_BASE_URL: http://users-service:8080
+      PRODUCER_APPROVAL_AUTH_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb3ZpbWVudGFjYW8tc2VydmljZSIsInNjb3BlcyI6InVzdWFyaW9zOnJlYWQiLCJpYXQiOjE3NjU3NTgxNzQsImV4cCI6MTkyMzQzODE3NH0.F_4qcCxaynfkN6g4aDT6850nFZhpy5_Lmx7Hk-eWxd0
     networks:
       - ecoledger
 

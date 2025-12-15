@@ -344,7 +344,7 @@ docker-compose -f docker-compose-ecoledger.yml up -d --build
 
 ## 🎯 Próximos Passos
 
-- [ ] Configurar Swagger em todos os microserviços
+- [X] Configurar Swagger em todos os microserviços
 - [ ] Adicionar frontend-web ao docker-compose-ecoledger.yml
 - [ ] Configurar credito-service e notification-service
 - [ ] Adicionar traefik/nginx como API Gateway

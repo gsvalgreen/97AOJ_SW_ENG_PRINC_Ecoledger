@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import io.cucumber.java.pt.Dado;
 import io.cucumber.java.pt.Entao;
 import io.cucumber.java.pt.Quando;
+import support.ScenarioContext;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -31,6 +32,7 @@ public class ExtraSteps {
 
     @Quando("eu registro uma movimentacao valida para o produtor {string} com idempotency key {string}")
     public void register_with_idempotency(String producerId, String key) throws Exception {
+        String resolvedProducerId = resolveProducerId(producerId);
         // create attachment via direct flow
         String attachmentUrl = null;
         try {
@@ -81,7 +83,7 @@ public class ExtraSteps {
         local.addProperty("lon", -46.633308);
 
         JsonObject body = new JsonObject();
-        body.addProperty("producerId", producerId);
+        body.addProperty("producerId", resolvedProducerId);
         body.addProperty("commodityId", "commodity-1");
         body.addProperty("tipo", "PRODUCAO");
         body.addProperty("quantidade", 1.0);
@@ -152,6 +154,7 @@ public class ExtraSteps {
 
     @Quando("eu registro uma movimentacao com anexo e hash invalido para o produtor {string}")
     public void register_with_invalid_hash(String producerId) throws Exception {
+        String resolvedProducerId = resolveProducerId(producerId);
         // create attachment
         String attachmentUrl = null;
         try {
@@ -202,7 +205,7 @@ public class ExtraSteps {
         local.addProperty("lon", -46.633308);
 
         JsonObject body = new JsonObject();
-        body.addProperty("producerId", producerId);
+        body.addProperty("producerId", resolvedProducerId);
         body.addProperty("commodityId", "commodity-1");
         body.addProperty("tipo", "PRODUCAO");
         body.addProperty("quantidade", 1.0);
@@ -274,11 +277,16 @@ public class ExtraSteps {
 
     @Dado("o banco está limpo para produtor {string}")
     public void db_clean_for_producer(String producerId) throws Exception {
+        String resolvedProducerId = resolveProducerId(producerId);
         // best effort: truncate movimentacoes and anexos
         try (var conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/movimentacao","ecoledger_admin","ecoledger_admin");
              var st = conn.createStatement()) {
             st.execute("DELETE FROM movimentacao_anexos WHERE movimentacao_id IN (SELECT id FROM movimentacoes WHERE producer_id='"+producerId+"')");
             st.execute("DELETE FROM movimentacoes WHERE producer_id='"+producerId+"'");
+            if (!resolvedProducerId.equals(producerId)) {
+                st.execute("DELETE FROM movimentacao_anexos WHERE movimentacao_id IN (SELECT id FROM movimentacoes WHERE producer_id='"+resolvedProducerId+"')");
+                st.execute("DELETE FROM movimentacoes WHERE producer_id='"+resolvedProducerId+"'");
+            }
         } catch (Exception e) {
             System.err.println("Warning cleaning producer data: " + e.getMessage());
         }
@@ -286,11 +294,17 @@ public class ExtraSteps {
 
     @Dado("o selo para o produtor {string} está limpo")
     public void clear_selo_for_producer(String producerId) throws Exception {
+        String resolvedProducerId = resolveProducerId(producerId);
         try (var conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/certificacao","ecoledger_certificacao","ecoledger_certificacao");
              var st = conn.createStatement()) {
             st.execute("DELETE FROM selo_motivos WHERE selo_producer_id='" + producerId + "'");
             st.execute("DELETE FROM alteracoes_selo WHERE producer_id='" + producerId + "'");
             st.execute("DELETE FROM selos WHERE producer_id='" + producerId + "'");
+            if (!resolvedProducerId.equals(producerId)) {
+                st.execute("DELETE FROM selo_motivos WHERE selo_producer_id='" + resolvedProducerId + "'");
+                st.execute("DELETE FROM alteracoes_selo WHERE producer_id='" + resolvedProducerId + "'");
+                st.execute("DELETE FROM selos WHERE producer_id='" + resolvedProducerId + "'");
+            }
         } catch (Exception e) {
             System.err.println("Warning cleaning selo data: " + e.getMessage());
         }
@@ -298,13 +312,14 @@ public class ExtraSteps {
 
     @Quando("eu crio {int} movimentacoes validas para o produtor {string}")
     public void create_n_movements_for_producer(Integer n, String producerId) throws Exception {
+        String resolvedProducerId = resolveProducerId(producerId);
         for (int i=0;i<n;i++) {
             JsonObject local = new JsonObject();
             local.addProperty("lat", -23.55052 + i * 0.001);
             local.addProperty("lon", -46.633308 + i * 0.001);
 
             JsonObject body = new JsonObject();
-            body.addProperty("producerId", producerId);
+            body.addProperty("producerId", resolvedProducerId);
             body.addProperty("commodityId", "commodity-1");
             body.addProperty("tipo", "PRODUCAO");
             body.addProperty("quantidade", 1.0 + i);
@@ -326,6 +341,7 @@ public class ExtraSteps {
     @Quando("eu solicito GET {word}")
     public void get_movements_paginated(String urlPath) throws Exception {
         String url = urlPath.startsWith("http") ? urlPath : "http://localhost:8082" + urlPath;
+        url = resolveProducerAliasInPath(url);
         HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofSeconds(10)).GET().build();
         HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
         lastGetStatus = resp.statusCode();
@@ -366,9 +382,10 @@ public class ExtraSteps {
 
     @Quando("eu aplico uma revisao manual para a primeira auditoria do produtor {string} com auditor {string} e resultado {string}")
     public void apply_manual_review(String producerId, String auditorId, String resultado) throws Exception {
+        String resolvedProducerId = resolveProducerId(producerId);
         // fetch history
         HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8083/produtores/" + producerId + "/historico-auditorias"))
+                .uri(URI.create("http://localhost:8083/produtores/" + resolvedProducerId + "/historico-auditorias"))
                 .timeout(Duration.ofSeconds(10))
                 .GET()
                 .build();
@@ -391,5 +408,32 @@ public class ExtraSteps {
                 .build();
         HttpResponse<String> revResp = client.send(revReq, HttpResponse.BodyHandlers.ofString());
         if (revResp.statusCode() != 200) throw new IllegalStateException("revisao failed: " + revResp.statusCode());
+    }
+
+    private String resolveProducerAliasInPath(String url) {
+        String marker = "/produtores/";
+        int idx = url.indexOf(marker);
+        if (idx == -1) {
+            return url;
+        }
+        int start = idx + marker.length();
+        int end = start;
+        while (end < url.length() && url.charAt(end) != '/' && url.charAt(end) != '?') {
+            end++;
+        }
+        if (start >= end) {
+            return url;
+        }
+        String alias = url.substring(start, end);
+        try {
+            String resolved = ScenarioContext.resolveProducerId(alias);
+            return url.substring(0, start) + resolved + url.substring(end);
+        } catch (Exception e) {
+            return url;
+        }
+    }
+
+    private String resolveProducerId(String alias) {
+        return ScenarioContext.resolveProducerId(alias);
     }
 }

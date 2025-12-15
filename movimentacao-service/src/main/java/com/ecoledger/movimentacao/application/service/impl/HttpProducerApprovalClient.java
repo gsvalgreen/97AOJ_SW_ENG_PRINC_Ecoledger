@@ -5,6 +5,7 @@ import com.ecoledger.movimentacao.config.ProducerApprovalProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
@@ -52,6 +53,12 @@ public class HttpProducerApprovalClient implements ProducerApprovalClient {
         factory.setConnectTimeout((int) properties.timeoutMs());
         factory.setReadTimeout((int) properties.timeoutMs());
         var template = new RestTemplate(factory);
+        if (properties.authToken() != null && !properties.authToken().isBlank()) {
+            template.getInterceptors().add((request, body, execution) -> {
+                request.getHeaders().set(HttpHeaders.AUTHORIZATION, "Bearer " + properties.authToken());
+                return execution.execute(request, body);
+            });
+        }
         template.setErrorHandler(new NoopErrorHandler());
         return template;
     }

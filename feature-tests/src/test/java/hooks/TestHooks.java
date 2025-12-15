@@ -1,6 +1,8 @@
 package hooks;
 
+import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import support.ScenarioContext;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -37,6 +39,13 @@ public class TestHooks {
         } catch (Exception e) {
             System.err.println("Warning: failed to create initial attachment: " + e.getMessage());
         }
+
+        ScenarioContext.init();
+    }
+
+    @After
+    public void cleanScenario() {
+        ScenarioContext.cleanup();
     }
 
     private void createInitialAttachment() throws Exception {
