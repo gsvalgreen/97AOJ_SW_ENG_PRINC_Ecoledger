@@ -1,5 +1,5 @@
+import type { CadastroCriacao, LoginRequest, RespostaCadastro, TokenAuth, Usuario } from '../types';
 import { usersApiInstance } from './axiosConfig';
-import type { Usuario, CadastroCriacao, RespostaCadastro, TokenAuth, LoginRequest } from '../types';
 
 export const usersApi = {
   login: async (data: LoginRequest): Promise<TokenAuth> => {
@@ -23,8 +23,10 @@ export const usersApi = {
     return response.data;
   },
 
-  getUsuario: async (id: string): Promise<Usuario> => {
-    const response = await usersApiInstance.get<Usuario>(`/usuarios/${id}`);
+  getUsuario: async (id: string, token?: string): Promise<Usuario> => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const response = await usersApiInstance.get<Usuario>(`/usuarios/${id}`, { headers });
+    
     return response.data;
   },
 
