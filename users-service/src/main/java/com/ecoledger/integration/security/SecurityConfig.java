@@ -55,8 +55,8 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/usuarios/auth/**", "/usuarios/cadastros").permitAll()
                         .requestMatchers("/usuarios/cadastros/**").permitAll()
-                        .requestMatchers("/usuarios/*/status").hasAuthority("SCOPE_admin:usuarios")
-                        .requestMatchers("/usuarios/*").hasAnyAuthority("SCOPE_usuarios:read", "SCOPE_usuarios:write")
+                        .requestMatchers("/usuarios/*/status").authenticated()
+                        .requestMatchers("/usuarios/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
