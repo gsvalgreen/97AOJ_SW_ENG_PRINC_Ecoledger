@@ -19,6 +19,7 @@ Este documento lista os usuários mock disponíveis para testar a aplicação qu
 ## Usuários Mock Disponíveis
 
 ### 1. Produtor (Aprovado)
+
 - **Email**: `joao@fazenda.com`
 - **Senha**: Qualquer senha (o mock aceita qualquer senha)
 - **Role**: `produtor`
@@ -26,6 +27,7 @@ Este documento lista os usuários mock disponíveis para testar a aplicação qu
 - **ID**: `prod-1`
 
 **Funcionalidades disponíveis:**
+
 - Dashboard do Produtor
 - Criar movimentações
 - Ver movimentações
@@ -34,6 +36,7 @@ Este documento lista os usuários mock disponíveis para testar a aplicação qu
 - Criar solicitações de crédito
 
 ### 2. Analista
+
 - **Email**: `maria@ecoledger.com`
 - **Senha**: Qualquer senha
 - **Role**: `analista`
@@ -41,6 +44,7 @@ Este documento lista os usuários mock disponíveis para testar a aplicação qu
 - **ID**: `anal-1`
 
 **Funcionalidades disponíveis:**
+
 - Dashboard do Analista
 - Ver cadastros pendentes
 - Aprovar/rejeitar cadastros
@@ -49,6 +53,7 @@ Este documento lista os usuários mock disponíveis para testar a aplicação qu
 - Aprovar/rejeitar solicitações de crédito
 
 ### 3. Auditor
+
 - **Email**: `carlos@ecoledger.com`
 - **Senha**: Qualquer senha
 - **Role**: `auditor`
@@ -56,11 +61,13 @@ Este documento lista os usuários mock disponíveis para testar a aplicação qu
 - **ID**: `aud-1`
 
 **Funcionalidades disponíveis:**
+
 - Dashboard do Auditor
 - Revisar auditorias
 - Ver histórico de auditorias
 
 ### 4. Produtor (Pendente)
+
 - **Email**: `pedro@fazenda.com`
 - **Senha**: Qualquer senha
 - **Role**: `produtor`
@@ -68,39 +75,46 @@ Este documento lista os usuários mock disponíveis para testar a aplicação qu
 - **ID**: `prod-2`
 
 **Funcionalidades:**
+
 - Login funciona, mas acesso limitado até aprovação
 - Aparece na lista de cadastros pendentes para analistas
 
 ## Dados Mock Disponíveis
 
 ### Movimentações
+
 - 3 movimentações de exemplo para o produtor `prod-1`
 - Tipos: COLHEITA, PLANTIO
 - Commodities: Soja, Milho, Café
 
 ### Selo Verde
+
 - Status: ATIVO
 - Nível: OURO
 - Pontuação: 95
 - Histórico de alterações disponível
 
 ### Propostas de Financiamento
+
 - 2 propostas disponíveis
 - Valores: R$ 500.000 e R$ 300.000
 - Diferentes taxas e prazos
 
 ### Solicitações de Crédito
+
 - 2 solicitações de exemplo
 - Status: APROVADO e PENDENTE
 - Histórico completo de alterações
 
 ### Cadastros Pendentes
+
 - 2 cadastros pendentes de aprovação
 - Aparecem na lista para analistas
 
 ## Fluxo de Teste Recomendado
 
 ### Como Produtor:
+
 1. Faça login com `joao@fazenda.com` (qualquer senha)
 2. Explore o dashboard
 3. Crie uma nova movimentação
@@ -110,6 +124,7 @@ Este documento lista os usuários mock disponíveis para testar a aplicação qu
 7. Crie uma solicitação de crédito
 
 ### Como Analista:
+
 1. Faça login com `maria@ecoledger.com` (qualquer senha)
 2. Veja cadastros pendentes
 3. Aprove ou rejeite um cadastro
@@ -118,6 +133,7 @@ Este documento lista os usuários mock disponíveis para testar a aplicação qu
 6. Aprove ou rejeite uma solicitação
 
 ### Como Auditor:
+
 1. Faça login com `carlos@ecoledger.com` (qualquer senha)
 2. Explore o dashboard do auditor
 3. Revise auditorias

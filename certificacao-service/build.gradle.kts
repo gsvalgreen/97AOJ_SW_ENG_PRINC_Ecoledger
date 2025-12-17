@@ -24,7 +24,10 @@ sonar {
     properties {
         property("sonar.projectName", "ECO Ledger - Certificacao Service")
         property("sonar.java.coveragePlugin", "jacoco")
-        property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport.xml")
+        property(
+            "sonar.coverage.jacoco.xmlReportPaths",
+            "${layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport.xml"
+        )
     }
 }
 
@@ -92,10 +95,12 @@ tasks.jacocoTestReport {
     }
     val sourceSetsMain = sourceSets["main"]
     classDirectories.setFrom(files(sourceSetsMain.output))
-    executionData.setFrom(files(
-        file("$buildDir/jacoco/test.exec"),
-        file("$buildDir/jacoco/integrationTest.exec")
-    ))
+    executionData.setFrom(
+        files(
+            file("$buildDir/jacoco/test.exec"),
+            file("$buildDir/jacoco/integrationTest.exec")
+        )
+    )
 }
 
 tasks.jacocoTestCoverageVerification {
@@ -108,10 +113,12 @@ tasks.jacocoTestCoverageVerification {
         }
     }
     classDirectories.setFrom(files(sourceSets["main"].output))
-    executionData.setFrom(files(
-        file("$buildDir/jacoco/test.exec"),
-        file("$buildDir/jacoco/integrationTest.exec")
-    ))
+    executionData.setFrom(
+        files(
+            file("$buildDir/jacoco/test.exec"),
+            file("$buildDir/jacoco/integrationTest.exec")
+        )
+    )
 }
 
 tasks.check {

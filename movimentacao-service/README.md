@@ -3,23 +3,28 @@
 Serviço responsável por registrar e consultar movimentações de commodities.
 
 Requisitos
+
 - Docker e Docker Compose
 - Java 21 (usado pelo projeto) e Gradle (wrapper incluído)
 
 Serviços auxiliares (definidos em docker-compose.yml)
+
 - Kafka: bootstrap em localhost:29092 (broker dentro do compose)
 - Schema Registry: http://localhost:8081
 - Kafka UI: http://localhost:8090
-- MinIO: http://localhost:9000 (console em http://localhost:9001) — credenciais: minioadmin / minioadmin. Buckets criados: `movimentacoes`, `anexos`.
+- MinIO: http://localhost:9000 (console em http://localhost:9001) — credenciais: minioadmin / minioadmin. Buckets
+  criados: `movimentacoes`, `anexos`.
 - Postgres (movimentacao-db): jdbc:postgresql://localhost:5433/movimentacao (user: ecoledger / ecoledger)
 - MailHog: http://localhost:8025
 
 Rodando localmente
+
 1. Subir a infraestrutura necessária:
 
    docker-compose up -d
 
-   Isso iniciará Zookeeper, Kafka, Schema Registry, MinIO, os bancos Postgres usados pelos serviços e outras dependências.
+   Isso iniciará Zookeeper, Kafka, Schema Registry, MinIO, os bancos Postgres usados pelos serviços e outras
+   dependências.
 
 2. Executar o serviço:
 
@@ -31,6 +36,7 @@ Rodando localmente
    java -jar build/libs/*.jar
 
 Variáveis de configuração úteis
+
 - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5433/movimentacao
 - SPRING_DATASOURCE_USERNAME=ecoledger
 - SPRING_DATASOURCE_PASSWORD=ecoledger
@@ -40,10 +46,12 @@ Variáveis de configuração úteis
 - S3_SECRET_KEY=minioadmin
 
 Testes
+
 - Testes unitários: ./gradlew test
 - Testes de integração (se configurados): ./gradlew integrationTest ou ./gradlew clean check
 
 CI/CD
+
 - O serviço possui um pipeline de CI configurado no GitHub Actions (`.github/workflows/movimentacao-service-ci.yml`)
 - O pipeline é acionado automaticamente em push/pull request para branches `main`, `develop` e `feature/**`
 - Executa: `./gradlew clean build` (inclui testes unitários, integração e cobertura de código)
@@ -51,10 +59,13 @@ CI/CD
 - Artefatos gerados: relatórios de testes e cobertura (disponíveis por 30 dias)
 
 Qualidade de Código
+
 - SonarCloud: https://sonarcloud.io/project/overview?id=gsvalgreen_97AOJ_SW_ENG_PRINC_Ecoledger_movimentacao
 - Para executar análise local: `./gradlew sonar -Dsonar.token=<seu-token>`
 - Cobertura mínima exigida: 80% (verificada pelo Jacoco durante o build)
 
 Notas
-- O serviço kafka-init no compose cria automaticamente os tópicos: usuarios.events, movimentacao.events, auditoria.events, certificacao.events, credito.events e notificacao.events.
+
+- O serviço kafka-init no compose cria automaticamente os tópicos: usuarios.events, movimentacao.events,
+  auditoria.events, certificacao.events, credito.events e notificacao.events.
 - Se precisar inspecionar filas e tópicos, acesse o Kafka UI em http://localhost:8080.
