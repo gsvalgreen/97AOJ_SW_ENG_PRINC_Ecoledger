@@ -135,7 +135,7 @@ To add Teams notifications to a new workflow:
 1. Add this step at the end of your job:
 ```yaml
 - name: Notify MS Teams
-  if: always() && secrets.TEAMS_WEBHOOK_URL
+  if: always() && env.TEAMS_WEBHOOK_URL != ''
   uses: ./.github/actions/teams-notification
   with:
     webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
