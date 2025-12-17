@@ -72,7 +72,7 @@ jobs:
           retention-days: 30
 
       - name: Notify MS Teams
-        if: always() && secrets.TEAMS_WEBHOOK_URL != ''
+        if: always() && secrets.TEAMS_WEBHOOK_URL
         uses: ./.github/actions/teams-notification
         with:
           webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
