@@ -21,12 +21,15 @@ runs:
         if [ "${{ inputs.job-status }}" = "success" ]; then
           COLOR="28a745"  # Green
           STATUS_EMOJI="✅"
+          CARD_COLOR="good"
         elif [ "${{ inputs.job-status }}" = "failure" ]; then
           COLOR="dc3545"  # Red
           STATUS_EMOJI="❌"
+          CARD_COLOR="attention"
         else
           COLOR="ffc107"  # Yellow
           STATUS_EMOJI="⚠️"
+          CARD_COLOR="warning"
         fi
 
         # Get commit info
@@ -59,7 +62,7 @@ runs:
                         "text": "${STATUS_EMOJI} Build ${{ inputs.job-status }}",
                         "size": "large",
                         "weight": "bolder",
-                        "color": "${{ inputs.job-status }}" == "success" ? "good" : "${{ inputs.job-status }}" == "failure" ? "attention" : "warning"
+                        "color": "${CARD_COLOR}"
                       }
                     ]
                   },
