@@ -354,6 +354,7 @@ docker-compose -f docker-compose-ecoledger.yml up -d --build
 
 - [AGENTS.md](AGENTS.md) - Guia de desenvolvimento e convenções
 - [README-minio.md](README-minio.md) - Configuração detalhada do MinIO
+- [README-teams-integration.md](README-teams-integration.md) - Integração com MS Teams para notificações de CI/CD
 - [planos/api-contracts/](planos/api-contracts/) - Contratos OpenAPI dos serviços
 
 ---

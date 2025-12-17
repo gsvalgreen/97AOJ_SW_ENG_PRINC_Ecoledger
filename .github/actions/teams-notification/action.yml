@@ -1,0 +1,139 @@
+name: 'MS Teams Notification'
+description: 'Send build status notification to MS Teams'
+inputs:
+  webhook-url:
+    description: 'MS Teams Incoming Webhook URL'
+    required: true
+  job-status:
+    description: 'Status of the job (success, failure, cancelled)'
+    required: true
+  service-name:
+    description: 'Name of the service being built'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Send Teams Notification
+      shell: bash
+      run: |
+        # Determine color based on status
+        if [ "${{ inputs.job-status }}" = "success" ]; then
+          COLOR="28a745"  # Green
+          STATUS_EMOJI="✅"
+        elif [ "${{ inputs.job-status }}" = "failure" ]; then
+          COLOR="dc3545"  # Red
+          STATUS_EMOJI="❌"
+        else
+          COLOR="ffc107"  # Yellow
+          STATUS_EMOJI="⚠️"
+        fi
+
+        # Get commit info
+        COMMIT_MSG=$(git log -1 --pretty=format:'%s' | sed 's/"/\\"/g')
+        COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+        COMMIT_SHA=$(git rev-parse --short HEAD)
+        BRANCH_NAME=${GITHUB_REF#refs/heads/}
+        
+        # Build URLs
+        RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+        COMMIT_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
+        REPO_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+
+        # Create JSON payload for Teams (Adaptive Card format)
+        PAYLOAD=$(cat <<EOF
+        {
+          "type": "message",
+          "attachments": [
+            {
+              "contentType": "application/vnd.microsoft.card.adaptive",
+              "content": {
+                "type": "AdaptiveCard",
+                "body": [
+                  {
+                    "type": "Container",
+                    "style": "emphasis",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "${STATUS_EMOJI} Build ${{ inputs.job-status }}",
+                        "size": "large",
+                        "weight": "bolder",
+                        "color": "${{ inputs.job-status }}" == "success" ? "good" : "${{ inputs.job-status }}" == "failure" ? "attention" : "warning"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "FactSet",
+                    "facts": [
+                      {
+                        "title": "Service:",
+                        "value": "${{ inputs.service-name }}"
+                      },
+                      {
+                        "title": "Branch:",
+                        "value": "${BRANCH_NAME}"
+                      },
+                      {
+                        "title": "Commit:",
+                        "value": "${COMMIT_SHA}"
+                      },
+                      {
+                        "title": "Author:",
+                        "value": "${COMMIT_AUTHOR}"
+                      },
+                      {
+                        "title": "Workflow:",
+                        "value": "${GITHUB_WORKFLOW}"
+                      },
+                      {
+                        "title": "Event:",
+                        "value": "${GITHUB_EVENT_NAME}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "TextBlock",
+                    "text": "${COMMIT_MSG}",
+                    "wrap": true,
+                    "separator": true
+                  }
+                ],
+                "actions": [
+                  {
+                    "type": "Action.OpenUrl",
+                    "title": "View Workflow Run",
+                    "url": "${RUN_URL}"
+                  },
+                  {
+                    "type": "Action.OpenUrl",
+                    "title": "View Commit",
+                    "url": "${COMMIT_URL}"
+                  },
+                  {
+                    "type": "Action.OpenUrl",
+                    "title": "View Repository",
+                    "url": "${REPO_URL}"
+                  }
+                ],
+                "\$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                "version": "1.4"
+              }
+            }
+          ]
+        }
+        EOF
+        )
+
+        # Send to Teams webhook
+        HTTP_STATUS=$(curl -X POST "${{ inputs.webhook-url }}" \
+          -H "Content-Type: application/json" \
+          -d "$PAYLOAD" \
+          -s -o /dev/null -w "%{http_code}")
+
+        if [ "$HTTP_STATUS" -eq 200 ]; then
+          echo "✅ Successfully sent notification to MS Teams"
+        else
+          echo "⚠️ Failed to send notification to MS Teams (HTTP $HTTP_STATUS)"
+          echo "This is non-blocking - the build status is not affected"
+        fi
