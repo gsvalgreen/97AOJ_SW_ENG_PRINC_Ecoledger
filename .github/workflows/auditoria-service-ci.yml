@@ -70,3 +70,13 @@ jobs:
           name: coverage-report
           path: auditoria-service/build/reports/jacoco/**
           retention-days: 30
+
+      - name: Notify MS Teams
+        if: always() && env.TEAMS_WEBHOOK_URL != ''
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+        uses: ./.github/actions/teams-notification
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          job-status: ${{ job.status }}
+          service-name: 'Auditoria Service'

@@ -70,3 +70,13 @@ jobs:
         with:
           name: frontend-web-coverage
           path: frontend-web/coverage
+
+      - name: Notify MS Teams
+        if: always() && env.TEAMS_WEBHOOK_URL != ''
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+        uses: ./.github/actions/teams-notification
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          job-status: ${{ job.status }}
+          service-name: 'Frontend Web'

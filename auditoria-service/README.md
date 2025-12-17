@@ -1,6 +1,7 @@
 # Auditoria Service
 
-Serviço de validação e auditoria do ECO LEDGER. Responsável por consumir eventos de movimentação, aplicar regras de sustentabilidade, registrar auditorias (automáticas e manuais) e publicar resultados para o serviço de Certificação.
+Serviço de validação e auditoria do ECO LEDGER. Responsável por consumir eventos de movimentação, aplicar regras de
+sustentabilidade, registrar auditorias (automáticas e manuais) e publicar resultados para o serviço de Certificação.
 
 ## Responsabilidades
 
@@ -27,11 +28,11 @@ Serviço de validação e auditoria do ECO LEDGER. Responsável por consumir eve
 
 ### Endpoints
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/auditorias/{id}` | Recuperar registro de auditoria por ID |
-| GET | `/produtores/{producerId}/historico-auditorias` | Histórico de auditorias de um produtor |
-| POST | `/auditorias/{id}/revisao` | Registrar revisão manual por auditor |
+| Método | Endpoint                                        | Descrição                              |
+|--------|-------------------------------------------------|----------------------------------------|
+| GET    | `/auditorias/{id}`                              | Recuperar registro de auditoria por ID |
+| GET    | `/produtores/{producerId}/historico-auditorias` | Histórico de auditorias de um produtor |
+| POST   | `/auditorias/{id}/revisao`                      | Registrar revisão manual por auditor   |
 
 ### Exemplos
 
@@ -42,6 +43,7 @@ curl -X GET http://localhost:8082/auditorias/123e4567-e89b-12d3-a456-42661417400
 ```
 
 Response:
+
 ```json
 {
   "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -83,7 +85,11 @@ curl -X POST http://localhost:8082/auditorias/123e4567-e89b-12d3-a456-4266141740
   "localizacao": "BR-SP",
   "dataMovimentacao": "2024-01-15T10:00:00Z",
   "anexos": [
-    {"tipo": "PHOTO", "url": "...", "hash": "..."}
+    {
+      "tipo": "PHOTO",
+      "url": "...",
+      "hash": "..."
+    }
   ],
   "timestamp": "2024-01-15T10:00:00Z"
 }
@@ -101,7 +107,10 @@ curl -X POST http://localhost:8082/auditorias/123e4567-e89b-12d3-a456-4266141740
   "resultado": "APROVADO|REPROVADO|REQUER_REVISAO",
   "versaoRegra": "1.0.0",
   "detalhes": [
-    {"tipo": "QUANTITY_VALIDATION", "detalhe": "..."}
+    {
+      "tipo": "QUANTITY_VALIDATION",
+      "detalhe": "..."
+    }
   ],
   "timestamp": "2024-01-15T10:30:00Z"
 }
@@ -140,13 +149,13 @@ auditoria:
 
 ## Variáveis de Ambiente
 
-| Variável | Descrição | Padrão |
-|----------|-----------|--------|
-| `SPRING_DATASOURCE_URL` | URL do banco PostgreSQL | `jdbc:postgresql://localhost:5432/auditoria` |
-| `SPRING_DATASOURCE_USERNAME` | Usuário do banco | `postgres` |
-| `SPRING_DATASOURCE_PASSWORD` | Senha do banco | `postgres` |
-| `KAFKA_ENABLED` | Habilita Kafka | `false` |
-| `KAFKA_BOOTSTRAP` | Endereço do Kafka | `localhost:9092` |
+| Variável                     | Descrição               | Padrão                                       |
+|------------------------------|-------------------------|----------------------------------------------|
+| `SPRING_DATASOURCE_URL`      | URL do banco PostgreSQL | `jdbc:postgresql://localhost:5432/auditoria` |
+| `SPRING_DATASOURCE_USERNAME` | Usuário do banco        | `postgres`                                   |
+| `SPRING_DATASOURCE_PASSWORD` | Senha do banco          | `postgres`                                   |
+| `KAFKA_ENABLED`              | Habilita Kafka          | `false`                                      |
+| `KAFKA_BOOTSTRAP`            | Endereço do Kafka       | `localhost:9092`                             |
 
 ## Desenvolvimento Local
 
