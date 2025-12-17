@@ -72,7 +72,7 @@ jobs:
           path: frontend-web/coverage
 
       - name: Notify MS Teams
-        if: always() && env.TEAMS_WEBHOOK_URL != ''
+        if: always() && secrets.TEAMS_WEBHOOK_URL != ''
         uses: ./.github/actions/teams-notification
         with:
           webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
