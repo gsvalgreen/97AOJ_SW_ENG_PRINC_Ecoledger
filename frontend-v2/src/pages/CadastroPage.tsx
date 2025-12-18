@@ -10,13 +10,13 @@ import { Link, useNavigate } from 'react-router-dom';
 
 export default function CadastroPage() {
   const [formData, setFormData] = useState<CadastroCriacaoDto>({
-    nomeCompleto: '',
+    nome: '',
     email: '',
+    documento: '',
     senha: '',
-    role: 'PRODUTOR',
-    cpf: '',
-    telefone: '',
-    localizacao: '',
+    role: 'produtor',
+    dadosFazenda: {},
+    anexos: [],
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -27,7 +27,15 @@ export default function CadastroPage() {
     setLoading(true);
 
     try {
-      await authService.cadastrar(formData);
+      // Adiciona telefone e localização aos dadosFazenda se preenchidos
+      const dadosFazenda: Record<string, any> = {};
+      if (formData.dadosFazenda.telefone) dadosFazenda.telefone = formData.dadosFazenda.telefone;
+      if (formData.dadosFazenda.localizacao) dadosFazenda.localizacao = formData.dadosFazenda.localizacao;
+      
+      await authService.cadastrar({
+        ...formData,
+        dadosFazenda,
+      });
       
       toast({
         title: 'Cadastro realizado com sucesso!',
@@ -62,11 +70,11 @@ export default function CadastroPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="nomeCompleto">Nome Completo *</Label>
+                <Label htmlFor="nome">Nome Completo *</Label>
                 <Input
-                  id="nomeCompleto"
-                  value={formData.nomeCompleto}
-                  onChange={(e) => setFormData({ ...formData, nomeCompleto: e.target.value })}
+                  id="nome"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                   required
                 />
               </div>
@@ -97,36 +105,37 @@ export default function CadastroPage() {
                   id="role"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                   required
                 >
-                  <option value="PRODUTOR">Produtor</option>
-                  <option value="ANALISTA">Analista</option>
-                  <option value="AUDITOR">Auditor</option>
+                  <option value="produtor">Produtor</option>
+                  <option value="analista">Analista</option>
+                  <option value="auditor">Auditor</option>
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cpf">CPF</Label>
+                <Label htmlFor="documento">CPF/CNPJ *</Label>
                 <Input
-                  id="cpf"
-                  value={formData.cpf}
-                  onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
+                  id="documento"
+                  value={formData.documento}
+                  onChange={(e) => setFormData({ ...formData, documento: e.target.value })}
+                  required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="telefone">Telefone</Label>
                 <Input
                   id="telefone"
-                  value={formData.telefone}
-                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                  value={formData.dadosFazenda.telefone || ''}
+                  onChange={(e) => setFormData({ ...formData, dadosFazenda: { ...formData.dadosFazenda, telefone: e.target.value } })}
                 />
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="localizacao">Localização</Label>
                 <Input
                   id="localizacao"
-                  value={formData.localizacao}
-                  onChange={(e) => setFormData({ ...formData, localizacao: e.target.value })}
+                  value={formData.dadosFazenda.localizacao || ''}
+                  onChange={(e) => setFormData({ ...formData, dadosFazenda: { ...formData.dadosFazenda, localizacao: e.target.value } })}
                   placeholder="Cidade, Estado"
                 />
               </div>

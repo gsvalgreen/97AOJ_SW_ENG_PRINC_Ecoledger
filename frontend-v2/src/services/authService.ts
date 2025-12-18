@@ -13,13 +13,13 @@ export interface TokenAuthDto {
 }
 
 export interface CadastroCriacaoDto {
-  nomeCompleto: string;
+  nome: string;
   email: string;
+  documento: string;
   senha: string;
-  role: 'PRODUTOR' | 'ANALISTA' | 'AUDITOR';
-  cpf?: string;
-  telefone?: string;
-  localizacao?: string;
+  role: string;
+  dadosFazenda: Record<string, any>;
+  anexos: Array<Record<string, any>>;
 }
 
 export interface RespostaCadastroDto {
