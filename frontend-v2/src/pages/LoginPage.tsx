@@ -27,7 +27,11 @@ export default function LoginPage() {
       // Decodificar o token para obter o userId
       const decoded = decodeToken(response.accessToken);
       
-      // Buscar perfil do usuário
+      // IMPORTANTE: Salvar token ANTES de buscar o perfil
+      // O interceptor do axios precisa do token no localStorage
+      localStorage.setItem('token', response.accessToken);
+      
+      // Buscar perfil do usuário (agora com token no header)
       const profile = await authService.getProfile(decoded.sub);
       
       login(response.accessToken, {
