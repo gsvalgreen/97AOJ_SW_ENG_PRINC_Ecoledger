@@ -56,5 +56,8 @@ movimentacao:
       movimentacao-atualizada: movimentacao.atualizada
   producer-approval:
     base-url: ${PRODUCER_APPROVAL_BASE_URL:http://localhost:8084}
-    auth-token: ${PRODUCER_APPROVAL_AUTH_TOKEN:}
     timeout-ms: ${PRODUCER_APPROVAL_TIMEOUT_MS:2000}
+    jwt-secret: ${PRODUCER_APPROVAL_JWT_SECRET:ecoledger-secret-key-minimum-256-bits-for-hs256-algorithm-security}
+    token-ttl: ${PRODUCER_APPROVAL_JWT_TTL:PT10M}
+    client-id: ${PRODUCER_APPROVAL_CLIENT_ID:movimentacao-service}
+    scopes: ${PRODUCER_APPROVAL_SCOPES:admin:usuarios usuarios:read}

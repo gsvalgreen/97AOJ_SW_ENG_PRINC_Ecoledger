@@ -210,7 +210,9 @@ services:
       MOVIMENTACAO_KAFKA_ENABLED: "true"
       MOVIMENTACAO_S3_LENIENT_WHEN_MISSING: "true"
       PRODUCER_APPROVAL_BASE_URL: http://users-service:8080
-      PRODUCER_APPROVAL_AUTH_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb3ZpbWVudGFjZSIsInNjb3BlcyI6InVzdWFyaW9zOnJlYWQiLCJpYXQiOjE3NjU3NjI1MzAsImV4cCI6MTkyMzQ0MjUzMH0.6VsmHz5xVNJiHFo3tQeuJSvCW7K9zlvutFvs-O0I-N0
+      PRODUCER_APPROVAL_JWT_SECRET: ecoledger-secret-key-minimum-256-bits-for-hs256-algorithm-security
+      PRODUCER_APPROVAL_JWT_TTL: PT10M
+      PRODUCER_APPROVAL_SCOPES: admin:usuarios usuarios:read
     networks:
       - ecoledger
     mem_limit: 1g
