@@ -21,6 +21,7 @@ public class TestHooks {
         waitForService("http://localhost:8083/actuator/health", 60);
         waitForService("http://localhost:8085/actuator/health", 60);
 
+        cleanupUsersDb();
         // attempt to truncate tables in movimentacao and auditoria databases to keep tests idempotent
         truncateDb("jdbc:postgresql://localhost:5432/movimentacao", "ecoledger_admin", "ecoledger_admin", "movimentacao_anexos");
         truncateDb("jdbc:postgresql://localhost:5432/movimentacao", "ecoledger_admin", "ecoledger_admin", "movimentacoes");
@@ -46,6 +47,7 @@ public class TestHooks {
     @After
     public void cleanScenario() {
         ScenarioContext.cleanup();
+        cleanupUsersDb();
     }
 
     private void createInitialAttachment() throws Exception {
@@ -147,5 +149,22 @@ public class TestHooks {
             // ignore: DB may not be ready or tables may not exist yet
             System.err.println("Warning: could not truncate " + table + " on " + jdbcUrl + " - " + e.getMessage());
         }
+    }
+
+    private void cleanupUsersDb() {
+        String url = resolveConfig("USERS_DB_URL", "jdbc:postgresql://localhost:5432/users");
+        String user = resolveConfig("USERS_DB_USERNAME", "ecoledger_users");
+        String password = resolveConfig("USERS_DB_PASSWORD", "ecoledger_users");
+        truncateDb(url, user, password, "idempotency_keys");
+        truncateDb(url, user, password, "cadastros");
+        truncateDb(url, user, password, "usuarios");
+    }
+
+    private String resolveConfig(String key, String defaultValue) {
+        String sys = System.getProperty(key);
+        if (sys != null && !sys.isBlank()) return sys;
+        String env = System.getenv(key);
+        if (env != null && !env.isBlank()) return env;
+        return defaultValue;
     }
 }
