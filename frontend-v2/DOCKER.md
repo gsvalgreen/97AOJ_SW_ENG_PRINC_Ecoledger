@@ -27,7 +27,7 @@ Isso irá:
 ### 2. Acessar o Frontend
 
 ```
-http://localhost:3001
+http://localhost:3000
 ```
 
 ### 3. Verificar Status
@@ -137,7 +137,7 @@ docker exec ecoledger-frontend-v2 wget -O- http://users-service:8080/usuarios/ca
 O CORS está configurado nos backends. Se houver problemas:
 
 1. Verifique se os backends têm CORS habilitado
-2. Verifique se o origin está correto (http://localhost:3001)
+2. Verifique se o origin está correto (http://localhost:3000)
 
 ### Rebuild do Frontend
 
@@ -199,7 +199,7 @@ O frontend-v2 não requer variáveis de ambiente específicas em runtime, pois:
 
 Após ter o frontend-v2 rodando no Docker:
 
-1. Acesse http://localhost:3001
+1. Acesse http://localhost:3000
 2. Faça login ou crie uma conta
 3. Explore as funcionalidades
 4. Verifique os logs dos backends para ver as requisições
