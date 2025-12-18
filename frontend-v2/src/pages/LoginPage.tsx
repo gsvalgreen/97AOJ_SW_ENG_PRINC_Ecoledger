@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { authService } from '@/services/authService';
+import { authService, decodeToken } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import { Leaf, Loader2 } from 'lucide-react';
 import { useState } from 'react';
@@ -24,8 +24,11 @@ export default function LoginPage() {
     try {
       const response = await authService.login({ email, password: senha });
       
+      // Decodificar o token para obter o userId
+      const decoded = decodeToken(response.accessToken);
+      
       // Buscar perfil do usuário
-      const profile = await authService.getProfile(response.userId);
+      const profile = await authService.getProfile(decoded.sub);
       
       login(response.accessToken, {
         id: profile.id,

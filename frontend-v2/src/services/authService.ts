@@ -8,8 +8,7 @@ export interface LoginRequest {
 export interface TokenAuthDto {
   accessToken: string;
   refreshToken: string;
-  userId: string;
-  role: string;
+  expiresIn: number;
 }
 
 export interface CadastroCriacaoDto {
@@ -72,4 +71,21 @@ export const authService = {
     const response = await api.patch<UsuarioDto>(`/usuarios/${userId}/status`, { status });
     return response.data;
   },
+};
+
+// Helper para decodificar JWT e extrair userId
+export const decodeToken = (token: string): { sub: string; role: string } => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    throw new Error('Token inválido');
+  }
 };
