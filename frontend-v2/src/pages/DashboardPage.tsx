@@ -32,13 +32,31 @@ export default function DashboardPage() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      console.log('Atualizando dados do usuário...');
+      console.log('Iniciando atualização completa...');
+      
+      // Limpar dados em cache (mas manter autenticação)
+      setSelo(null);
+      setStats({ movimentacoes: 0, auditorias: 0, pontuacao: 0 });
+      setRecentMovimentacoes([]);
+      
+      // Força reload da página para limpar cache do browser (service workers, etc)
+      // mas mantém o token e user no localStorage
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+        console.log('Cache do browser limpo');
+      }
+      
+      // Recarregar dados do usuário
       await refreshUser();
       console.log('Usuário atualizado:', useAuthStore.getState().user);
+      
+      // Recarregar dados do dashboard com timestamp para evitar cache
       await loadDashboardData();
+      
       toast({
-        title: 'Atualizado!',
-        description: 'Seus dados foram recarregados do servidor.',
+        title: 'Atualizado com sucesso!',
+        description: 'Todos os dados foram recarregados do servidor.',
       });
     } catch (error) {
       console.error('Erro ao atualizar:', error);
@@ -87,10 +105,10 @@ export default function DashboardPage() {
           pontuacao: seloData?.pontuacao || 0,
         });
         
-        // Pegar as 5 movimentações mais recentes
+        // Pegar as 4 movimentações mais recentes
         const recent = (movimentacoesData.items || [])
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-          .slice(0, 5);
+          .slice(0, 4);
         setRecentMovimentacoes(recent);
       }
     } catch (error: any) {
@@ -252,7 +270,7 @@ export default function DashboardPage() {
                       </p>
                     </div>
                     <div className="text-xs text-muted-foreground text-right">
-                      {format(new Date(mov.timestamp), "dd/MM/yy", { locale: ptBR })}
+                      {format(new Date(mov.timestamp), "dd/MM/yy HH:mm", { locale: ptBR })}
                     </div>
                   </div>
                 ))
