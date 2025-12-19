@@ -60,11 +60,25 @@ export default function DashboardPage() {
 
       if (user.role === 'PRODUTOR') {
         // Carregar dados do produtor
+        console.log('Carregando dados do dashboard para produtor:', user.id);
         const [seloData, movimentacoesData, auditoriasData] = await Promise.all([
-          certificacaoService.obterSelo(user.id).catch(() => null),
-          movimentacaoService.listarPorProdutor(user.id, 1, 100).catch(() => ({ items: [], total: 0 })),
-          auditoriaService.historicoPorProdutor(user.id).catch(() => ({ auditorias: [] })),
+          certificacaoService.obterSelo(user.id).catch((error) => {
+            console.error('Erro ao carregar selo:', error);
+            return null;
+          }),
+          movimentacaoService.listarPorProdutor(user.id, 1, 100).catch((error) => {
+            console.error('Erro ao carregar movimentações:', error);
+            return { items: [], total: 0 };
+          }),
+          auditoriaService.historicoPorProdutor(user.id).catch((error) => {
+            console.error('Erro ao carregar auditorias:', error);
+            return { auditorias: [] };
+          }),
         ]);
+
+        console.log('Selo carregado:', seloData);
+        console.log('Movimentações carregadas:', movimentacoesData);
+        console.log('Auditorias carregadas:', auditoriasData);
 
         setSelo(seloData);
         setStats({
