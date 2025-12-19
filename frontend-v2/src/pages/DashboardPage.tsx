@@ -102,7 +102,7 @@ export default function DashboardPage() {
           <div className="flex items-center space-x-3">
             <Leaf className="w-8 h-8" />
             <div>
-              <h1 className="text-3xl font-bold">Bem-vindo, {user?.nome}!</h1>
+              <h1 className="text-3xl font-bold">Olá, {user?.nome}!</h1>
               <div className="mt-2">
                 {user?.status && <StatusBadge status={user.status} />}
               </div>

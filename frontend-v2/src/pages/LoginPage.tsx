@@ -39,9 +39,9 @@ export default function LoginPage() {
       login(response.accessToken, {
         id: profile.id,
         email: profile.email,
-        role: profile.role,
+        role: profile.role.toUpperCase(),
         nome: profile.nome,
-        status: profile.status,
+        status: profile.status.toUpperCase(),
       });
 
       console.log('User após login:', useAuthStore.getState().user);

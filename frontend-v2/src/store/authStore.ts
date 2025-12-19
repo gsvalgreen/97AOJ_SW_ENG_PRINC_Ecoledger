@@ -51,9 +51,9 @@ export const useAuthStore = create<AuthState>()(
           const newUser = {
             id: updatedUser.id,
             email: updatedUser.email,
-            role: updatedUser.role,
+            role: updatedUser.role.toUpperCase(),
             nome: updatedUser.nome,
-            status: updatedUser.status,
+            status: updatedUser.status.toUpperCase(),
           };
           localStorage.setItem('user', JSON.stringify(newUser));
           // Forçar atualização do estado (criar novo objeto para garantir re-render)
