@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { formatDateTime } from '@/lib/utils';
-import { MovimentacaoListItem, movimentacaoService } from '@/services/movimentacaoService';
+import { MovimentacaoDetailResponse, movimentacaoService } from '@/services/movimentacaoService';
 import { useAuthStore } from '@/store/authStore';
 import { Calendar, Package, Plus, TrendingDown, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -12,7 +12,7 @@ export default function MovimentacoesPage() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [movimentacoes, setMovimentacoes] = useState<MovimentacaoListItem[]>([]);
+  const [movimentacoes, setMovimentacoes] = useState<MovimentacaoDetailResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
 
@@ -28,7 +28,7 @@ export default function MovimentacoesPage() {
     try {
       setLoading(true);
       const response = await movimentacaoService.listarPorProdutor(user.id, 1, 50);
-      setMovimentacoes(response.movimentacoes || []);
+      setMovimentacoes(response.items || []);
       setTotal(response.total || 0);
     } catch (error: any) {
       toast({
@@ -77,9 +77,9 @@ export default function MovimentacoesPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {movimentacoes.filter(m => m.tipo === 'ENTRADA').length}
+              {movimentacoes.filter(m => m.tipo === 'PRODUCAO' || m.tipo === 'ARMAZENAMENTO').length}
             </div>
-            <p className="text-xs text-muted-foreground">Commodities recebidas</p>
+            <p className="text-xs text-muted-foreground">Produção e armazenamento</p>
           </CardContent>
         </Card>
 
@@ -90,9 +90,9 @@ export default function MovimentacoesPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {movimentacoes.filter(m => m.tipo === 'SAIDA').length}
+              {movimentacoes.filter(m => m.tipo === 'PROCESSAMENTO' || m.tipo === 'TRANSPORTE').length}
             </div>
-            <p className="text-xs text-muted-foreground">Commodities expedidas</p>
+            <p className="text-xs text-muted-foreground">Processamento e transporte</p>
           </CardContent>
         </Card>
       </div>
@@ -123,11 +123,11 @@ export default function MovimentacoesPage() {
                   onClick={() => navigate(`/movimentacoes/${mov.id}`)}
                 >
                   <div className="flex items-center space-x-4">
-                    <div className={`p-2 rounded-full ${mov.tipo === 'ENTRADA' ? 'bg-green-100' : 'bg-red-100'}`}>
-                      {mov.tipo === 'ENTRADA' ? (
+                    <div className={`p-2 rounded-full ${mov.tipo === 'PRODUCAO' || mov.tipo === 'ARMAZENAMENTO' ? 'bg-green-100' : 'bg-blue-100'}`}>
+                      {mov.tipo === 'PRODUCAO' || mov.tipo === 'ARMAZENAMENTO' ? (
                         <TrendingUp className="w-5 h-5 text-green-600" />
                       ) : (
-                        <TrendingDown className="w-5 h-5 text-red-600" />
+                        <TrendingDown className="w-5 h-5 text-blue-600" />
                       )}
                     </div>
                     <div>
@@ -141,7 +141,7 @@ export default function MovimentacoesPage() {
                     <p className="text-sm font-medium">{mov.tipo}</p>
                     <p className="text-xs text-muted-foreground flex items-center">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {formatDateTime(mov.dataMovimentacao)}
+                      {formatDateTime(mov.timestamp)}
                     </p>
                   </div>
                 </div>

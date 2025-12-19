@@ -53,7 +53,7 @@ export interface MovimentacaoListItem {
 }
 
 export interface MovimentacaoListResponse {
-  movimentacoes: MovimentacaoListItem[];
+  items: MovimentacaoDetailResponse[];
   total: number;
 }
 
