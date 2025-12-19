@@ -3,7 +3,7 @@ import api from './api';
 export interface SeloResponse {
   producerId: string;
   status: 'ATIVO' | 'PENDENTE' | 'INATIVO';
-  nivel: 'BRONZE' | 'PRATA' | 'OURO';
+  nivel: 'DIAMANTE' | 'OURO' | 'PRATA' | 'BRONZE' | 'NENHUM';
   pontuacao: number;
   motivos: string[];
   ultimoCheck: string;
@@ -17,7 +17,7 @@ export interface RecalcularResponse {
   producerId: string;
   nivelAnterior: string;
   nivelAtual: string;
-  score: number;
+  pontuacao: number;
   dataCalculo: string;
 }
 
