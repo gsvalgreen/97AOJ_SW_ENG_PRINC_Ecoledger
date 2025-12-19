@@ -1,26 +1,53 @@
+import { StatusBadge } from '@/components/StatusBadge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { auditoriaService } from '@/services/auditoriaService';
 import { certificacaoService, SeloResponse } from '@/services/certificacaoService';
 import { movimentacaoService } from '@/services/movimentacaoService';
 import { useAuthStore } from '@/store/authStore';
-import { Award, ClipboardCheck, Leaf, Package, TrendingUp } from 'lucide-react';
+import { Award, ClipboardCheck, Leaf, Package, RefreshCw, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
+  const { user, refreshUser } = useAuthStore();
   const { toast } = useToast();
   const [selo, setSelo] = useState<SeloResponse | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
     movimentacoes: 0,
     auditorias: 0,
-    score: 0,
+    pontuacao: 0,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('DashboardPage - user changed:', user);
     loadDashboardData();
   }, [user]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      console.log('Atualizando dados do usuário...');
+      await refreshUser();
+      console.log('Usuário atualizado:', useAuthStore.getState().user);
+      await loadDashboardData();
+      toast({
+        title: 'Atualizado!',
+        description: 'Seus dados foram recarregados do servidor.',
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao atualizar',
+        description: 'Não foi possível recarregar os dados.',
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const loadDashboardData = async () => {
     if (!user) return;
@@ -40,7 +67,7 @@ export default function DashboardPage() {
         setStats({
           movimentacoes: movimentacoesData.total || 0,
           auditorias: auditoriasData.auditorias?.length || 0,
-          score: seloData?.score || 0,
+          pontuacao: seloData?.pontuacao || 0,
         });
       }
     } catch (error: any) {
@@ -71,11 +98,28 @@ export default function DashboardPage() {
       {/* Welcome Section */}
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-lg p-6 text-white">
-        <div className="flex items-center space-x-3 mb-2">
-          <Leaf className="w-8 h-8" />
-          <h1 className="text-3xl font-bold">Bem-vindo, {user?.nomeCompleto}!</h1>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-3">
+            <Leaf className="w-8 h-8" />
+            <div>
+              <h1 className="text-3xl font-bold">Bem-vindo, {user?.nome}!</h1>
+              <div className="mt-2">
+                {user?.status && <StatusBadge status={user.status} />}
+              </div>
+            </div>
+          </div>
+          <Button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            variant="secondary"
+            size="sm"
+            className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            Atualizar
+          </Button>
         </div>
-        <p className="text-green-100">
+        <p className="text-green-100 mt-3">
           {user?.role === 'PRODUTOR' && 'Gerencie suas movimentações e acompanhe sua certificação verde'}
           {user?.role === 'AUDITOR' && 'Revise e aprove movimentações em conformidade'}
           {user?.role === 'ANALISTA' && 'Monitore e analise dados de sustentabilidade'}
@@ -110,11 +154,11 @@ export default function DashboardPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Score</CardTitle>
+              <CardTitle className="text-sm font-medium">Pontuação</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.score}</div>
+              <div className="text-2xl font-bold">{stats.pontuacao}</div>
               <p className="text-xs text-muted-foreground">
                 Pontuação atual
               </p>
@@ -191,9 +235,9 @@ export default function DashboardPage() {
                 <div className="flex items-start space-x-3">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
                   <div>
-                    <p className="text-sm font-medium">Renovação de certificado</p>
+                    <p className="text-sm font-medium">Última verificação</p>
                     <p className="text-xs text-muted-foreground">
-                      {selo.validadeAte ? `Válido até ${new Date(selo.validadeAte).toLocaleDateString('pt-BR')}` : 'Sem data de validade'}
+                      {new Date(selo.ultimoCheck).toLocaleDateString('pt-BR')}
                     </p>
                   </div>
                 </div>

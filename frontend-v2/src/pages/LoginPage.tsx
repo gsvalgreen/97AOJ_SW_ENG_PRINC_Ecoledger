@@ -34,16 +34,21 @@ export default function LoginPage() {
       // Buscar perfil do usuário (agora com token no header)
       const profile = await authService.getProfile(decoded.sub);
       
+      console.log('Profile recebido do backend:', profile);
+      
       login(response.accessToken, {
         id: profile.id,
         email: profile.email,
         role: profile.role,
-        nomeCompleto: profile.nomeCompleto,
+        nome: profile.nome,
+        status: profile.status,
       });
+
+      console.log('User após login:', useAuthStore.getState().user);
 
       toast({
         title: 'Login realizado com sucesso!',
-        description: `Bem-vindo, ${profile.nomeCompleto}`,
+        description: `Bem-vindo, ${profile.nome}`,
       });
 
       navigate('/dashboard');

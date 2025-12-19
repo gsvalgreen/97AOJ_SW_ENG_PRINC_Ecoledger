@@ -151,21 +151,14 @@ export default function CertificacoesPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center space-x-2">
                       <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Score:</span>
-                      <span className="font-bold text-lg">{selo.score}</span>
+                      <span className="text-muted-foreground">Pontuação:</span>
+                      <span className="font-bold text-lg">{selo.pontuacao}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Calendar className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Última atualização:</span>
-                      <span>{formatDateTime(selo.dataUltimaAtualizacao)}</span>
+                      <span className="text-muted-foreground">Última verificação:</span>
+                      <span>{formatDateTime(selo.ultimoCheck)}</span>
                     </div>
-                    {selo.validadeAte && (
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Válido até:</span>
-                        <span>{formatDateTime(selo.validadeAte)}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>

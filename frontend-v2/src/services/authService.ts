@@ -29,21 +29,16 @@ export interface RespostaCadastroDto {
 
 export interface UsuarioDto {
   id: string;
-  nomeCompleto: string;
+  nome: string;
   email: string;
   role: string;
+  documento: string;
   status: string;
-  cpf?: string;
-  telefone?: string;
-  localizacao?: string;
   criadoEm: string;
-  atualizadoEm: string;
 }
 
 export interface UsuarioAtualizacaoDto {
-  nomeCompleto?: string;
-  telefone?: string;
-  localizacao?: string;
+  nome?: string;
 }
 
 export const authService = {

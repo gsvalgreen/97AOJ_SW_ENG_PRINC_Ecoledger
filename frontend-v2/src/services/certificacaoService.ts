@@ -2,11 +2,11 @@ import api from './api';
 
 export interface SeloResponse {
   producerId: string;
-  nivel: 'BRONZE' | 'PRATA' | 'OURO' | 'DIAMANTE' | 'NENHUM';
-  status: 'ATIVO' | 'SUSPENSO' | 'REVOGADO';
-  score: number;
-  dataUltimaAtualizacao: string;
-  validadeAte?: string;
+  status: 'ATIVO' | 'PENDENTE' | 'INATIVO';
+  nivel: 'BRONZE' | 'PRATA' | 'OURO';
+  pontuacao: number;
+  motivos: string[];
+  ultimoCheck: string;
 }
 
 export interface RecalcularRequest {

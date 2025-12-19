@@ -75,7 +75,7 @@ export default function DashboardLayout() {
 
             <div className="flex items-center space-x-4">
               <div className="hidden md:flex flex-col items-end">
-                <span className="text-sm font-medium">{user?.nomeCompleto}</span>
+                <span className="text-sm font-medium">{user?.nome}</span>
                 <span className="text-xs text-gray-500">{user?.role}</span>
               </div>
               <Button variant="ghost" size="icon" onClick={handleLogout} className="hidden md:flex">

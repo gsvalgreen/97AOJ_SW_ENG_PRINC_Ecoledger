@@ -4,18 +4,16 @@ export interface RegistroAuditoriaResponse {
   id: string;
   movimentacaoId: string;
   producerId: string;
-  resultado: 'APROVADA' | 'REPROVADA' | 'PENDENTE_REVISAO';
-  score: number;
-  regrasVioladas: string[];
+  versaoRegra: string;
+  resultado: 'APROVADO' | 'REPROVADO' | 'REQUER_REVISAO';
   evidencias: Array<{
     tipo: string;
-    descricao: string;
-    severidade: string;
+    detalhe: string;
   }>;
-  revisadoPor?: string;
-  observacoesRevisao?: string;
-  criadaEm: string;
-  atualizadaEm: string;
+  processadoEm: string;
+  auditorId?: string;
+  observacoes?: string;
+  revisadoEm?: string;
 }
 
 export interface HistoricoAuditoriasResponse {

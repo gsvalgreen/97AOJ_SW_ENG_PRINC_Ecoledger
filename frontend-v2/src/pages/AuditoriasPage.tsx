@@ -47,9 +47,9 @@ export default function AuditoriasPage() {
 
   const stats = {
     total: auditorias.length,
-    aprovadas: auditorias.filter(a => a.resultado === 'APROVADA').length,
-    reprovadas: auditorias.filter(a => a.resultado === 'REPROVADA').length,
-    pendentes: auditorias.filter(a => a.resultado === 'PENDENTE_REVISAO').length,
+    aprovadas: auditorias.filter(a => a.resultado === 'APROVADO').length,
+    reprovadas: auditorias.filter(a => a.resultado === 'REPROVADO').length,
+    pendentes: auditorias.filter(a => a.resultado === 'REQUER_REVISAO').length,
   };
 
   return (
@@ -150,32 +150,34 @@ export default function AuditoriasPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Score:</span>
-                        <span className="ml-2 font-medium">{auditoria.score}</span>
+                        <span className="text-muted-foreground">Data:</span>
+                        <span className="ml-2">{formatDateTime(auditoria.processadoEm)}</span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Data:</span>
-                        <span className="ml-2">{formatDateTime(auditoria.criadaEm)}</span>
+                        <span className="text-muted-foreground">Versão da Regra:</span>
+                        <span className="ml-2">{auditoria.versaoRegra}</span>
                       </div>
                     </div>
 
-                    {auditoria.regrasVioladas && auditoria.regrasVioladas.length > 0 && (
-                      <div className="mt-3 p-3 bg-red-50 rounded-md">
-                        <p className="text-sm font-medium text-red-900 mb-1">Regras Violadas:</p>
-                        <ul className="text-sm text-red-700 list-disc list-inside">
-                          {auditoria.regrasVioladas.map((regra, idx) => (
-                            <li key={idx}>{regra}</li>
+                    {auditoria.evidencias && auditoria.evidencias.length > 0 && (
+                      <div className="mt-3 p-3 bg-yellow-50 rounded-md">
+                        <p className="text-sm font-medium text-yellow-900 mb-1">Evidências:</p>
+                        <ul className="text-sm text-yellow-700 space-y-1">
+                          {auditoria.evidencias.map((evidencia, idx) => (
+                            <li key={idx}>
+                              <span className="font-medium">{evidencia.tipo}:</span> {evidencia.detalhe}
+                            </li>
                           ))}
                         </ul>
                       </div>
                     )}
 
-                    {auditoria.observacoesRevisao && (
+                    {auditoria.observacoes && (
                       <div className="mt-3 p-3 bg-blue-50 rounded-md">
                         <p className="text-sm font-medium text-blue-900 mb-1">Observações da Revisão:</p>
-                        <p className="text-sm text-blue-700">{auditoria.observacoesRevisao}</p>
-                        {auditoria.revisadoPor && (
-                          <p className="text-xs text-blue-600 mt-1">Revisado por: {auditoria.revisadoPor}</p>
+                        <p className="text-sm text-blue-700">{auditoria.observacoes}</p>
+                        {auditoria.auditorId && (
+                          <p className="text-xs text-blue-600 mt-1">Revisado por: {auditoria.auditorId}</p>
                         )}
                       </div>
                     )}

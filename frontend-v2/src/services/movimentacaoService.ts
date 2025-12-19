@@ -23,11 +23,17 @@ export interface MovimentacaoDetailResponse {
   tipo: string;
   quantidade: number;
   unidade: string;
-  localizacao: string;
-  dataMovimentacao: string;
-  observacoes?: string;
-  attachmentKey?: string;
-  criadaEm: string;
+  timestamp: string;
+  localizacao?: {
+    lat: number;
+    lon: number;
+  };
+  criadoEm: string;
+  anexos: Array<{
+    tipo: string;
+    url: string;
+    hash: string;
+  }>;
 }
 
 export interface MovimentacaoListItem {

@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { authService, UsuarioAtualizacaoDto, UsuarioDto } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
-import { Loader2, Mail, MapPin, Phone, Save, Shield, User } from 'lucide-react';
+import { Loader2, Mail, Save, Shield, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function PerfilPage() {
@@ -15,9 +15,7 @@ export default function PerfilPage() {
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<UsuarioDto | null>(null);
   const [formData, setFormData] = useState<UsuarioAtualizacaoDto>({
-    nomeCompleto: '',
-    telefone: '',
-    localizacao: '',
+    nome: '',
   });
 
   useEffect(() => {
@@ -32,9 +30,7 @@ export default function PerfilPage() {
       const data = await authService.getProfile(user.id);
       setProfile(data);
       setFormData({
-        nomeCompleto: data.nomeCompleto,
-        telefone: data.telefone || '',
-        localizacao: data.localizacao || '',
+        nome: data.nome,
       });
     } catch (error: any) {
       toast({
@@ -58,7 +54,7 @@ export default function PerfilPage() {
       
       updateUser({
         ...user,
-        nomeCompleto: updated.nomeCompleto,
+        nome: updated.nome,
       });
 
       toast({
@@ -114,12 +110,12 @@ export default function PerfilPage() {
                 <p className="font-medium">{profile?.role}</p>
               </div>
             </div>
-            {profile?.cpf && (
+            {profile?.documento && (
               <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                 <User className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">CPF</p>
-                  <p className="font-medium">{profile.cpf}</p>
+                  <p className="text-sm text-muted-foreground">Documento</p>
+                  <p className="font-medium">{profile.documento}</p>
                 </div>
               </div>
             )}
@@ -136,43 +132,15 @@ export default function PerfilPage() {
         <CardContent>
           <form onSubmit={handleSave} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="nomeCompleto">Nome Completo</Label>
+              <Label htmlFor="nome">Nome Completo</Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="nomeCompleto"
+                  id="nome"
                   className="pl-10"
-                  value={formData.nomeCompleto}
-                  onChange={(e) => setFormData({ ...formData, nomeCompleto: e.target.value })}
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                   required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="telefone">Telefone</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="telefone"
-                  className="pl-10"
-                  value={formData.telefone}
-                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                  placeholder="(00) 00000-0000"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="localizacao">Localização</Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="localizacao"
-                  className="pl-10"
-                  value={formData.localizacao}
-                  onChange={(e) => setFormData({ ...formData, localizacao: e.target.value })}
-                  placeholder="Cidade, Estado"
                 />
               </div>
             </div>
