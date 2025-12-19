@@ -6,7 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { MovimentacaoRequest, movimentacaoService } from '@/services/movimentacaoService';
 import { useAuthStore } from '@/store/authStore';
 import { ArrowLeft, Loader2, MapPin } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function NovaMovimentacaoPage() {
@@ -15,7 +15,18 @@ export default function NovaMovimentacaoPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
-  
+
+  // Verificar se o usuário está aprovado
+  useEffect(() => {
+    if (user && user.status !== 'APROVADO') {
+      toast({
+        variant: 'destructive',
+        title: 'Acesso não autorizado',
+        description: 'Seu cadastro precisa estar APROVADO para registrar movimentações',
+      });
+    }
+  }, [user, toast]);
+
   // Função para obter data/hora atual no formato datetime-local
   const getCurrentDateTimeLocal = () => {
     const now = new Date();
@@ -80,6 +91,17 @@ export default function NovaMovimentacaoPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Verifica se o usuário está aprovado
+    if (user?.status !== 'APROVADO') {
+      toast({
+        variant: 'destructive',
+        title: 'Operação não permitida',
+        description: 'Apenas usuários com cadastro APROVADO podem registrar movimentações',
+      });
+      return;
+    }
+
     if (!formData.commodityId || !formData.quantidade || !formData.timestamp) {
       toast({
         variant: 'destructive',
