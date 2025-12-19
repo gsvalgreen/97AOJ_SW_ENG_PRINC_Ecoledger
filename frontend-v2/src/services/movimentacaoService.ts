@@ -42,16 +42,6 @@ export interface MovimentacaoDetailResponse {
   }>;
 }
 
-export interface MovimentacaoListItem {
-  id: string;
-  commodityId: string;
-  tipo: string;
-  quantidade: number;
-  unidade: string;
-  dataMovimentacao: string;
-  criadaEm: string;
-}
-
 export interface MovimentacaoListResponse {
   items: MovimentacaoDetailResponse[];
   total: number;
@@ -64,6 +54,10 @@ export interface UploadUrlResponse {
 
 export interface ConfirmUploadRequest {
   attachmentKey: string;
+}
+
+export interface HistoricoMovimentacaoResponse {
+  items: MovimentacaoDetailResponse[];
 }
 
 export const movimentacaoService = {
@@ -98,8 +92,8 @@ export const movimentacaoService = {
     return response.data;
   },
 
-  historicoPorCommodity: async (commodityId: string): Promise<{ movimentacoes: MovimentacaoListItem[] }> => {
-    const response = await api.get(`/commodities/${commodityId}/historico`);
+  historicoPorCommodity: async (commodityId: string): Promise<HistoricoMovimentacaoResponse> => {
+    const response = await api.get<HistoricoMovimentacaoResponse>(`/commodities/${commodityId}/historico`);
     return response.data;
   },
 
