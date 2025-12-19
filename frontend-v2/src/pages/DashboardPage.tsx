@@ -4,9 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/components/ui/use-toast';
 import { auditoriaService } from '@/services/auditoriaService';
 import { certificacaoService, SeloResponse } from '@/services/certificacaoService';
-import { movimentacaoService } from '@/services/movimentacaoService';
+import { MovimentacaoDetailResponse, movimentacaoService } from '@/services/movimentacaoService';
 import { useAuthStore } from '@/store/authStore';
-import { Award, ClipboardCheck, Leaf, Package, RefreshCw, TrendingUp } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Award, ClipboardCheck, Factory, Leaf, Package, RefreshCw, TrendingUp, Truck, Warehouse } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function DashboardPage() {
@@ -19,6 +21,7 @@ export default function DashboardPage() {
     auditorias: 0,
     pontuacao: 0,
   });
+  const [recentMovimentacoes, setRecentMovimentacoes] = useState<MovimentacaoDetailResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -59,7 +62,7 @@ export default function DashboardPage() {
         // Carregar dados do produtor
         const [seloData, movimentacoesData, auditoriasData] = await Promise.all([
           certificacaoService.obterSelo(user.id).catch(() => null),
-          movimentacaoService.listarPorProdutor(user.id, 1, 100).catch(() => ({ total: 0 })),
+          movimentacaoService.listarPorProdutor(user.id, 1, 100).catch(() => ({ items: [], total: 0 })),
           auditoriaService.historicoPorProdutor(user.id).catch(() => ({ auditorias: [] })),
         ]);
 
@@ -69,6 +72,12 @@ export default function DashboardPage() {
           auditorias: auditoriasData.auditorias?.length || 0,
           pontuacao: seloData?.pontuacao || 0,
         });
+        
+        // Pegar as 5 movimentações mais recentes
+        const recent = (movimentacoesData.items || [])
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 5);
+        setRecentMovimentacoes(recent);
       }
     } catch (error: any) {
       console.error('Erro ao carregar dashboard:', error);
@@ -204,10 +213,35 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {loading ? (
                 <p className="text-sm text-muted-foreground">Carregando...</p>
-              ) : (
+              ) : recentMovimentacoes.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Nenhuma atividade recente
+                  Nenhuma movimentação registrada ainda
                 </p>
+              ) : (
+                recentMovimentacoes.map((mov) => (
+                  <div key={mov.id} className="flex items-center space-x-3 pb-3 border-b last:border-0">
+                    <div className={`p-2 rounded-full ${
+                      mov.tipo === 'PRODUCAO' ? 'bg-green-100' :
+                      mov.tipo === 'ARMAZENAMENTO' ? 'bg-blue-100' :
+                      mov.tipo === 'PROCESSAMENTO' ? 'bg-purple-100' :
+                      'bg-orange-100'
+                    }`}>
+                      {mov.tipo === 'PRODUCAO' && <Warehouse className="w-4 h-4 text-green-600" />}
+                      {mov.tipo === 'ARMAZENAMENTO' && <Package className="w-4 h-4 text-blue-600" />}
+                      {mov.tipo === 'PROCESSAMENTO' && <Factory className="w-4 h-4 text-purple-600" />}
+                      {mov.tipo === 'TRANSPORTE' && <Truck className="w-4 h-4 text-orange-600" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{mov.commodityId}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {mov.tipo} • {mov.quantidade} {mov.unidade}
+                      </p>
+                    </div>
+                    <div className="text-xs text-muted-foreground text-right">
+                      {format(new Date(mov.timestamp), "dd/MM/yy", { locale: ptBR })}
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           </CardContent>
