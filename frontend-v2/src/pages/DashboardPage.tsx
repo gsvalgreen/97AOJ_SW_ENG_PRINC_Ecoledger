@@ -322,13 +322,24 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <a
-                href="/movimentacoes/nova"
-                className="flex flex-col items-center justify-center p-6 border rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <Package className="w-8 h-8 text-primary mb-2" />
-                <span className="text-sm font-medium">Nova Movimentação</span>
-              </a>
+              {user?.status === 'APROVADO' ? (
+                <a
+                  href="/movimentacoes/nova"
+                  className="flex flex-col items-center justify-center p-6 border rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <Package className="w-8 h-8 text-primary mb-2" />
+                  <span className="text-sm font-medium">Nova Movimentação</span>
+                </a>
+              ) : (
+                <div
+                  className="flex flex-col items-center justify-center p-6 border rounded-lg bg-gray-100 opacity-60 cursor-not-allowed"
+                  title="Disponível apenas para usuários com cadastro APROVADO"
+                >
+                  <Package className="w-8 h-8 text-gray-400 mb-2" />
+                  <span className="text-sm font-medium text-gray-500">Nova Movimentação</span>
+                  <span className="text-xs text-gray-400 mt-1">Cadastro não aprovado</span>
+                </div>
+              )}
               <a
                 href="/movimentacoes"
                 className="flex flex-col items-center justify-center p-6 border rounded-lg hover:bg-gray-50 transition-colors"
