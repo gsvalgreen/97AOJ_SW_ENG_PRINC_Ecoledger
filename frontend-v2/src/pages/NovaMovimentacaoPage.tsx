@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { MovimentacaoRequest, movimentacaoService } from '@/services/movimentacaoService';
 import { useAuthStore } from '@/store/authStore';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,6 +14,7 @@ export default function NovaMovimentacaoPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [loadingLocation, setLoadingLocation] = useState(false);
   
   // Função para obter data/hora atual no formato datetime-local
   const getCurrentDateTimeLocal = () => {
@@ -36,6 +37,46 @@ export default function NovaMovimentacaoPage() {
     lat: undefined as number | undefined,
     lon: undefined as number | undefined,
   });
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        variant: 'destructive',
+        title: 'Geolocalização não suportada',
+        description: 'Seu navegador não suporta geolocalização',
+      });
+      return;
+    }
+
+    setLoadingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setFormData({
+          ...formData,
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+        });
+        toast({
+          title: 'Localização capturada!',
+          description: `Lat: ${position.coords.latitude.toFixed(6)}, Lon: ${position.coords.longitude.toFixed(6)}`,
+        });
+        setLoadingLocation(false);
+      },
+      (error) => {
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao obter localização',
+          description: error.message || 'Permita o acesso à localização',
+        });
+        setLoadingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,27 +204,45 @@ export default function NovaMovimentacaoPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="lat">Latitude (opcional)</Label>
-                <Input
-                  id="lat"
-                  type="number"
-                  step="0.000001"
-                  value={formData.lat || ''}
-                  onChange={(e) => setFormData({ ...formData, lat: e.target.value ? parseFloat(e.target.value) : undefined })}
-                  placeholder="Ex: -23.55052"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="lon">Longitude (opcional)</Label>
-                <Input
-                  id="lon"
-                  type="number"
-                  step="0.000001"
-                  value={formData.lon || ''}
-                  onChange={(e) => setFormData({ ...formData, lon: e.target.value ? parseFloat(e.target.value) : undefined })}
-                  placeholder="Ex: -46.633308"
-                />
+                <div className="flex items-center justify-between">
+                  <Label>Localização (opcional)</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGetLocation}
+                    disabled={loadingLocation}
+                  >
+                    {loadingLocation ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <MapPin className="w-4 h-4 mr-2" />
+                    )}
+                    Usar minha localização
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      id="lat"
+                      type="number"
+                      step="0.000001"
+                      value={formData.lat || ''}
+                      onChange={(e) => setFormData({ ...formData, lat: e.target.value ? parseFloat(e.target.value) : undefined })}
+                      placeholder="Latitude"
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      id="lon"
+                      type="number"
+                      step="0.000001"
+                      value={formData.lon || ''}
+                      onChange={(e) => setFormData({ ...formData, lon: e.target.value ? parseFloat(e.target.value) : undefined })}
+                      placeholder="Longitude"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
