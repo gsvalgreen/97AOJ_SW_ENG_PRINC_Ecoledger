@@ -322,12 +322,37 @@ services:
           memory: 1g
 
   # Frontend web application
-  frontend-web:
+  # frontend-web:
+  #   build:
+  #     context: ./frontend-web
+  #     dockerfile: Dockerfile
+  #   image: frontend-web:local
+  #   container_name: ecoledger-frontend-web
+  #   depends_on:
+  #     movimentacao-service:
+  #       condition: service_started
+  #     auditoria-service:
+  #       condition: service_healthy
+  #     users-service:
+  #       condition: service_started
+  #     certificacao-service:
+  #       condition: service_healthy
+  #   ports:
+  #     - "3000:80"
+  #   environment:
+  #     # Frontend will be built with VITE_MOCK_API=true (set in Dockerfile)
+  #     # In production, you would configure API endpoints here
+  #     NODE_ENV: production
+  #   networks:
+  #     - ecoledger
+
+  # Frontend v2 - Modern React application
+  frontend-v2:
     build:
-      context: ./frontend-web
+      context: ./frontend-v2
       dockerfile: Dockerfile
-    image: frontend-web:local
-    container_name: ecoledger-frontend-web
+    image: frontend-v2:local
+    container_name: ecoledger-frontend-v2
     depends_on:
       movimentacao-service:
         condition: service_started
@@ -337,14 +362,18 @@ services:
         condition: service_started
       certificacao-service:
         condition: service_healthy
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
     ports:
       - "3000:80"
     environment:
-      # Frontend will be built with VITE_MOCK_API=true (set in Dockerfile)
-      # In production, you would configure API endpoints here
       NODE_ENV: production
+      # API endpoints are configured in nginx.conf
     networks:
       - ecoledger
+    restart: unless-stopped
 
 networks:
   ecoledger:
