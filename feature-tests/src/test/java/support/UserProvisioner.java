@@ -41,8 +41,8 @@ public class UserProvisioner {
         this.baseUrl = normalize(resolveConfig("USERS_SERVICE_BASE_URL", "http://localhost:8084"));
         this.jwtSecret = resolveConfig("USERS_JWT_SECRET", "ecoledger-secret-key-minimum-256-bits-for-hs256-algorithm-security");
         this.dbUrl = resolveConfig("USERS_DB_URL", "jdbc:postgresql://localhost:5432/users");
-        this.dbUser = resolveConfig("USERS_DB_USERNAME", "ecoledger_admin");
-        this.dbPassword = resolveConfig("USERS_DB_PASSWORD", "ecoledger_admin");
+        this.dbUser = resolveConfig("USERS_DB_USERNAME", "ecoledger_users");
+        this.dbPassword = resolveConfig("USERS_DB_PASSWORD", "ecoledger_users");
     }
 
     public ProvisionedUser ensureProducer(String alias) {
@@ -55,12 +55,22 @@ public class UserProvisioner {
             return;
         }
         try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-             PreparedStatement stmt = conn.prepareStatement("DELETE FROM cadastros WHERE id = ?")) {
+             PreparedStatement deleteIdempotency = conn.prepareStatement("DELETE FROM idempotency_keys WHERE cadastro_id = ?");
+             PreparedStatement deleteCadastros = conn.prepareStatement("DELETE FROM cadastros WHERE id = ?");
+             PreparedStatement deleteUsuarios = conn.prepareStatement("DELETE FROM usuarios WHERE id = ?")) {
+            conn.setAutoCommit(false);
             for (ProvisionedUser user : new ArrayList<>(createdUsers)) {
-                stmt.setObject(1, UUID.fromString(user.cadastroId()));
-                stmt.addBatch();
+                deleteIdempotency.setObject(1, UUID.fromString(user.cadastroId()));
+                deleteIdempotency.addBatch();
+                deleteCadastros.setObject(1, UUID.fromString(user.cadastroId()));
+                deleteCadastros.addBatch();
+                deleteUsuarios.setObject(1, UUID.fromString(user.usuarioId()));
+                deleteUsuarios.addBatch();
             }
-            stmt.executeBatch();
+            deleteIdempotency.executeBatch();
+            deleteCadastros.executeBatch();
+            deleteUsuarios.executeBatch();
+            conn.commit();
         } catch (Exception e) {
             System.err.println("Warning cleaning provisioned users: " + e.getMessage());
         } finally {

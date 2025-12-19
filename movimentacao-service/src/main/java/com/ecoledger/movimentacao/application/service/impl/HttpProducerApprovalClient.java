@@ -5,7 +5,10 @@ import com.ecoledger.movimentacao.config.ProducerApprovalProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
@@ -20,9 +23,12 @@ public class HttpProducerApprovalClient implements ProducerApprovalClient {
 
     private final RestTemplate restTemplate;
     private final ProducerApprovalProperties properties;
+    private final ProducerApprovalTokenProvider tokenProvider;
 
-    public HttpProducerApprovalClient(ProducerApprovalProperties properties) {
+    public HttpProducerApprovalClient(ProducerApprovalProperties properties,
+                                      ProducerApprovalTokenProvider tokenProvider) {
         this.properties = properties;
+        this.tokenProvider = tokenProvider;
         this.restTemplate = createTemplate(properties);
     }
 
@@ -32,7 +38,10 @@ public class HttpProducerApprovalClient implements ProducerApprovalClient {
         var url = properties.baseUrl() + "/usuarios/" + producerId;
         LOGGER.info("Checking producer approval for {} traceId={} url={}", producerId, traceId, url);
         try {
-            var response = restTemplate.getForEntity(url, UsuarioResponse.class);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(tokenProvider.currentToken());
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            ResponseEntity<UsuarioResponse> response = restTemplate.exchange(url, HttpMethod.GET, request, UsuarioResponse.class);
             LOGGER.debug("Producer service responded with status={} body={}", response.getStatusCode().value(), response.getBody());
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
                 LOGGER.info("Producer {} not approved or no body returned traceId={}", producerId, traceId);
@@ -53,12 +62,6 @@ public class HttpProducerApprovalClient implements ProducerApprovalClient {
         factory.setConnectTimeout((int) properties.timeoutMs());
         factory.setReadTimeout((int) properties.timeoutMs());
         var template = new RestTemplate(factory);
-        if (properties.authToken() != null && !properties.authToken().isBlank()) {
-            template.getInterceptors().add((request, body, execution) -> {
-                request.getHeaders().set(HttpHeaders.AUTHORIZATION, "Bearer " + properties.authToken());
-                return execution.execute(request, body);
-            });
-        }
         template.setErrorHandler(new NoopErrorHandler());
         return template;
     }

@@ -35,6 +35,9 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
     val cucumberPlugins = listOf(
         "pretty",
         "html:$cucumberReportsPath/index.html",
