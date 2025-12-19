@@ -14,15 +14,20 @@ export default function NovaMovimentacaoPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<Partial<MovimentacaoRequest>>({
+  const [formData, setFormData] = useState({
     producerId: user?.id || '',
-    tipo: 'ENTRADA',
+    commodityId: '',
+    tipo: 'PRODUCAO',
+    quantidade: 0,
     unidade: 'KG',
+    timestamp: '',
+    lat: undefined as number | undefined,
+    lon: undefined as number | undefined,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.commodityId || !formData.quantidade || !formData.localizacao || !formData.dataMovimentacao) {
+    if (!formData.commodityId || !formData.quantidade || !formData.timestamp) {
       toast({
         variant: 'destructive',
         title: 'Campos obrigatórios',
@@ -34,7 +39,23 @@ export default function NovaMovimentacaoPage() {
     setLoading(true);
 
     try {
-      const response = await movimentacaoService.criar(formData as MovimentacaoRequest);
+      // Converter datetime-local para ISO-8601
+      const timestampISO = new Date(formData.timestamp).toISOString();
+      
+      const payload: MovimentacaoRequest = {
+        producerId: formData.producerId,
+        commodityId: formData.commodityId,
+        tipo: formData.tipo,
+        quantidade: formData.quantidade,
+        unidade: formData.unidade,
+        timestamp: timestampISO,
+        localizacao: (formData.lat !== undefined && formData.lon !== undefined) 
+          ? { lat: formData.lat, lon: formData.lon }
+          : undefined,
+        anexos: [],
+      };
+
+      const response = await movimentacaoService.criar(payload);
       
       toast({
         title: 'Movimentação criada com sucesso!',
@@ -90,11 +111,13 @@ export default function NovaMovimentacaoPage() {
                   id="tipo"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={formData.tipo}
-                  onChange={(e) => setFormData({ ...formData, tipo: e.target.value as any })}
+                  onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
                   required
                 >
-                  <option value="ENTRADA">Entrada</option>
-                  <option value="SAIDA">Saída</option>
+                  <option value="PRODUCAO">Produção</option>
+                  <option value="PROCESSAMENTO">Processamento</option>
+                  <option value="TRANSPORTE">Transporte</option>
+                  <option value="ARMAZENAMENTO">Armazenamento</option>
                 </select>
               </div>
 
@@ -128,35 +151,37 @@ export default function NovaMovimentacaoPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="localizacao">Localização *</Label>
+                <Label htmlFor="lat">Latitude (opcional)</Label>
                 <Input
-                  id="localizacao"
-                  value={formData.localizacao || ''}
-                  onChange={(e) => setFormData({ ...formData, localizacao: e.target.value })}
-                  placeholder="Ex: Armazém A, Setor 3"
-                  required
+                  id="lat"
+                  type="number"
+                  step="0.000001"
+                  value={formData.lat || ''}
+                  onChange={(e) => setFormData({ ...formData, lat: e.target.value ? parseFloat(e.target.value) : undefined })}
+                  placeholder="Ex: -23.55052"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dataMovimentacao">Data da Movimentação *</Label>
+                <Label htmlFor="lon">Longitude (opcional)</Label>
                 <Input
-                  id="dataMovimentacao"
-                  type="datetime-local"
-                  value={formData.dataMovimentacao || ''}
-                  onChange={(e) => setFormData({ ...formData, dataMovimentacao: e.target.value })}
-                  required
+                  id="lon"
+                  type="number"
+                  step="0.000001"
+                  value={formData.lon || ''}
+                  onChange={(e) => setFormData({ ...formData, lon: e.target.value ? parseFloat(e.target.value) : undefined })}
+                  placeholder="Ex: -46.633308"
                 />
               </div>
 
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="observacoes">Observações</Label>
-                <textarea
-                  id="observacoes"
-                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  value={formData.observacoes || ''}
-                  onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                  placeholder="Informações adicionais sobre a movimentação..."
+              <div className="space-y-2">
+                <Label htmlFor="timestamp">Data da Movimentação *</Label>
+                <Input
+                  id="timestamp"
+                  type="datetime-local"
+                  value={formData.timestamp || ''}
+                  onChange={(e) => setFormData({ ...formData, timestamp: e.target.value })}
+                  required
                 />
               </div>
             </div>

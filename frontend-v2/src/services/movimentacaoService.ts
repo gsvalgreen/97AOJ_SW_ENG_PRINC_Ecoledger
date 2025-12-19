@@ -3,13 +3,19 @@ import api from './api';
 export interface MovimentacaoRequest {
   producerId: string;
   commodityId: string;
-  tipo: 'ENTRADA' | 'SAIDA';
+  tipo: string;
   quantidade: number;
   unidade: string;
-  localizacao: string;
-  dataMovimentacao: string;
-  observacoes?: string;
-  attachmentKey?: string;
+  timestamp: string; // ISO-8601 format
+  localizacao?: {
+    lat: number;
+    lon: number;
+  };
+  anexos?: Array<{
+    tipo: string;
+    url: string;
+    hash: string;
+  }>;
 }
 
 export interface MovimentacaoResponse {
