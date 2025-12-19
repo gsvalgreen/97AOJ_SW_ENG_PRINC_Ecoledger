@@ -4,7 +4,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { formatDateTime } from '@/lib/utils';
 import { MovimentacaoDetailResponse, movimentacaoService } from '@/services/movimentacaoService';
 import { useAuthStore } from '@/store/authStore';
-import { Calendar, Package, Plus, TrendingDown, TrendingUp } from 'lucide-react';
+import { Calendar, Factory, Package, Plus, Truck, Warehouse } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -58,7 +58,7 @@ export default function MovimentacoesPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total</CardTitle>
@@ -66,33 +66,59 @@ export default function MovimentacoesPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{total}</div>
-            <p className="text-xs text-muted-foreground">Movimentações registradas</p>
+            <p className="text-xs text-muted-foreground">Movimentações</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Entradas</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
+            <CardTitle className="text-sm font-medium">Produção</CardTitle>
+            <Warehouse className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {movimentacoes.filter(m => m.tipo === 'PRODUCAO' || m.tipo === 'ARMAZENAMENTO').length}
+              {movimentacoes.filter(m => m.tipo === 'PRODUCAO').length}
             </div>
-            <p className="text-xs text-muted-foreground">Produção e armazenamento</p>
+            <p className="text-xs text-muted-foreground">Registros</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saídas</CardTitle>
-            <TrendingDown className="h-4 w-4 text-red-600" />
+            <CardTitle className="text-sm font-medium">Armazenamento</CardTitle>
+            <Package className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {movimentacoes.filter(m => m.tipo === 'PROCESSAMENTO' || m.tipo === 'TRANSPORTE').length}
+            <div className="text-2xl font-bold text-blue-600">
+              {movimentacoes.filter(m => m.tipo === 'ARMAZENAMENTO').length}
             </div>
-            <p className="text-xs text-muted-foreground">Processamento e transporte</p>
+            <p className="text-xs text-muted-foreground">Registros</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Processamento</CardTitle>
+            <Factory className="h-4 w-4 text-purple-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-purple-600">
+              {movimentacoes.filter(m => m.tipo === 'PROCESSAMENTO').length}
+            </div>
+            <p className="text-xs text-muted-foreground">Registros</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Transporte</CardTitle>
+            <Truck className="h-4 w-4 text-orange-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">
+              {movimentacoes.filter(m => m.tipo === 'TRANSPORTE').length}
+            </div>
+            <p className="text-xs text-muted-foreground">Registros</p>
           </CardContent>
         </Card>
       </div>
@@ -123,12 +149,16 @@ export default function MovimentacoesPage() {
                   onClick={() => navigate(`/movimentacoes/${mov.id}`)}
                 >
                   <div className="flex items-center space-x-4">
-                    <div className={`p-2 rounded-full ${mov.tipo === 'PRODUCAO' || mov.tipo === 'ARMAZENAMENTO' ? 'bg-green-100' : 'bg-blue-100'}`}>
-                      {mov.tipo === 'PRODUCAO' || mov.tipo === 'ARMAZENAMENTO' ? (
-                        <TrendingUp className="w-5 h-5 text-green-600" />
-                      ) : (
-                        <TrendingDown className="w-5 h-5 text-blue-600" />
-                      )}
+                    <div className={`p-2 rounded-full ${
+                      mov.tipo === 'PRODUCAO' ? 'bg-green-100' :
+                      mov.tipo === 'ARMAZENAMENTO' ? 'bg-blue-100' :
+                      mov.tipo === 'PROCESSAMENTO' ? 'bg-purple-100' :
+                      'bg-orange-100'
+                    }`}>
+                      {mov.tipo === 'PRODUCAO' && <Warehouse className="w-5 h-5 text-green-600" />}
+                      {mov.tipo === 'ARMAZENAMENTO' && <Package className="w-5 h-5 text-blue-600" />}
+                      {mov.tipo === 'PROCESSAMENTO' && <Factory className="w-5 h-5 text-purple-600" />}
+                      {mov.tipo === 'TRANSPORTE' && <Truck className="w-5 h-5 text-orange-600" />}
                     </div>
                     <div>
                       <p className="font-medium">{mov.commodityId}</p>
@@ -138,7 +168,12 @@ export default function MovimentacoesPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium">{mov.tipo}</p>
+                    <p className={`text-sm font-medium ${
+                      mov.tipo === 'PRODUCAO' ? 'text-green-600' :
+                      mov.tipo === 'ARMAZENAMENTO' ? 'text-blue-600' :
+                      mov.tipo === 'PROCESSAMENTO' ? 'text-purple-600' :
+                      'text-orange-600'
+                    }`}>{mov.tipo}</p>
                     <p className="text-xs text-muted-foreground flex items-center">
                       <Calendar className="w-3 h-3 mr-1" />
                       {formatDateTime(mov.timestamp)}
